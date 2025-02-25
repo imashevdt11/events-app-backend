@@ -49,7 +49,7 @@ public class UserController {
         if (userRegistrationDto == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.registerUser(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userRegistrationDto);
     }
 
     @Operation(
