@@ -7,18 +7,21 @@ import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
+import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.UserRepository;
+import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,7 +32,7 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final UserRepository repository;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserRepository repository) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserRepository repository, CategoryService categoryService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
@@ -37,57 +40,42 @@ public class UserServiceImpl implements UserService {
         this.repository = repository;
     }
 
-    @Transactional
-    public UserRegistrationDto registerUser(UserRegistrationDto request) {
+    public List<User> getAllUsers() {
+        return repository.findAll();
+    }
 
-        Role role = roleService.findByName(request.role());
-        if (role == null) {
-            System.out.println("Role not found");
-            return null;
+    public User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = repository.findByEmail(email);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователь с почтой '" + email + "' не найден");
         }
-        User user;
-        if (!repository.existsUserByEmail(request.email())) {
-            user = new User(
-                    request.firstName(),
-                    request.lastName(),
-                    request.phoneNumber(),
-                    request.email(),
-                    passwordEncoder.encode(request.password()),
-                    role,
-                    false);
-            user = repository.save(user);
+        return user;
+    }
 
-            return new UserRegistrationDto(
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getPhoneNumber(),
-                    user.getEmail(),
-                    request.password(),
-                    user.getRole().getName()
-                    );
-        } else {
-            System.out.printf("User with email '%s' is already exists", request.email());
-            return null;
+    public User getUserById(UUID id) {
+        User user = repository.findUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователь с id " + id + " не найден");
         }
+        return user;
     }
 
     @Transactional
     public LoginResponse logIn(LoginRequest request) {
 
         if (request.email() == null || request.password() == null || request.email().isEmpty() || request.password().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email and password are required");
+            throw new InvalidRequestException("Введите почту и пароль");
         }
 
-        Optional<User> user = repository.findUserByEmail(request.email());
-        if (user.isPresent()) {
-
-            System.out.println(request.password());
-            System.out.println(user.get().getPassword());
-            if (!passwordEncoder.matches(request.password(), user.get().getPassword())) {
-                throw new ResourceNotFoundException("invalid password");
+        User user = repository.findByEmail(request.email());
+        if (user != null) {
+            if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+                throw new ResourceNotFoundException("Неправильный пароль");
             }
         } else {
-            throw new ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("Пользователь с почтой '" + request.email() + "' не найден");
         }
 
         authenticationManager.authenticate(
@@ -97,8 +85,38 @@ public class UserServiceImpl implements UserService {
                 )
         );
 
-        var jwtToken = jwtUtil.generateToken(user.get());
-        var refreshToken = jwtUtil.generateRefreshToken(user.get());
+        var jwtToken = jwtUtil.generateToken(user);
+        var refreshToken = jwtUtil.generateRefreshToken(user);
         return new LoginResponse(jwtToken, refreshToken);
+    }
+
+    @Transactional
+    public UserRegistrationDto registerUser(UserRegistrationDto request) {
+
+        Role role = roleService.findRoleByName(request.role());
+        if (role == null) {
+            throw new ResourceNotFoundException("Роль '" + request.role() + "' не найдена");
+        }
+
+        User user = new User(
+                request.firstName(),
+                request.lastName(),
+                request.phoneNumber(),
+                request.email(),
+                passwordEncoder.encode(request.password()),
+                role,
+                false
+        );
+
+        user = repository.save(user);
+
+        return new UserRegistrationDto(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber(),
+                user.getEmail(),
+                request.password(),
+                user.getRole().getName()
+        );
     }
 }

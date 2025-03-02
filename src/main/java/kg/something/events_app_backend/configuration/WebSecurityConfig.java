@@ -12,17 +12,16 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfiguration {
+public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("JwtAuthenticationFilter: " + jwtAuthenticationFilter); // Debugging line
         http
                 .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -30,12 +29,10 @@ public class WebSecurityConfiguration {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowCredentials(true);
                     configuration.addAllowedOriginPattern("http://*");
-                    configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
                     return configuration;
                 }))
                 .authorizeHttpRequests(req -> req
-//                        .requestMatchers("/api/v3/**", "/swagger-ui/**", "/swagger-ui.html", "/api/users/**", "/api/roles").permitAll()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

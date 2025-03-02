@@ -9,9 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -58,7 +56,7 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_role")
     private Role role;
 
@@ -75,8 +73,6 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public User() {}
-
     public User(String firstName, String lastName, String phoneNumber, String email, String password, Role role, boolean enabled) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -86,6 +82,8 @@ public class User implements UserDetails {
         this.role = role;
         this.enabled = enabled;
     }
+
+    public User() {}
 
     @PrePersist
     protected void onCreate() {

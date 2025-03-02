@@ -20,4 +20,4 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER
 )
-public class OpenApiConfiguration {}
+public class OpenApiConfig {}

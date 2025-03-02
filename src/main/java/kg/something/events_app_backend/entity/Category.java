@@ -1,28 +1,36 @@
 package kg.something.events_app_backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-public class Image {
+@Table(name = "categories")
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column
-    private String url;
+    @NotBlank
+    @Column(name = "name")
+    @Size(min = 2, max = 50)
+    private String name;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Image() {
+    public Category() {
 
+    }
+    public Category(String name) {
+        this.name = name;
     }
 
     @PrePersist
@@ -34,10 +42,6 @@ public class Image {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public Image(String url) {
-        this.url = url;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -56,19 +60,19 @@ public class Image {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 }

@@ -8,4 +8,6 @@ public record LoginRequest (
 
     @JsonProperty("password")
     String password
-) {}
+    ) {
+
+}

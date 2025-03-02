@@ -1,11 +1,24 @@
 package kg.something.events_app_backend.service;
 
-import kg.something.events_app_backend.dto.request.RoleRegistrationDto;
+import kg.something.events_app_backend.dto.RoleDto;
 import kg.something.events_app_backend.entity.Role;
+
+import java.util.List;
+import java.util.UUID;
 
 public interface RoleService {
 
-    RoleRegistrationDto createRole(RoleRegistrationDto dto);
+    String createRole(RoleDto role);
 
-    Role findByName(String name);
+    Role findRoleByName(String name);
+
+    String deleteRole(UUID id);
+
+    List<RoleDto> getAllRolesNames();
+
+    List<Role> getAllRoles();
+
+    Role getRoleById(UUID id);
+
+    String updateRole(RoleDto roleDto, UUID id);
 }
