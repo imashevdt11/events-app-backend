@@ -29,6 +29,7 @@ public class WebSecurityConfig {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowCredentials(true);
                     configuration.addAllowedOriginPattern("http://*");
+                    configuration.addAllowedOriginPattern("https://*");
                     configuration.addAllowedMethod("*");
                     return configuration;
                 }))
