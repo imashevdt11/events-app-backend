@@ -23,13 +23,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowCredentials(true);
-                    configuration.addAllowedOriginPattern("http://*");
                     configuration.addAllowedOriginPattern("https://*");
+                    configuration.addAllowedOriginPattern("http://*");
+                    configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
                     return configuration;
                 }))
