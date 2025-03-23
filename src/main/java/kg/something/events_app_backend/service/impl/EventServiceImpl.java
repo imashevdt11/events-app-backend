@@ -26,7 +26,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -90,8 +93,43 @@ public class EventServiceImpl implements EventService {
                 event.getPrice(),
                 eventRequest.priceCurrency(),
                 event.getAmountOfPlaces(),
-                savedImage,
+                event.getAmountOfAvailablePlaces(),
+                savedImage.getUrl(),
                 categories
+        );
+    }
+
+    public List<EventResponse> getAllEvents() {
+        List<Event> events = eventRepository.findAll();
+        return events.stream().map(event -> new EventResponse(
+                event.getTitle(),
+                event.getDescription(),
+                event.getLocation(),
+                event.getMinimumAge(),
+                event.getStartTime(),
+                event.getPrice(),
+                event.getPriceCurrency(),
+                event.getAmountOfPlaces(),
+                event.getAmountOfAvailablePlaces(),
+                event.getImage().getUrl(),
+                event.getCategories()
+        )).collect(Collectors.toList());
+    }
+
+    public EventResponse getEventById(UUID id) {
+        Event event = eventRepository.findEventById(id);
+        return new EventResponse(
+                event.getTitle(),
+                event.getDescription(),
+                event.getLocation(),
+                event.getMinimumAge(),
+                event.getStartTime(),
+                event.getPrice(),
+                event.getPriceCurrency(),
+                event.getAmountOfPlaces(),
+                event.getAmountOfAvailablePlaces(),
+                event.getImage().getUrl(),
+                event.getCategories()
         );
     }
 

@@ -2,7 +2,6 @@ package kg.something.events_app_backend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kg.something.events_app_backend.entity.Category;
-import kg.something.events_app_backend.entity.Image;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,8 +33,11 @@ public record EventResponse(
         @JsonProperty("amount_of_places")
         Integer amountOfPlaces,
 
+        @JsonProperty("amount_of_available_places")
+        Integer amountOfAvailablePlaces,
+
         @JsonProperty("image")
-        Image image,
+        String imageUrl,
 
         @JsonProperty("categories")
         Set<Category> categories
