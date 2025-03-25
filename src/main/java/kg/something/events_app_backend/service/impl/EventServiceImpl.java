@@ -118,6 +118,9 @@ public class EventServiceImpl implements EventService {
 
     public EventResponse getEventById(UUID id) {
         Event event = eventRepository.findEventById(id);
+        if (event == null) {
+            throw new ResourceNotFoundException("User not found with id: %s".formatted(id));
+        }
         return new EventResponse(
                 event.getTitle(),
                 event.getDescription(),
