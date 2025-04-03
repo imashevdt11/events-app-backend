@@ -10,7 +10,6 @@ import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.UserRepository;
-import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final UserRepository repository;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserRepository repository, CategoryService categoryService) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserRepository repository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
@@ -87,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         var jwtToken = jwtUtil.generateToken(user);
         var refreshToken = jwtUtil.generateRefreshToken(user);
-        return new LoginResponse(jwtToken, refreshToken);
+        return new LoginResponse(user.getId(), jwtToken, refreshToken);
     }
 
     @Transactional
