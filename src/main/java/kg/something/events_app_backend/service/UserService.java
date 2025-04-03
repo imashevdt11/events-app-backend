@@ -19,4 +19,6 @@ public interface UserService {
     LoginResponse logIn(LoginRequest request);
 
     UserRegistrationDto registerUser(UserRegistrationDto userRegistrationDto);
+
+    List<User> findUsersByRoleId(UUID roleId);
 }

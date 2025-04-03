@@ -61,6 +61,14 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    public List<User> findUsersByRoleId(UUID roleId) {
+        List<User> user = repository.findUsersByRole_Id(roleId);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователей с ролью " + roleId + " не найдено");
+        }
+        return user;
+    }
+
     @Transactional
     public LoginResponse logIn(LoginRequest request) {
 
