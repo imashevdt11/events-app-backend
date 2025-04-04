@@ -88,4 +88,9 @@ public class UserController {
                                                                @RequestBody UserUpdateRequest request) {
         return new ResponseEntity<>(service.updateUser(id, request), HttpStatus.OK);
     }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestParam("refreshToken") String refreshToken) {
+        return ResponseEntity.ok(service.refreshToken(refreshToken));
+    }
 }

@@ -2,6 +2,7 @@ package kg.something.events_app_backend.service.impl;
 
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.configuration.JwtUtil;
+import kg.something.events_app_backend.dto.AccessToken;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
@@ -10,6 +11,7 @@ import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
+import kg.something.events_app_backend.exception.OutOfDateException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.UserMapper;
@@ -20,6 +22,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +38,16 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final UserDetailsService userDetailsService;
     private final UserMapper userMapper;
     private final UserRepository repository;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserMapper userMapper, UserRepository repository) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserRepository repository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
+        this.userDetailsService = userDetailsService;
         this.userMapper = userMapper;
         this.repository = repository;
     }
@@ -105,6 +111,17 @@ public class UserServiceImpl implements UserService {
         var jwtToken = jwtUtil.generateToken(user);
         var refreshToken = jwtUtil.generateRefreshToken(user);
         return new LoginResponse(user.getId(), jwtToken, refreshToken);
+    }
+
+    public AccessToken refreshToken(String refreshToken) {
+        if (jwtUtil.isRefreshTokenExpired(refreshToken)) {
+            throw new OutOfDateException("Срок действия токена истек");
+        }
+        String username = jwtUtil.extractUsername(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        String newAccessToken = jwtUtil.generateToken(userDetails);
+
+        return new AccessToken(newAccessToken);
     }
 
     @Transactional

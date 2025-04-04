@@ -104,8 +104,7 @@ public class User implements UserDetails {
     private List<SavedEvent> savedEvents = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> eventComplaints = new ArrayList<>();
-
+    private List<Complaint> eventComplaints = new ArrayList<>();
 
     public User(String firstName, String lastName, String phoneNumber, String email, String password, Role role, boolean enabled) {
         this.firstName = firstName;
@@ -230,11 +229,11 @@ public class User implements UserDetails {
         this.eventComments = eventComments;
     }
 
-    public List<Comment> getEventComplaints() {
+    public List<Complaint> getEventComplaints() {
         return eventComplaints;
     }
 
-    public void setEventComplaints(List<Comment> eventComplaints) {
+    public void setEventComplaints(List<Complaint> eventComplaints) {
         this.eventComplaints = eventComplaints;
     }
 
@@ -288,6 +287,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return enabled;
     }
 }
