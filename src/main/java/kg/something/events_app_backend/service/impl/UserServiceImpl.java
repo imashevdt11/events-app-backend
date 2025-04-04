@@ -2,13 +2,15 @@ package kg.something.events_app_backend.service.impl;
 
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.configuration.JwtUtil;
-import kg.something.events_app_backend.dto.UserRegistrationDto;
+import kg.something.events_app_backend.dto.UserUpdateRequest;
 import kg.something.events_app_backend.dto.request.LoginRequest;
+import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
+import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.UserMapper;
 import kg.something.events_app_backend.repository.UserRepository;
@@ -22,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -45,6 +48,16 @@ public class UserServiceImpl implements UserService {
 
     public List<User> getAllUsers() {
         return repository.findAll();
+    }
+
+    public String changeUserRole(UUID userId, String roleName) {
+        User user = findUserById(userId);
+        Role role = roleService.findRoleByName(roleName);
+
+        user.setRole(role);
+        repository.save(user);
+
+        return "Роль пользователя '%s %s' изменена на '%s'".formatted(user.getFirstName(), user.getLastName(), roleName);
     }
 
     public User getAuthenticatedUser() {
@@ -75,11 +88,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public LoginResponse logIn(LoginRequest request) {
-
         if (request.email() == null || request.password() == null || request.email().isEmpty() || request.password().isEmpty()) {
             throw new InvalidRequestException("Введите почту и пароль");
         }
-
         User user = repository.findByEmail(request.email());
         if (user != null) {
             if (!passwordEncoder.matches(request.password(), user.getPassword())) {
@@ -89,12 +100,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Пользователь с почтой '" + request.email() + "' не найден");
         }
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
         var jwtToken = jwtUtil.generateToken(user);
         var refreshToken = jwtUtil.generateRefreshToken(user);
@@ -102,32 +108,49 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public UserRegistrationDto registerUser(UserRegistrationDto request) {
-
+    public UserResponse registerUser(UserRegistrationRequest request) {
+        checkUniqueFieldsForExistingBeforeRegistration(request);
         Role role = roleService.findRoleByName(request.role());
-        if (role == null) {
-            throw new ResourceNotFoundException("Роль '" + request.role() + "' не найдена");
+
+        User user = userMapper.toEntityFromRegistrationRequest(request, role);
+        repository.save(user);
+
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse updateUser(UUID userId, UserUpdateRequest request) {
+        User user = findUserById(userId);
+        checkUniqueFieldsForExistingBeforeUpdate(user, request);
+
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setEmail(request.email());
+        user.setPhoneNumber(request.phoneNumber());
+        repository.save(user);
+
+        return userMapper.toUserResponse(user);
+    }
+
+    private void checkUniqueFieldsForExistingBeforeUpdate(User existingUser, UserUpdateRequest updateRequest) {
+        if (repository.existsByEmail(updateRequest.email()) && !existingUser.getEmail().equals(updateRequest.email())) {
+            throw new ResourceAlreadyExistsException("Пользователь с почтой '%s' уже есть в базе данных".formatted(updateRequest.email()));
         }
+        if (repository.existsByPhoneNumber(updateRequest.phoneNumber()) && !existingUser.getPhoneNumber().equals(updateRequest.phoneNumber())) {
+            throw new ResourceAlreadyExistsException("Пользователь с номером телефона '%s' уже есть в базе данных".formatted(updateRequest.phoneNumber()));
+        }
+    }
 
-        User user = new User(
-                request.firstName(),
-                request.lastName(),
-                request.phoneNumber(),
-                request.email(),
-                passwordEncoder.encode(request.password()),
-                role,
-                false
-        );
+    private void checkUniqueFieldsForExistingBeforeRegistration(UserRegistrationRequest request) {
+        if (repository.existsByEmail(request.email())) {
+            throw new ResourceAlreadyExistsException("Пользователь с почтой '%s' уже есть в базе данных".formatted(request.email()));
+        }
+        if (repository.existsByPhoneNumber(request.phoneNumber())) {
+            throw new ResourceAlreadyExistsException("Пользователь с номером телефона '%s' уже есть в базе данных".formatted(request.phoneNumber()));
+        }
+    }
 
-        user = repository.save(user);
-
-        return new UserRegistrationDto(
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhoneNumber(),
-                user.getEmail(),
-                request.password(),
-                user.getRole().getName()
-        );
+    private User findUserById(UUID id) {
+        return Optional.ofNullable(repository.findUserById(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
     }
 }

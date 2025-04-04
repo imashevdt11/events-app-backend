@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -57,7 +58,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public Role findRoleByName(String name) {
-        return repository.findRoleByName(name);
+        return Optional.ofNullable(repository.findRoleByName(name))
+                .orElseThrow(() -> new ResourceNotFoundException("Роль '%s' не найдена в базе данных".formatted(name)));
     }
 
     public List<Role> getAllRoles() {
