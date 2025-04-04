@@ -44,6 +44,11 @@ public class UserController {
         return new ResponseEntity<>(service.changeUserRole(id, role), HttpStatus.OK);
     }
 
+    @PutMapping("/change-user-status/{id}")
+    public ResponseEntity<String> changeUserStatus(@PathVariable UUID id) {
+        return new ResponseEntity<>(service.changeUserStatus(id), HttpStatus.OK);
+    }
+
     @GetMapping("/admin")
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>(service.getAllUsers(), HttpStatus.OK);

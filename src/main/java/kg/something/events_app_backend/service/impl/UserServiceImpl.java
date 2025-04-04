@@ -66,6 +66,18 @@ public class UserServiceImpl implements UserService {
         return "Роль пользователя '%s %s' изменена на '%s'".formatted(user.getFirstName(), user.getLastName(), roleName);
     }
 
+    public String changeUserStatus(UUID userId) {
+        User user = findUserById(userId);
+
+        user.setEnabled(!user.isEnabled());
+        repository.save(user);
+
+        if (user.isEnabled()) {
+            return "Учетная запись пользователя '%s %s' активирована".formatted(user.getFirstName(), user.getLastName());
+        }
+        return "Учетная запись пользователя '%s %s' заблокирована".formatted(user.getFirstName(), user.getLastName());
+    }
+
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

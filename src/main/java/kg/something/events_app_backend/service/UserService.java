@@ -15,6 +15,8 @@ public interface UserService {
 
     String changeUserRole(UUID userId, String roleName);
 
+    String changeUserStatus(UUID userId);
+
     List<User> findUsersByRoleId(UUID roleId);
 
     List<User> getAllUsers();
