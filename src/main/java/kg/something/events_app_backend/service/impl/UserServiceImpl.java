@@ -5,10 +5,12 @@ import kg.something.events_app_backend.configuration.JwtUtil;
 import kg.something.events_app_backend.dto.UserRegistrationDto;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
+import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
+import kg.something.events_app_backend.mapper.UserMapper;
 import kg.something.events_app_backend.repository.UserRepository;
 import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.UserService;
@@ -29,13 +31,15 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final UserMapper userMapper;
     private final UserRepository repository;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserRepository repository) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserMapper userMapper, UserRepository repository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
+        this.userMapper = userMapper;
         this.repository = repository;
     }
 
@@ -53,12 +57,12 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    public User getUserById(UUID id) {
+    public UserResponse getUserById(UUID id) {
         User user = repository.findUserById(id);
         if (user == null) {
             throw new ResourceNotFoundException("Пользователь с id " + id + " не найден");
         }
-        return user;
+        return userMapper.toUserResponse(user);
     }
 
     public List<User> findUsersByRoleId(UUID roleId) {

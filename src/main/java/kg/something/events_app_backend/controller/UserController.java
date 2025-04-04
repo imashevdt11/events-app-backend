@@ -7,13 +7,19 @@ import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.UserRegistrationDto;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
+import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable("id") UUID id) {
+    public ResponseEntity<UserResponse> getUserInfo(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(service.getUserById(id), HttpStatus.OK);
     }
 
