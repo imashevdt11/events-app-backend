@@ -7,6 +7,7 @@ import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,4 +33,6 @@ public interface UserService {
     UserResponse registerUser(UserRegistrationRequest request);
 
     UserResponse updateUser(UUID userId, UserUpdateRequest request);
+
+    String uploadProfileImage(UUID userId, MultipartFile image);
 }

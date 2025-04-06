@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -97,5 +98,22 @@ public class UserController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestParam("refreshToken") String refreshToken) {
         return ResponseEntity.ok(service.refreshToken(refreshToken));
+    }
+
+    @Operation(
+            summary = "UPLOAD PROFILE IMAGE",
+            description = "Sets an image to user, removes previous image from the Cloudinary",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Profile image has been uploaded"),
+                    @ApiResponse(responseCode = "400", description = "Current request is not a multipart request"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Invalid authorization type"),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error")
+            }
+    )
+    @PostMapping("/upload-profile-image/{userId}")
+    public ResponseEntity<?> uploadProfileImage(@PathVariable("userId") UUID userId,
+                                                @RequestParam("image") MultipartFile image) {
+        return ResponseEntity.ok(service.uploadProfileImage(userId, image));
     }
 }

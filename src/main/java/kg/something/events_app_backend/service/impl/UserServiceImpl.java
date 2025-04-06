@@ -8,6 +8,7 @@ import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;
+import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
@@ -16,6 +17,7 @@ import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.UserMapper;
 import kg.something.events_app_backend.repository.UserRepository;
+import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +28,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +39,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final AuthenticationManager authenticationManager;
+    private final CloudinaryService cloudinaryService;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
@@ -42,8 +47,9 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRepository repository;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserRepository repository) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, CloudinaryService cloudinaryService, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserRepository repository) {
         this.authenticationManager = authenticationManager;
+        this.cloudinaryService = cloudinaryService;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
@@ -181,5 +187,31 @@ public class UserServiceImpl implements UserService {
     private User findUserById(UUID id) {
         return Optional.ofNullable(repository.findUserById(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
+    }
+
+    @Transactional
+    public String uploadProfileImage(UUID userId, MultipartFile image) {
+        User user = getAuthenticatedUser();
+        String imageUrl;
+        try {
+            imageUrl = cloudinaryService.uploadImage(image);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (user.getImage() != null) {
+            if (!user.getImage().getUrl().isEmpty()) {
+                try {
+                    cloudinaryService.deleteImage(user.getImage().getUrl());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            user.getImage().setUrl(imageUrl);
+        } else {
+            user.setImage(new Image(imageUrl));
+        }
+        repository.save(user);
+
+        return "Изображение профиля сохранено";
     }
 }
