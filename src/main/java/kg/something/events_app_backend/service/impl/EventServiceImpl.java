@@ -8,14 +8,17 @@ import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Event;
+import kg.something.events_app_backend.entity.Grade;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.User;
+import kg.something.events_app_backend.enums.EventGrade;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.EventRepository;
 import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.EventService;
+import kg.something.events_app_backend.service.GradeService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -26,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -36,18 +40,20 @@ public class EventServiceImpl implements EventService {
 
     private final CategoryService categoryService;
     private final CloudinaryService cloudinaryService;
-    private final EventRepository eventRepository;
+    private final EventRepository repository;
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final Validator validator;
+    private final GradeService gradeService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository eventRepository, ObjectMapper objectMapper, UserService userService, Validator validator) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
-        this.eventRepository = eventRepository;
+        this.repository = repository;
         this.objectMapper = objectMapper;
         this.userService = userService;
         this.validator = validator;
+        this.gradeService = gradeService;
     }
 
     @Transactional
@@ -82,7 +88,7 @@ public class EventServiceImpl implements EventService {
                 categories
         );
 
-        eventRepository.save(event);
+        repository.save(event);
 
         return new EventResponse(
                 event.getTitle(),
@@ -100,7 +106,7 @@ public class EventServiceImpl implements EventService {
     }
 
     public List<EventResponse> getAllEvents() {
-        List<Event> events = eventRepository.findAll();
+        List<Event> events = repository.findAll();
         return events.stream().map(event -> new EventResponse(
                 event.getTitle(),
                 event.getDescription(),
@@ -117,7 +123,7 @@ public class EventServiceImpl implements EventService {
     }
 
     public EventResponse getEventById(UUID id) {
-        Event event = eventRepository.findEventById(id);
+        Event event = repository.findEventById(id);
         if (event == null) {
             throw new ResourceNotFoundException("User not found with id: %s".formatted(id));
         }
@@ -185,4 +191,32 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    public Event findEventById(UUID id) {
+        return Optional.ofNullable(repository.findEventById(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Мероприятие с id '%s' не найдено в базе данных".formatted(id)));
+    }
+
+    @Transactional
+    public String likeEvent(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        Grade grade = gradeService.findGradeByEventAndUser(event, user);
+        if (grade == null) {
+            gradeService.save(new Grade(EventGrade.LIKE, event, user));
+            return "Пользователь '%s %s' поставил оценку '%s' мероприятию '%s'"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName(),
+                            EventGrade.LIKE.name(),
+                            event.getTitle()
+                    );
+        } else {
+            if (grade.getName().equals(EventGrade.DISLIKE)) {
+                throw new InvalidRequestException("Аутентифицированный пользователь не может поставить лайк мероприятию, потому что поставил дизлайк");
+            } else {
+                throw new InvalidRequestException("Аутентифицированный пользователь уже поставил лайк мероприятию");
+            }
+        }
+    }
 }

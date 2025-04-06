@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

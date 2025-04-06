@@ -8,7 +8,12 @@ import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -50,5 +55,11 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable("id") UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventById(id));
+    }
+
+    @Operation(summary = "RATE (LIKE) EVENT")
+    @PostMapping("/like/{id}")
+    public ResponseEntity<String> likeEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.likeEvent(eventId));
     }
 }
