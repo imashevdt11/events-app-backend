@@ -18,4 +18,6 @@ public interface EventService {
     EventResponse getEventById(UUID id);
 
     String likeEvent(UUID eventId);
+
+    String removeLike(UUID eventId);
 }

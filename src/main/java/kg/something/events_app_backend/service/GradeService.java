@@ -8,4 +8,6 @@ public interface GradeService {
     Grade findGradeByEventAndUser(Event event, User user);
 
     void save(Grade grade);
+
+    void delete(Grade grade);
 }

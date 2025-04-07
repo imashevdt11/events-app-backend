@@ -23,4 +23,8 @@ public class GradeServiceImpl implements GradeService {
     public void save(Grade grade) {
         repository.save(grade);
     }
+
+    public void delete(Grade grade) {
+        repository.delete(grade);
+    }
 }

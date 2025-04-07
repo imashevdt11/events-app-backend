@@ -8,6 +8,7 @@ import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +62,11 @@ public class EventController {
     @PostMapping("/like/{id}")
     public ResponseEntity<String> likeEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.likeEvent(eventId));
+    }
+
+    @Operation(summary = "REMOVE RATE (UNLIKE) EVENT")
+    @DeleteMapping("/unlike/{id}")
+    public ResponseEntity<String> unlikeEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeLike(eventId));
     }
 }

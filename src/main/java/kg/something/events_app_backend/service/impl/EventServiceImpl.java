@@ -219,4 +219,27 @@ public class EventServiceImpl implements EventService {
             }
         }
     }
+
+    @Transactional
+    public String removeLike(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        Grade grade = gradeService.findGradeByEventAndUser(event, user);
+        if (grade == null) {
+            throw new InvalidRequestException("Аутентифицированный пользователь не ставил оценку данному мероприятию");
+        } else {
+            if (grade.getName().equals(EventGrade.DISLIKE)) {
+                throw new InvalidRequestException("Аутентифицированный пользователь не ставил лайк данному мероприятию");
+            }
+            gradeService.delete(grade);
+            return "Оценка '%s' от пользователя '%s %s' удалена с мероприятия '%s'"
+                    .formatted(
+                            EventGrade.LIKE.name(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            event.getTitle()
+                    );
+        }
+    }
 }
