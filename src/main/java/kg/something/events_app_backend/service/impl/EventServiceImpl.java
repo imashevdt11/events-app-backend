@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
+import kg.something.events_app_backend.entity.Booking;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Comment;
 import kg.something.events_app_backend.entity.Event;
@@ -17,6 +18,7 @@ import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.EventMapper;
 import kg.something.events_app_backend.repository.EventRepository;
+import kg.something.events_app_backend.service.BookingService;
 import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.CommentService;
@@ -50,8 +52,9 @@ public class EventServiceImpl implements EventService {
     private final Validator validator;
     private final GradeService gradeService;
     private final CommentService commentService;
+    private final BookingService bookingService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, BookingService bookingService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
@@ -61,6 +64,7 @@ public class EventServiceImpl implements EventService {
         this.validator = validator;
         this.gradeService = gradeService;
         this.commentService = commentService;
+        this.bookingService = bookingService;
     }
 
     @Transactional
@@ -253,5 +257,29 @@ public class EventServiceImpl implements EventService {
                             user.getLastName()
                     ));
         }
+    }
+
+    @Transactional
+    public String bookPlace(UUID eventId, Integer numberOfPlaces) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (event.getAmountOfAvailablePlaces() < numberOfPlaces) {
+            throw new InvalidRequestException("Количество запрошенных мест превышает доступное. Доступное количество мест на мероприятие: %s".formatted(event.getAmountOfAvailablePlaces()));
+        }
+        if (event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Организатор не может бронировать места на свои же мероприятия");
+        }
+        for (int i = 0; i < numberOfPlaces; i++) {
+            bookingService.save(new Booking(event, user));
+        }
+        event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - numberOfPlaces);
+        return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"
+                .formatted(
+                        numberOfPlaces,
+                        event.getTitle(),
+                        user.getFirstName(),
+                        user.getLastName()
+                );
     }
 }

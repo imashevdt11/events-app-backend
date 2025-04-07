@@ -87,7 +87,7 @@ public class EventController {
     @Operation(summary = "REMOVE RATE (DISLIKE) FROM EVENT")
     @DeleteMapping("/remove-dislike/{id}")
     public ResponseEntity<String> removeDislikeFromEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
     }
 
     @Operation(summary = "ADD COMMENT TO EVENT")
@@ -101,6 +101,13 @@ public class EventController {
     @DeleteMapping("/remove-comment/{id}")
     public ResponseEntity<String> removeComment(@PathVariable("id") UUID eventId,
                                                 @RequestParam("commentId") UUID commentId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeComment(eventId, commentId));
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeComment(eventId, commentId));
+    }
+
+    @Operation(summary = "BOOK PLACE TO EVENT")
+    @PostMapping("/book-place/{id}")
+    public ResponseEntity<String> bookPlace(@PathVariable("id") UUID eventId,
+                                             @RequestParam("numberOfPlaces") Integer numberOfPlaces) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.bookPlace(eventId, numberOfPlaces));
     }
 }

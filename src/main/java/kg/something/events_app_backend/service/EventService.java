@@ -27,4 +27,6 @@ public interface EventService {
     String addComment(UUID eventId, String comment);
 
     String removeComment(UUID eventId, UUID commentId);
+
+    String bookPlace(UUID eventId, Integer numberOfPlaces);
 }
