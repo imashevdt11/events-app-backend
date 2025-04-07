@@ -197,31 +197,33 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    public String likeEvent(UUID eventId) {
+    public String rateEvent(UUID eventId, EventGrade rate) {
         User user = userService.getAuthenticatedUser();
         Event event = findEventById(eventId);
 
         Grade grade = gradeService.findGradeByEventAndUser(event, user);
         if (grade == null) {
-            gradeService.save(new Grade(EventGrade.LIKE, event, user));
+            gradeService.save(new Grade(rate, event, user));
             return "Пользователь '%s %s' поставил оценку '%s' мероприятию '%s'"
                     .formatted(
                             user.getFirstName(),
                             user.getLastName(),
-                            EventGrade.LIKE.name(),
+                            rate.name(),
                             event.getTitle()
                     );
         } else {
-            if (grade.getName().equals(EventGrade.DISLIKE)) {
+            if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
                 throw new InvalidRequestException("Аутентифицированный пользователь не может поставить лайк мероприятию, потому что поставил дизлайк");
+            } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
+                throw new InvalidRequestException("Аутентифицированный пользователь не может поставить дизлайк мероприятию, потому что поставил лайк");
             } else {
-                throw new InvalidRequestException("Аутентифицированный пользователь уже поставил лайк мероприятию");
+                throw new InvalidRequestException("Аутентифицированный пользователь уже поставил '%s' мероприятию".formatted(grade.getName()));
             }
         }
     }
 
     @Transactional
-    public String removeLike(UUID eventId) {
+    public String removeRate(UUID eventId, EventGrade rate) {
         User user = userService.getAuthenticatedUser();
         Event event = findEventById(eventId);
 
@@ -229,13 +231,15 @@ public class EventServiceImpl implements EventService {
         if (grade == null) {
             throw new InvalidRequestException("Аутентифицированный пользователь не ставил оценку данному мероприятию");
         } else {
-            if (grade.getName().equals(EventGrade.DISLIKE)) {
+            if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
                 throw new InvalidRequestException("Аутентифицированный пользователь не ставил лайк данному мероприятию");
+            } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
+                throw new InvalidRequestException("Аутентифицированный пользователь не ставил дизлайк данному мероприятию");
             }
             gradeService.delete(grade);
             return "Оценка '%s' от пользователя '%s %s' удалена с мероприятия '%s'"
                     .formatted(
-                            EventGrade.LIKE.name(),
+                            rate.name(),
                             user.getFirstName(),
                             user.getLastName(),
                             event.getTitle()

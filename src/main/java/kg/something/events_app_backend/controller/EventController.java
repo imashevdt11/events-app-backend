@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import kg.something.events_app_backend.dto.response.EventResponse;
+import kg.something.events_app_backend.enums.EventGrade;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.service.EventService;
 import org.springframework.http.HttpStatus;
@@ -61,12 +62,24 @@ public class EventController {
     @Operation(summary = "RATE (LIKE) EVENT")
     @PostMapping("/like/{id}")
     public ResponseEntity<String> likeEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.likeEvent(eventId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.LIKE));
     }
 
-    @Operation(summary = "REMOVE RATE (UNLIKE) EVENT")
-    @DeleteMapping("/unlike/{id}")
-    public ResponseEntity<String> unlikeEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeLike(eventId));
+    @Operation(summary = "REMOVE RATE (LIKE) FROM EVENT")
+    @DeleteMapping("/remove-like/{id}")
+    public ResponseEntity<String> removeLikeFromEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeRate(eventId, EventGrade.LIKE));
+    }
+
+    @Operation(summary = "RATE (DISLIKE) EVENT")
+    @PostMapping("/dislike/{id}")
+    public ResponseEntity<String> dislikeEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.DISLIKE));
+    }
+
+    @Operation(summary = "REMOVE RATE (DISLIKE) FROM EVENT")
+    @DeleteMapping("/remove-dislike/{id}")
+    public ResponseEntity<String> removeDislikeFromEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
     }
 }
