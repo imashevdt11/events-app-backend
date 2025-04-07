@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import kg.something.events_app_backend.dto.CommentDto;
 import kg.something.events_app_backend.entity.Category;
 
 import java.math.BigDecimal;
@@ -41,6 +42,9 @@ public record EventResponse(
 
         @JsonProperty("categories")
         Set<Category> categories,
+
+        @JsonProperty("comments")
+        Set<CommentDto> comments,
 
         @JsonProperty("isLiked")
         Boolean isLiked,

@@ -82,7 +82,7 @@ public class Event {
     private List<SavedEvent> savedByUsers = new ArrayList<>();
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> eventComplaints = new ArrayList<>();
+    private List<Complaint> eventComplaints = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -251,5 +251,45 @@ public class Event {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<Booking> getEventBookings() {
+        return eventBookings;
+    }
+
+    public void setEventBookings(List<Booking> eventBookings) {
+        this.eventBookings = eventBookings;
+    }
+
+    public List<Comment> getEventComments() {
+        return eventComments;
+    }
+
+    public void setEventComments(List<Comment> eventComments) {
+        this.eventComments = eventComments;
+    }
+
+    public List<Complaint> getEventComplaints() {
+        return eventComplaints;
+    }
+
+    public void setEventComplaints(List<Complaint> eventComplaints) {
+        this.eventComplaints = eventComplaints;
+    }
+
+    public List<Grade> getEventGrades() {
+        return eventGrades;
+    }
+
+    public void setEventGrades(List<Grade> eventGrades) {
+        this.eventGrades = eventGrades;
+    }
+
+    public List<SavedEvent> getSavedByUsers() {
+        return savedByUsers;
+    }
+
+    public void setSavedByUsers(List<SavedEvent> savedByUsers) {
+        this.savedByUsers = savedByUsers;
     }
 }
