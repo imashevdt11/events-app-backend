@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Category;
+import kg.something.events_app_backend.entity.Comment;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.Grade;
 import kg.something.events_app_backend.entity.Image;
@@ -18,6 +19,7 @@ import kg.something.events_app_backend.mapper.EventMapper;
 import kg.something.events_app_backend.repository.EventRepository;
 import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.CloudinaryService;
+import kg.something.events_app_backend.service.CommentService;
 import kg.something.events_app_backend.service.EventService;
 import kg.something.events_app_backend.service.GradeService;
 import kg.something.events_app_backend.service.UserService;
@@ -47,8 +49,9 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     private final Validator validator;
     private final GradeService gradeService;
+    private final CommentService commentService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
@@ -57,6 +60,7 @@ public class EventServiceImpl implements EventService {
         this.userService = userService;
         this.validator = validator;
         this.gradeService = gradeService;
+        this.commentService = commentService;
     }
 
     @Transactional
@@ -212,5 +216,42 @@ public class EventServiceImpl implements EventService {
         return events.stream().map(
                 event -> eventMapper.toEventResponse(event, null, null))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public String addComment(UUID eventId, String commentText) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        commentService.save(new Comment(commentText, event, user));
+        return "Пользователь '%s %s' оставил комментарий к мероприятию '%s'"
+                .formatted(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        event.getTitle()
+                );
+    }
+
+    @Transactional
+    public String removeComment(UUID eventId, UUID commentId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+        Comment comment = commentService.findCommentById(commentId);
+
+        if (user.getId().equals(comment.getUser().getId())) {
+            commentService.delete(comment);
+            return "Пользователь '%s %s' удалил комментарий к мероприятию '%s'"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName(),
+                            event.getTitle()
+                    );
+        } else {
+            throw new InvalidRequestException("Пользователь '%s %s' не является автором указанного мероприятия"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName()
+                    ));
+        }
     }
 }

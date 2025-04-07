@@ -89,4 +89,18 @@ public class EventController {
     public ResponseEntity<String> removeDislikeFromEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
     }
+
+    @Operation(summary = "ADD COMMENT TO EVENT")
+    @PostMapping("/comment/{id}")
+    public ResponseEntity<String> addComment(@PathVariable("id") UUID eventId,
+                                             @RequestParam("comment") String comment) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.addComment(eventId, comment));
+    }
+
+    @Operation(summary = "REMOVE COMMENT FROM EVENT")
+    @DeleteMapping("/remove-comment/{id}")
+    public ResponseEntity<String> removeComment(@PathVariable("id") UUID eventId,
+                                                @RequestParam("commentId") UUID commentId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeComment(eventId, commentId));
+    }
 }

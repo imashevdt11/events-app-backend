@@ -23,4 +23,8 @@ public interface EventService {
     String removeRate(UUID eventId, EventGrade rate);
 
     List<EventResponse> getEventsByCategory(String categoryName);
+
+    String addComment(UUID eventId, String comment);
+
+    String removeComment(UUID eventId, UUID commentId);
 }
