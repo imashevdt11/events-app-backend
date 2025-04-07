@@ -202,4 +202,15 @@ public class EventServiceImpl implements EventService {
                     );
         }
     }
+
+    public List<EventResponse> getEventsByCategory(String categoryName) {
+        Category category = categoryService.findCategoryByName(categoryName);
+        Set<Category> categories = new HashSet<>();
+        categories.add(category);
+
+        List<Event> events = repository.findEventsByCategories(categories);
+        return events.stream().map(
+                event -> eventMapper.toEventResponse(event, null, null))
+                .collect(Collectors.toList());
+    }
 }

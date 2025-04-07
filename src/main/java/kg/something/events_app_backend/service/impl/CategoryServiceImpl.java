@@ -9,6 +9,7 @@ import kg.something.events_app_backend.service.CategoryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -41,7 +42,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public Category findCategoryByName(String name) {
-        return repository.findCategoryByName(name);
+        return Optional.ofNullable(repository.findCategoryByName(name))
+                .orElseThrow(() -> new ResourceNotFoundException("Категория с названием '%s' не найдена в базе данных".formatted(name)));
     }
 
     public List<CategoryDto> getAllCategoriesNames() {

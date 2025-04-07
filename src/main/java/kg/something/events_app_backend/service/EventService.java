@@ -21,4 +21,6 @@ public interface EventService {
     String rateEvent(UUID eventId, EventGrade rate);
 
     String removeRate(UUID eventId, EventGrade rate);
+
+    List<EventResponse> getEventsByCategory(String categoryName);
 }

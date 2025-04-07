@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +52,12 @@ public class EventController {
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAllEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());
+    }
+
+    @Operation(summary = "GET EVENTS BY CATEGORY")
+    @GetMapping("/category")
+    public ResponseEntity<List<EventResponse>> getEventsByCategory(@RequestParam("category") String category) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
     }
 
     @Operation(summary = "GET EVENT INFORMATION BY ID")
