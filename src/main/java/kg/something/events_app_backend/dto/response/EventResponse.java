@@ -40,6 +40,12 @@ public record EventResponse(
         String imageUrl,
 
         @JsonProperty("categories")
-        Set<Category> categories
+        Set<Category> categories,
+
+        @JsonProperty("isLiked")
+        Boolean isLiked,
+
+        @JsonProperty("isDisliked")
+        Boolean isDisliked
 ) {
 }

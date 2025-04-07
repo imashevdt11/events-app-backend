@@ -20,6 +20,7 @@ import kg.something.events_app_backend.repository.UserRepository;
 import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.UserService;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -92,6 +93,13 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Пользователь с почтой '" + email + "' не найден");
         }
         return user;
+    }
+
+    public boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null &&
+                authentication.isAuthenticated() &&
+                !(authentication instanceof AnonymousAuthenticationToken);
     }
 
     public UserResponse getUserById(UUID id) {

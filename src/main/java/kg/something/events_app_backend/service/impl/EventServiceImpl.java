@@ -14,6 +14,7 @@ import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.enums.EventGrade;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
+import kg.something.events_app_backend.mapper.EventMapper;
 import kg.something.events_app_backend.repository.EventRepository;
 import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.CloudinaryService;
@@ -38,18 +39,20 @@ import java.util.stream.Collectors;
 @Service
 public class EventServiceImpl implements EventService {
 
+    private final EventRepository repository;
     private final CategoryService categoryService;
     private final CloudinaryService cloudinaryService;
-    private final EventRepository repository;
+    private final EventMapper eventMapper;
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final Validator validator;
     private final GradeService gradeService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
+        this.eventMapper = eventMapper;
         this.objectMapper = objectMapper;
         this.userService = userService;
         this.validator = validator;
@@ -58,10 +61,8 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     public EventResponse createEvent(String eventRequestString, MultipartFile image) {
-
         User authenticatedUser = userService.getAuthenticatedUser();
         Image savedImage = cloudinaryService.saveImage(image);
-
         EventRequest eventRequest = parseAndValidateEvent(eventRequestString);
 
         Set<Category> categories = new HashSet<>();
@@ -72,74 +73,29 @@ public class EventServiceImpl implements EventService {
             }
             categories.add(existingCategory);
         }
-
-        Event event = new Event(
-                eventRequest.title(),
-                eventRequest.description(),
-                eventRequest.location(),
-                eventRequest.minimumAge(),
-                eventRequest.startTime(),
-                eventRequest.price(),
-                eventRequest.priceCurrency(),
-                eventRequest.amountOfPlaces(),
-                eventRequest.amountOfPlaces(),
-                authenticatedUser,
-                savedImage,
-                categories
-        );
-
+        Event event = eventMapper.toEntity(eventRequest, savedImage, authenticatedUser, categories);
         repository.save(event);
 
-        return new EventResponse(
-                event.getTitle(),
-                event.getDescription(),
-                event.getLocation(),
-                event.getMinimumAge(),
-                event.getStartTime(),
-                event.getPrice(),
-                eventRequest.priceCurrency(),
-                event.getAmountOfPlaces(),
-                event.getAmountOfAvailablePlaces(),
-                savedImage.getUrl(),
-                categories
-        );
+        return eventMapper.toEventResponse(event, null, null);
     }
 
     public List<EventResponse> getAllEvents() {
         List<Event> events = repository.findAll();
-        return events.stream().map(event -> new EventResponse(
-                event.getTitle(),
-                event.getDescription(),
-                event.getLocation(),
-                event.getMinimumAge(),
-                event.getStartTime(),
-                event.getPrice(),
-                event.getPriceCurrency(),
-                event.getAmountOfPlaces(),
-                event.getAmountOfAvailablePlaces(),
-                event.getImage().getUrl(),
-                event.getCategories()
-        )).collect(Collectors.toList());
+        return events.stream().map(
+                event -> eventMapper.toEventResponse(event, null, null))
+                .collect(Collectors.toList());
     }
 
     public EventResponse getEventById(UUID id) {
-        Event event = repository.findEventById(id);
-        if (event == null) {
-            throw new ResourceNotFoundException("User not found with id: %s".formatted(id));
+        Event event = findEventById(id);
+        Boolean isLiked = null;
+        Boolean isDisliked = null;
+        if (userService.isAuthenticated()) {
+            Grade grade = gradeService.findGradeByEventAndUser(event, userService.getAuthenticatedUser());
+            isLiked = grade.getName().equals(EventGrade.LIKE);
+            isDisliked = grade.getName().equals(EventGrade.DISLIKE);
         }
-        return new EventResponse(
-                event.getTitle(),
-                event.getDescription(),
-                event.getLocation(),
-                event.getMinimumAge(),
-                event.getStartTime(),
-                event.getPrice(),
-                event.getPriceCurrency(),
-                event.getAmountOfPlaces(),
-                event.getAmountOfAvailablePlaces(),
-                event.getImage().getUrl(),
-                event.getCategories()
-        );
+        return eventMapper.toEventResponse(event, isLiked, isDisliked);
     }
 
     private EventRequest parseAndValidateEvent(String eventRequestString) {

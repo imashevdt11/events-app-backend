@@ -47,7 +47,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event, image));
     }
 
-    @Operation(summary = "GET ALL EVENTS (NEW to OLD")
+    @Operation(summary = "GET ALL EVENTS")
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAllEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());

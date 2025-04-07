@@ -24,6 +24,8 @@ public interface UserService {
 
     User getAuthenticatedUser();
 
+    boolean isAuthenticated();
+
     UserResponse getUserById(UUID id);
 
     LoginResponse logIn(LoginRequest request);
