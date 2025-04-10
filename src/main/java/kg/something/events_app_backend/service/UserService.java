@@ -37,4 +37,8 @@ public interface UserService {
     UserResponse updateUser(UUID userId, UserUpdateRequest request);
 
     String uploadProfileImage(UUID userId, MultipartFile image);
+
+    String subscribeToUser(UUID userId);
+
+    String unsubscribeFromUser(UUID userId);
 }

@@ -10,6 +10,7 @@ import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.Role;
+import kg.something.events_app_backend.entity.Subscription;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.OutOfDateException;
@@ -19,6 +20,7 @@ import kg.something.events_app_backend.mapper.UserMapper;
 import kg.something.events_app_backend.repository.UserRepository;
 import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.RoleService;
+import kg.something.events_app_backend.service.SubscriptionService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,8 +49,9 @@ public class UserServiceImpl implements UserService {
     private final UserDetailsService userDetailsService;
     private final UserMapper userMapper;
     private final UserRepository repository;
+    private final SubscriptionService subscriptionService;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, CloudinaryService cloudinaryService, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserRepository repository) {
+    public UserServiceImpl(AuthenticationManager authenticationManager, CloudinaryService cloudinaryService, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserRepository repository, SubscriptionService subscriptionService) {
         this.authenticationManager = authenticationManager;
         this.cloudinaryService = cloudinaryService;
         this.jwtUtil = jwtUtil;
@@ -57,6 +60,7 @@ public class UserServiceImpl implements UserService {
         this.userDetailsService = userDetailsService;
         this.userMapper = userMapper;
         this.repository = repository;
+        this.subscriptionService = subscriptionService;
     }
 
     public List<User> getAllUsers() {
@@ -221,5 +225,49 @@ public class UserServiceImpl implements UserService {
         repository.save(user);
 
         return "Изображение профиля сохранено";
+    }
+
+    public String subscribeToUser(UUID userId) {
+        User subscriber = getAuthenticatedUser();
+        User organizer = findUserById(userId);
+
+        if (subscriber.getId().equals(organizer.getId())) {
+            throw new InvalidRequestException("Пользователь не может подписаться на самого себя");
+        }
+//        if (subscriber.getRole().getName().equals("ROLE_ORGANIZER")) {
+//            throw new InvalidRequestException("Вы не можете подписаться на пользователя, поскольку он не является организатором");
+//        }
+        Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
+        if (subscription != null) {
+            throw new ResourceAlreadyExistsException("Пользователь уже подписан на организатора");
+        }
+        subscriptionService.save(new Subscription(organizer, subscriber));
+
+        return "Пользователь '%s %s' подписался на '%s %s'"
+                .formatted(
+                        subscriber.getFirstName(),
+                        subscriber.getLastName(),
+                        organizer.getFirstName(),
+                        organizer.getLastName()
+                );
+    }
+
+    public String unsubscribeFromUser(UUID userId) {
+        User subscriber = getAuthenticatedUser();
+        User organizer = findUserById(userId);
+
+        Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
+        if (subscription == null) {
+            throw new ResourceAlreadyExistsException("Пользователь не подписан на организатора");
+        }
+        subscriptionService.delete(subscription);
+
+        return "Пользователь '%s %s' отписался от '%s %s'"
+                .formatted(
+                        subscriber.getFirstName(),
+                        subscriber.getLastName(),
+                        organizer.getFirstName(),
+                        organizer.getLastName()
+                );
     }
 }

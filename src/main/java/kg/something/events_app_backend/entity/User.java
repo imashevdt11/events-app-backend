@@ -105,6 +105,12 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Complaint> eventComplaints = new ArrayList<>();
 
+    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> organizersSubscriptions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscribersSubscriptions = new ArrayList<>();
+
     public User(String firstName, String lastName, String phoneNumber, String email, String password, Role role, boolean enabled) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -250,6 +256,22 @@ public class User implements UserDetails {
 
     public void setSavedEvents(List<SavedEvent> savedEvents) {
         this.savedEvents = savedEvents;
+    }
+
+    public List<Subscription> getSubscribersSubscriptions() {
+        return subscribersSubscriptions;
+    }
+
+    public void setSubscribersSubscriptions(List<Subscription> subscribersSubscriptions) {
+        this.subscribersSubscriptions = subscribersSubscriptions;
+    }
+
+    public List<Subscription> getOrganizersSubscriptions() {
+        return organizersSubscriptions;
+    }
+
+    public void setOrganizersSubscriptions(List<Subscription> organizersSubscriptions) {
+        this.organizersSubscriptions = organizersSubscriptions;
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -115,5 +116,17 @@ public class UserController {
     public ResponseEntity<?> uploadProfileImage(@PathVariable("userId") UUID userId,
                                                 @RequestParam("image") MultipartFile image) {
         return ResponseEntity.ok(service.uploadProfileImage(userId, image));
+    }
+
+    @Operation(summary = "SUBSCRIBE TO USER")
+    @PostMapping("/subscribe/{id}")
+    public ResponseEntity<String> subscribeToUser(@PathVariable("id") UUID userId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.subscribeToUser(userId));
+    }
+
+    @Operation(summary = "UNSUBSCRIBE FROM USER")
+    @DeleteMapping("/unsubscribe/{id}")
+    public ResponseEntity<String> unsubscribeFromUser(@PathVariable("id") UUID userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.unsubscribeFromUser(userId));
     }
 }
