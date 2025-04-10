@@ -22,12 +22,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public String createCategory(CategoryDto category) {
-        if (repository.existsByName(category.getName())) {
-            throw new ResourceAlreadyExistsException("Категория с названием '" + category.getName() + "' уже есть в базе данных");
+        if (repository.existsByName(category.name())) {
+            throw new ResourceAlreadyExistsException("Категория с названием '" + category.name() + "' уже есть в базе данных");
         }
-        repository.save(new Category(category.getName()));
+        repository.save(new Category(category.name()));
 
-        return "Категория '" + category.getName() + "' сохранена";
+        return "Категория '" + category.name() + "' сохранена";
     }
 
     @Override
@@ -69,13 +69,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         String oldCategoryName = category.getName();
-        if (category.getName().equals(categoryDto.getName())) {
+        if (category.getName().equals(categoryDto.name())) {
             return "Категория не изменена. Данные из запроса и записи в базе данных идентичны";
         }
-        if (repository.existsByName(categoryDto.getName())) {
+        if (repository.existsByName(categoryDto.name())) {
             throw new ResourceAlreadyExistsException("Категория с названием '" + category.getName() + "' уже есть в базе данных");
         }
-        category.setName(categoryDto.getName());
+        category.setName(categoryDto.name());
         repository.save(category);
 
         return "Название категории изменено с '" + oldCategoryName + "' на '" + category.getName() + "'";

@@ -1,14 +1,18 @@
 package kg.something.events_app_backend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.CommentDto;
-import kg.something.events_app_backend.entity.Category;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 public record EventResponse(
+
+        @JsonProperty("id")
+        UUID id,
 
         @JsonProperty("title")
         String title,
@@ -41,7 +45,7 @@ public record EventResponse(
         String imageUrl,
 
         @JsonProperty("categories")
-        Set<Category> categories,
+        Set<CategoryDto> categories,
 
         @JsonProperty("comments")
         Set<CommentDto> comments,
