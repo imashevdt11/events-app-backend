@@ -59,6 +59,7 @@ public class EventMapper {
                 event.getPriceCurrency(),
                 event.getAmountOfPlaces(),
                 event.getAmountOfAvailablePlaces(),
+                event.getCreatedAt(),
                 event.getImage().getUrl(),
                 categories,
                 commentDtoSet,

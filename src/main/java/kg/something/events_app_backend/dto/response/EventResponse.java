@@ -41,6 +41,9 @@ public record EventResponse(
         @JsonProperty("amount_of_available_places")
         Integer amountOfAvailablePlaces,
 
+        @JsonProperty("created_at")
+        LocalDateTime createdAt,
+
         @JsonProperty("image")
         String imageUrl,
 
