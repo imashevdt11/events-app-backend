@@ -10,4 +10,8 @@ public interface GradeService {
     void save(Grade grade);
 
     void delete(Grade grade);
+
+    Integer getEventAmountOfLikes(Event event);
+
+    Integer getEventAmountOfDislikes(Event event);
 }

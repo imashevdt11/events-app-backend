@@ -3,6 +3,7 @@ package kg.something.events_app_backend.service.impl;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.Grade;
 import kg.something.events_app_backend.entity.User;
+import kg.something.events_app_backend.enums.EventGrade;
 import kg.something.events_app_backend.repository.GradeRepository;
 import kg.something.events_app_backend.service.GradeService;
 import org.springframework.stereotype.Service;
@@ -26,5 +27,13 @@ public class GradeServiceImpl implements GradeService {
 
     public void delete(Grade grade) {
         repository.delete(grade);
+    }
+
+    public Integer getEventAmountOfLikes(Event event) {
+        return repository.countGradesByEventAndName(event, EventGrade.LIKE);
+    }
+
+    public Integer getEventAmountOfDislikes(Event event) {
+        return repository.countGradesByEventAndName(event, EventGrade.DISLIKE);
     }
 }

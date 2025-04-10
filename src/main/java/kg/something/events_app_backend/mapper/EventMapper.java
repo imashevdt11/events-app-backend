@@ -8,6 +8,7 @@ import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.User;
+import kg.something.events_app_backend.service.GradeService;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 public class EventMapper {
 
     private final CommentMapper commentMapper;
+    private final GradeService gradeService;
 
-    public EventMapper(CommentMapper commentMapper) {
+    public EventMapper(CommentMapper commentMapper, GradeService gradeService) {
         this.commentMapper = commentMapper;
+        this.gradeService = gradeService;
     }
 
     public Event toEntity(EventRequest eventRequest, Image eventImage, User author, Set<Category> categories) {
@@ -59,6 +62,8 @@ public class EventMapper {
                 event.getImage().getUrl(),
                 categories,
                 commentDtoSet,
+                gradeService.getEventAmountOfLikes(event),
+                gradeService.getEventAmountOfDislikes(event),
                 isLiked,
                 isDisliked
         );

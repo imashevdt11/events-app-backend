@@ -50,6 +50,12 @@ public record EventResponse(
         @JsonProperty("comments")
         Set<CommentDto> comments,
 
+        @JsonProperty("amount_of_likes")
+        Integer amountOfLikes,
+
+        @JsonProperty("amount_of_dislikes")
+        Integer amountOfDislikes,
+
         @JsonProperty("isLiked")
         Boolean isLiked,
 

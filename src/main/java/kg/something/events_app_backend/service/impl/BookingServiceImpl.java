@@ -1,7 +1,7 @@
 package kg.something.events_app_backend.service.impl;
 
 import kg.something.events_app_backend.entity.Booking;
-import kg.something.events_app_backend.mapper.BookingRepository;
+import kg.something.events_app_backend.repository.BookingRepository;
 import kg.something.events_app_backend.service.BookingService;
 import org.springframework.stereotype.Service;
 

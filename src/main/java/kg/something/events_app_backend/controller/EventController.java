@@ -107,7 +107,7 @@ public class EventController {
     @Operation(summary = "BOOK PLACE TO EVENT")
     @PostMapping("/book-place/{id}")
     public ResponseEntity<String> bookPlace(@PathVariable("id") UUID eventId,
-                                             @RequestParam("numberOfPlaces") Integer numberOfPlaces) {
+                                            @RequestParam("numberOfPlaces") Integer numberOfPlaces) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.bookPlace(eventId, numberOfPlaces));
     }
 }
