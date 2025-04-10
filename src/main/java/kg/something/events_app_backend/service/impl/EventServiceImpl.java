@@ -32,6 +32,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
@@ -219,6 +220,20 @@ public class EventServiceImpl implements EventService {
         List<Event> events = repository.findEventsByCategories(categories);
         return events.stream().map(
                 event -> eventMapper.toEventResponse(event, null, null))
+                .collect(Collectors.toList());
+    }
+
+    public List<EventResponse> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
+        List<Event> events = repository.findEventsCreatedBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+        return events.stream().map(
+                        event -> eventMapper.toEventResponse(event, null, null))
+                .collect(Collectors.toList());
+    }
+
+    public List<EventResponse> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate) {
+        List<Event> events = repository.findEventsWhichStartBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+        return events.stream().map(
+                        event -> eventMapper.toEventResponse(event, null, null))
                 .collect(Collectors.toList());
     }
 

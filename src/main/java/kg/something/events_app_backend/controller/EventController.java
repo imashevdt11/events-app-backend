@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +59,20 @@ public class EventController {
     @GetMapping("/category")
     public ResponseEntity<List<EventResponse>> getEventsByCategory(@RequestParam("category") String category) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
+    }
+
+    @Operation(summary = "GET EVENTS CREATED IN SPECIFIED PERIOD")
+    @GetMapping("/creation-time-period")
+    public ResponseEntity<List<EventResponse>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,
+                                                                          @RequestParam("endDate") LocalDate endDate) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCreationTimePeriod(startDate, endDate));
+    }
+
+    @Operation(summary = "GET EVENTS THAT WILL BE STARTED IN SPECIFIED PERIOD")
+    @GetMapping("/start-time-period")
+    public ResponseEntity<List<EventResponse>> getEventsByStartTimePeriod(@RequestParam("startDate") LocalDate startDate,
+                                                                          @RequestParam("endDate") LocalDate endDate) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByStartTimePeriod(startDate, endDate));
     }
 
     @Operation(summary = "GET EVENT INFORMATION BY ID")

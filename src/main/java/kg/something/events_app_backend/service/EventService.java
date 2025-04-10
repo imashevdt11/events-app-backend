@@ -5,6 +5,7 @@ import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.enums.EventGrade;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,10 @@ public interface EventService {
     String removeRate(UUID eventId, EventGrade rate);
 
     List<EventResponse> getEventsByCategory(String categoryName);
+
+    List<EventResponse> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate);
+
+    List<EventResponse> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate);
 
     String addComment(UUID eventId, String comment);
 
