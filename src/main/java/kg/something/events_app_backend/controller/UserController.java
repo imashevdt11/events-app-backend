@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import kg.something.events_app_backend.dto.UserOrganizerDto;
+import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
@@ -128,5 +130,17 @@ public class UserController {
     @DeleteMapping("/unsubscribe/{id}")
     public ResponseEntity<String> unsubscribeFromUser(@PathVariable("id") UUID userId) {
         return ResponseEntity.status(HttpStatus.OK).body(service.unsubscribeFromUser(userId));
+    }
+
+    @Operation(summary = "USER'S SUBSCRIPTIONS")
+    @GetMapping("/subscriptions/{id}")
+    public ResponseEntity<List<UserOrganizerDto>> getUserSubscriptions(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersUserFollows(id));
+    }
+
+    @Operation(summary = "ORGANIZER'S SUBSCRIBERS")
+    @GetMapping("/subscribers/{id}")
+    public ResponseEntity<List<UserSubscriberDto>> getOrganizerSubscribers(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersSubscribers(id));
     }
 }

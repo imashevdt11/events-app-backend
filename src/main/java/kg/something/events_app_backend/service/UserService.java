@@ -1,6 +1,8 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.AccessToken;
+import kg.something.events_app_backend.dto.UserOrganizerDto;
+import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
@@ -41,4 +43,8 @@ public interface UserService {
     String subscribeToUser(UUID userId);
 
     String unsubscribeFromUser(UUID userId);
+
+    List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId);
+
+    List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId);
 }

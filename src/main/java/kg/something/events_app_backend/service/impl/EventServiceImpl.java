@@ -232,8 +232,8 @@ public class EventServiceImpl implements EventService {
 
     public List<EventResponse> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate) {
         List<Event> events = repository.findEventsWhichStartBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-        return events.stream().map(
-                        event -> eventMapper.toEventResponse(event, null, null))
+        return events.stream()
+                .map(event -> eventMapper.toEventResponse(event, null, null))
                 .collect(Collectors.toList());
     }
 

@@ -3,6 +3,8 @@ package kg.something.events_app_backend.service.impl;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.configuration.JwtUtil;
 import kg.something.events_app_backend.dto.AccessToken;
+import kg.something.events_app_backend.dto.UserOrganizerDto;
+import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
@@ -269,5 +271,21 @@ public class UserServiceImpl implements UserService {
                         organizer.getFirstName(),
                         organizer.getLastName()
                 );
+    }
+
+    public List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId) {
+        User user = getAuthenticatedUser();
+        return subscriptionService.findAllOrganizersUserFollows(user)
+                .stream()
+                .map(userMapper::toUserOrganizerDto)
+                .toList();
+    }
+
+    public List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId) {
+        User user = getAuthenticatedUser();
+        return subscriptionService.findAllOrganizersSubscribers(user)
+                .stream()
+                .map(userMapper::toUserSubscriberDto)
+                .toList();
     }
 }

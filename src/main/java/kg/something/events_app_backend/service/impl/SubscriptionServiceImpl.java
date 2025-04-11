@@ -6,6 +6,8 @@ import kg.something.events_app_backend.repository.SubscriptionRepository;
 import kg.something.events_app_backend.service.SubscriptionService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
 
@@ -25,5 +27,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     public void delete(Subscription subscription) {
         repository.delete(subscription);
+    }
+
+    public List<Subscription> findAllOrganizersUserFollows(User user) {
+        return repository.findAllBySubscriber(user);
+    }
+
+    public List<Subscription> findAllOrganizersSubscribers(User user) {
+        return repository.findAllByOrganizer(user);
     }
 }
