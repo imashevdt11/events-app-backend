@@ -11,6 +11,7 @@ import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Comment;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.Grade;
+import kg.something.events_app_backend.entity.SavedEvent;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.enums.EventGrade;
@@ -24,6 +25,7 @@ import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.CommentService;
 import kg.something.events_app_backend.service.EventService;
 import kg.something.events_app_backend.service.GradeService;
+import kg.something.events_app_backend.service.SavedEventService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -54,8 +56,9 @@ public class EventServiceImpl implements EventService {
     private final GradeService gradeService;
     private final CommentService commentService;
     private final BookingService bookingService;
+    private final SavedEventService savedEventService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, BookingService bookingService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, BookingService bookingService, SavedEventService savedEventService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
@@ -66,6 +69,7 @@ public class EventServiceImpl implements EventService {
         this.gradeService = gradeService;
         this.commentService = commentService;
         this.bookingService = bookingService;
+        this.savedEventService = savedEventService;
     }
 
     @Transactional
@@ -225,8 +229,8 @@ public class EventServiceImpl implements EventService {
 
     public List<EventResponse> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
         List<Event> events = repository.findEventsCreatedBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-        return events.stream().map(
-                        event -> eventMapper.toEventResponse(event, null, null))
+        return events.stream()
+                .map(event -> eventMapper.toEventResponse(event, null, null))
                 .collect(Collectors.toList());
     }
 
@@ -304,5 +308,36 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(event -> eventMapper.toEventResponse(event, null, null))
                 .toList();
+    }
+
+    public String saveEventAsBookmark(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
+        if (savedEvent == null) {
+            savedEventService.save(new SavedEvent(event, user));
+            return "Пользователь '%s %s' добавил мероприятие '%s' в 'Избранное'"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName(),
+                            event.getTitle()
+                    );
+        } else {
+            throw new InvalidRequestException("Аутентифицированный пользователь уже добавил мероприятие в избранное");
+        }
+    }
+
+    public String removeEventAsBookmark(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
+        if (savedEvent == null) {
+            throw new ResourceNotFoundException("Указанное мероприятие не сохранялось пользователем");
+        } else {
+            savedEventService.delete(savedEvent);
+            return "Мероприятие удаленно из 'Избранного'";
+        }
     }
 }

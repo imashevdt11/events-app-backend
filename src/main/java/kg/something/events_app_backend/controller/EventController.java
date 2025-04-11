@@ -131,4 +131,16 @@ public class EventController {
     public ResponseEntity<List<EventResponse>> getEventsByUser(@PathVariable("userId") UUID userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUser(userId));
     }
+
+    @Operation(summary = "SAVE EVENT AS BOOKMARK")
+    @PostMapping("/save-as-bookmark/{id}")
+    public ResponseEntity<String> saveEventAsBookmark(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveEventAsBookmark(eventId));
+    }
+
+    @Operation(summary = "REMOVE EVENT AS BOOKMARK")
+    @DeleteMapping("/remove-as-bookmark/{id}")
+    public ResponseEntity<String> removeEventAsBookmark(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeEventAsBookmark(eventId));
+    }
 }

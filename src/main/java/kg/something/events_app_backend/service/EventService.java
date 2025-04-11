@@ -36,4 +36,8 @@ public interface EventService {
     String bookPlace(UUID eventId, Integer numberOfPlaces);
 
     List<EventResponse> getEventsByUser(UUID userId);
+
+    String saveEventAsBookmark(UUID eventId);
+
+    String removeEventAsBookmark(UUID eventId);
 }
