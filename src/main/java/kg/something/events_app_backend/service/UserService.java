@@ -47,4 +47,6 @@ public interface UserService {
     List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId);
 
     List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId);
+
+    User findUserById(UUID id);
 }

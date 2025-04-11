@@ -297,4 +297,12 @@ public class EventServiceImpl implements EventService {
                         user.getLastName()
                 );
     }
+
+    public List<EventResponse> getEventsByUser(UUID userId) {
+        User user = userService.findUserById(userId);
+        return repository.findEventsByOrganizerUser(user)
+                .stream()
+                .map(event -> eventMapper.toEventResponse(event, null, null))
+                .toList();
+    }
 }

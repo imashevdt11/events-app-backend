@@ -34,4 +34,6 @@ public interface EventService {
     String removeComment(UUID eventId, UUID commentId);
 
     String bookPlace(UUID eventId, Integer numberOfPlaces);
+
+    List<EventResponse> getEventsByUser(UUID userId);
 }

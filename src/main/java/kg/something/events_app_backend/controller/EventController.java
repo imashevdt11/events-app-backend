@@ -125,4 +125,10 @@ public class EventController {
                                             @RequestParam("numberOfPlaces") Integer numberOfPlaces) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.bookPlace(eventId, numberOfPlaces));
     }
+
+    @Operation(summary = "GET EVENTS CREATED BY USER")
+    @GetMapping("/created-by/{userId}")
+    public ResponseEntity<List<EventResponse>> getEventsByUser(@PathVariable("userId") UUID userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUser(userId));
+    }
 }

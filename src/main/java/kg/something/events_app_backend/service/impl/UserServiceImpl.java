@@ -198,7 +198,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User findUserById(UUID id) {
+    public User findUserById(UUID id) {
         return Optional.ofNullable(repository.findUserById(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
     }
