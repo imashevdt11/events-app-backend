@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Column(name = "first_name")
     @Size(
             min = 2,
-            max = 50
+            max = 20
     )
     private String firstName;
 
@@ -48,7 +48,7 @@ public class User implements UserDetails {
     @Column(name = "last_name")
     @Size(
             min = 2,
-            max = 50
+            max = 20
     )
     private String lastName;
 
@@ -56,7 +56,7 @@ public class User implements UserDetails {
     @Column(name = "phone_number")
     @Size(
             min = 10,
-            max = 20
+            max = 15
     )
     private String phoneNumber;
 

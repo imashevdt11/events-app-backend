@@ -37,7 +37,7 @@ public class UserMapper {
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 role,
-                false
+                true
         );
     }
 

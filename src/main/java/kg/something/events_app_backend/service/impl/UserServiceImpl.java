@@ -1,21 +1,15 @@
 package kg.something.events_app_backend.service.impl;
 
 import jakarta.transaction.Transactional;
-import kg.something.events_app_backend.configuration.JwtUtil;
-import kg.something.events_app_backend.dto.AccessToken;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
-import kg.something.events_app_backend.dto.request.LoginRequest;
-import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
-import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.Subscription;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
-import kg.something.events_app_backend.exception.OutOfDateException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.UserMapper;
@@ -25,13 +19,8 @@ import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.SubscriptionService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,30 +32,24 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final AuthenticationManager authenticationManager;
     private final CloudinaryService cloudinaryService;
-    private final JwtUtil jwtUtil;
-    private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-    private final UserDetailsService userDetailsService;
     private final UserMapper userMapper;
     private final UserRepository repository;
     private final SubscriptionService subscriptionService;
 
-    public UserServiceImpl(AuthenticationManager authenticationManager, CloudinaryService cloudinaryService, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserRepository repository, SubscriptionService subscriptionService) {
-        this.authenticationManager = authenticationManager;
+    public UserServiceImpl(CloudinaryService cloudinaryService, RoleService roleService, UserMapper userMapper, UserRepository repository, SubscriptionService subscriptionService) {
         this.cloudinaryService = cloudinaryService;
-        this.jwtUtil = jwtUtil;
-        this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
-        this.userDetailsService = userDetailsService;
         this.userMapper = userMapper;
         this.repository = repository;
         this.subscriptionService = subscriptionService;
     }
 
-    public List<User> getAllUsers() {
-        return repository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return repository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
     }
 
     public String changeUserRole(UUID userId, String roleName) {
@@ -124,49 +107,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    @Transactional
-    public LoginResponse logIn(LoginRequest request) {
-        if (request.email() == null || request.password() == null || request.email().isEmpty() || request.password().isEmpty()) {
-            throw new InvalidRequestException("Введите почту и пароль");
-        }
-        User user = repository.findByEmail(request.email());
-        if (user != null) {
-            if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-                throw new ResourceNotFoundException("Неправильный пароль");
-            }
-        } else {
-            throw new ResourceNotFoundException("Пользователь с почтой '" + request.email() + "' не найден");
-        }
-
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-
-        var jwtToken = jwtUtil.generateToken(user);
-        var refreshToken = jwtUtil.generateRefreshToken(user);
-        return new LoginResponse(user.getId(), jwtToken, refreshToken);
-    }
-
-    public AccessToken refreshToken(String refreshToken) {
-        if (jwtUtil.isRefreshTokenExpired(refreshToken)) {
-            throw new OutOfDateException("Срок действия токена истек");
-        }
-        String username = jwtUtil.extractUsername(refreshToken);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        String newAccessToken = jwtUtil.generateToken(userDetails);
-
-        return new AccessToken(newAccessToken);
-    }
-
-    @Transactional
-    public UserResponse registerUser(UserRegistrationRequest request) {
-        checkUniqueFieldsForExistingBeforeRegistration(request);
-        Role role = roleService.findRoleByName(request.role());
-
-        User user = userMapper.toEntityFromRegistrationRequest(request, role);
-        repository.save(user);
-
-        return userMapper.toUserResponse(user);
-    }
-
     public UserResponse updateUser(UUID userId, UserUpdateRequest request) {
         User user = findUserById(userId);
         checkUniqueFieldsForExistingBeforeUpdate(user, request);
@@ -189,19 +129,16 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void checkUniqueFieldsForExistingBeforeRegistration(UserRegistrationRequest request) {
-        if (repository.existsByEmail(request.email())) {
-            throw new ResourceAlreadyExistsException("Пользователь с почтой '%s' уже есть в базе данных".formatted(request.email()));
-        }
-        if (repository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new ResourceAlreadyExistsException("Пользователь с номером телефона '%s' уже есть в базе данных".formatted(request.phoneNumber()));
-        }
-    }
-
     public User findUserById(UUID id) {
         return Optional.ofNullable(repository.findUserById(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
     }
+
+    public User findUserByEmail(String email) {
+        return Optional.ofNullable(repository.findUsersByEmail(email))
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email '%s' не найден в базе данных".formatted(email)));
+    }
+
 
     @Transactional
     public String uploadProfileImage(UUID userId, MultipartFile image) {
@@ -287,5 +224,17 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(userMapper::toUserSubscriberDto)
                 .toList();
+    }
+
+    public void save(User user) {
+        repository.save(user);
+    }
+
+    public boolean existsByEmail(String email) {
+        return repository.existsByEmail(email);
+    }
+
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return repository.existsByPhoneNumber(phoneNumber);
     }
 }
