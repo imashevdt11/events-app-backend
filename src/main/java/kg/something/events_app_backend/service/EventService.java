@@ -1,5 +1,6 @@
 package kg.something.events_app_backend.service;
 
+import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.enums.EventGrade;
@@ -15,7 +16,7 @@ public interface EventService {
 
     Event findEventById(UUID id);
 
-    List<EventResponse> getAllEvents();
+    List<EventListDto> getAllEvents();
 
     EventResponse getEventById(UUID id);
 
@@ -23,11 +24,11 @@ public interface EventService {
 
     String removeRate(UUID eventId, EventGrade rate);
 
-    List<EventResponse> getEventsByCategory(String categoryName);
+    List<EventListDto> getEventsByCategory(String categoryName);
 
-    List<EventResponse> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate);
+    List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate);
 
-    List<EventResponse> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate);
+    List<EventListDto> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate);
 
     String addComment(UUID eventId, String comment);
 
@@ -35,7 +36,7 @@ public interface EventService {
 
     String bookPlace(UUID eventId, Integer numberOfPlaces);
 
-    List<EventResponse> getEventsByUser(UUID userId);
+    List<EventListDto> getEventsByUser(UUID userId);
 
     String saveEventAsBookmark(UUID eventId);
 

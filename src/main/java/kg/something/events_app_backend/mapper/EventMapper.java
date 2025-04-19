@@ -2,6 +2,7 @@ package kg.something.events_app_backend.mapper;
 
 import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.CommentDto;
+import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Category;
@@ -67,6 +68,19 @@ public class EventMapper {
                 gradeService.getEventAmountOfDislikes(event),
                 isLiked,
                 isDisliked
+        );
+    }
+
+    public EventListDto toEventListDto(Event event) {
+        return new EventListDto(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getPrice(),
+                event.getPriceCurrency(),
+                event.getAmountOfAvailablePlaces(),
+                event.getAmountOfPlaces() - event.getAmountOfAvailablePlaces(),
+                event.getImage().getUrl()
         );
     }
 }

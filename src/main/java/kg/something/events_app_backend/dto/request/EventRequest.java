@@ -35,5 +35,4 @@ public record EventRequest(
 
         @JsonProperty("categories")
         Set<Category> categories
-) {
-}
+) {}

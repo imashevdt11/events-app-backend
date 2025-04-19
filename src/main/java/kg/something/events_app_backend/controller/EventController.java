@@ -3,6 +3,7 @@ package kg.something.events_app_backend.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.enums.EventGrade;
 import kg.something.events_app_backend.exception.InvalidRequestException;
@@ -42,36 +43,34 @@ public class EventController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PostMapping
-    public ResponseEntity<EventResponse> createEvent(
-            @RequestPart("event") String event,
-            @RequestPart("image") MultipartFile image)
-            throws InvalidRequestException {
+    public ResponseEntity<EventResponse> createEvent(@RequestPart("event") String event,
+                                                     @RequestPart("image") MultipartFile image) throws InvalidRequestException {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event, image));
     }
 
     @Operation(summary = "GET ALL EVENTS")
     @GetMapping
-    public ResponseEntity<List<EventResponse>> getAllEvents() {
+    public ResponseEntity<List<EventListDto>> getAllEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());
     }
 
     @Operation(summary = "GET EVENTS BY CATEGORY")
     @GetMapping("/category")
-    public ResponseEntity<List<EventResponse>> getEventsByCategory(@RequestParam("category") String category) {
+    public ResponseEntity<List<EventListDto>> getEventsByCategory(@RequestParam("category") String category) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
     }
 
     @Operation(summary = "GET EVENTS CREATED IN SPECIFIED PERIOD")
     @GetMapping("/creation-time-period")
-    public ResponseEntity<List<EventResponse>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,
-                                                                          @RequestParam("endDate") LocalDate endDate) {
+    public ResponseEntity<List<EventListDto>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,
+                                                                           @RequestParam("endDate") LocalDate endDate) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCreationTimePeriod(startDate, endDate));
     }
 
     @Operation(summary = "GET EVENTS THAT WILL BE STARTED IN SPECIFIED PERIOD")
     @GetMapping("/start-time-period")
-    public ResponseEntity<List<EventResponse>> getEventsByStartTimePeriod(@RequestParam("startDate") LocalDate startDate,
-                                                                          @RequestParam("endDate") LocalDate endDate) {
+    public ResponseEntity<List<EventListDto>> getEventsByStartTimePeriod(@RequestParam("startDate") LocalDate startDate,
+                                                                         @RequestParam("endDate") LocalDate endDate) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByStartTimePeriod(startDate, endDate));
     }
 
@@ -128,7 +127,7 @@ public class EventController {
 
     @Operation(summary = "GET EVENTS CREATED BY USER")
     @GetMapping("/created-by/{userId}")
-    public ResponseEntity<List<EventResponse>> getEventsByUser(@PathVariable("userId") UUID userId) {
+    public ResponseEntity<List<EventListDto>> getEventsByUser(@PathVariable("userId") UUID userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUser(userId));
     }
 

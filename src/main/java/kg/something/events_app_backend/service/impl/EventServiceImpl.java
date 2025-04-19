@@ -4,6 +4,7 @@ import com.cloudinary.utils.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Booking;
@@ -41,7 +42,6 @@ import java.util.Optional;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -92,11 +92,11 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventResponse(event, null, null);
     }
 
-    public List<EventResponse> getAllEvents() {
+    public List<EventListDto> getAllEvents() {
         List<Event> events = repository.findAll();
-        return events.stream().map(
-                event -> eventMapper.toEventResponse(event, null, null))
-                .collect(Collectors.toList());
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
     }
 
     public EventResponse getEventById(UUID id) {
@@ -216,29 +216,29 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    public List<EventResponse> getEventsByCategory(String categoryName) {
+    public List<EventListDto> getEventsByCategory(String categoryName) {
         Category category = categoryService.findCategoryByName(categoryName);
         Set<Category> categories = new HashSet<>();
         categories.add(category);
 
         List<Event> events = repository.findEventsByCategories(categories);
-        return events.stream().map(
-                event -> eventMapper.toEventResponse(event, null, null))
-                .collect(Collectors.toList());
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
     }
 
-    public List<EventResponse> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
+    public List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
         List<Event> events = repository.findEventsCreatedBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
         return events.stream()
-                .map(event -> eventMapper.toEventResponse(event, null, null))
-                .collect(Collectors.toList());
+                .map(eventMapper::toEventListDto)
+                .toList();
     }
 
-    public List<EventResponse> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate) {
+    public List<EventListDto> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate) {
         List<Event> events = repository.findEventsWhichStartBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
         return events.stream()
-                .map(event -> eventMapper.toEventResponse(event, null, null))
-                .collect(Collectors.toList());
+                .map(eventMapper::toEventListDto)
+                .toList();
     }
 
     @Transactional
@@ -302,11 +302,11 @@ public class EventServiceImpl implements EventService {
                 );
     }
 
-    public List<EventResponse> getEventsByUser(UUID userId) {
+    public List<EventListDto> getEventsByUser(UUID userId) {
         User user = userService.findUserById(userId);
         return repository.findEventsByOrganizerUser(user)
                 .stream()
-                .map(event -> eventMapper.toEventResponse(event, null, null))
+                .map(eventMapper::toEventListDto)
                 .toList();
     }
 
