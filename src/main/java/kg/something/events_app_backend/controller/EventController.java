@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.enums.EventGrade;
 import kg.something.events_app_backend.exception.InvalidRequestException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -118,11 +120,11 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.removeComment(eventId, commentId));
     }
 
-    @Operation(summary = "BOOK PLACE TO EVENT")
-    @PostMapping("/book-place/{id}")
-    public ResponseEntity<String> bookPlace(@PathVariable("id") UUID eventId,
-                                            @RequestParam("numberOfPlaces") Integer numberOfPlaces) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.bookPlace(eventId, numberOfPlaces));
+    @Operation(summary = "Купить билет")
+    @PostMapping("/buy-ticket/{eventId}")
+    public ResponseEntity<String> bookPlace(@PathVariable("eventId") UUID eventId,
+                                            @RequestBody PaymentRequest paymentRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.buyTickets(eventId, paymentRequest));
     }
 
     @Operation(summary = "GET EVENTS CREATED BY USER")

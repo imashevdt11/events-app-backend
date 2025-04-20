@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.enums.EventGrade;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventService {
+
+    String buyTickets(UUID eventId, PaymentRequest paymentRequest);
 
     EventResponse createEvent(String eventRequestString, MultipartFile image);
 
@@ -33,8 +36,6 @@ public interface EventService {
     String addComment(UUID eventId, String comment);
 
     String removeComment(UUID eventId, UUID commentId);
-
-    String bookPlace(UUID eventId, Integer numberOfPlaces);
 
     List<EventListDto> getEventsByUser(UUID userId);
 

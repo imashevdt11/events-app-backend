@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class ApplicationConfig {
@@ -43,5 +44,16 @@ public class ApplicationConfig {
     public UserDetailsService userDetailsService() {
         return email -> repository.findUserByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: ".concat(email)));
+    }
+
+    @Bean
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
+    }
+
+    @Bean
+    public WebClient webClient(WebClient.Builder webClient) {
+        return webClient
+                .baseUrl("http://localhost:9012").build();
     }
 }

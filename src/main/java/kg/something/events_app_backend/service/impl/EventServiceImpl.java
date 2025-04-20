@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
+import kg.something.events_app_backend.dto.request.PaymentRequest;
+import kg.something.events_app_backend.dto.request.PaymentServiceRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Booking;
 import kg.something.events_app_backend.entity.Category;
@@ -26,6 +28,7 @@ import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.CommentService;
 import kg.something.events_app_backend.service.EventService;
 import kg.something.events_app_backend.service.GradeService;
+import kg.something.events_app_backend.service.PaymentService;
 import kg.something.events_app_backend.service.SavedEventService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.stereotype.Service;
@@ -57,8 +60,9 @@ public class EventServiceImpl implements EventService {
     private final CommentService commentService;
     private final BookingService bookingService;
     private final SavedEventService savedEventService;
+    private final PaymentService paymentService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, BookingService bookingService, SavedEventService savedEventService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, BookingService bookingService, SavedEventService savedEventService, PaymentService paymentService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
@@ -70,11 +74,15 @@ public class EventServiceImpl implements EventService {
         this.commentService = commentService;
         this.bookingService = bookingService;
         this.savedEventService = savedEventService;
+        this.paymentService = paymentService;
     }
 
     @Transactional
     public EventResponse createEvent(String eventRequestString, MultipartFile image) {
         User authenticatedUser = userService.getAuthenticatedUser();
+        if (!authenticatedUser.getRole().getName().equals("ROLE_ORGANIZER")) {
+            throw new InvalidRequestException("Только пользователи с ролью 'ROLE_ORGANIZER' могут создавать мероприятия");
+        }
         Image savedImage = cloudinaryService.saveImage(image);
         EventRequest eventRequest = parseAndValidateEvent(eventRequestString);
 
@@ -279,23 +287,36 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    public String bookPlace(UUID eventId, Integer numberOfPlaces) {
+    public String buyTickets(UUID eventId, PaymentRequest paymentRequest) {
         User user = userService.getAuthenticatedUser();
         Event event = findEventById(eventId);
 
-        if (event.getAmountOfAvailablePlaces() < numberOfPlaces) {
-            throw new InvalidRequestException("Количество запрошенных мест превышает доступное. Доступное количество мест на мероприятие: %s".formatted(event.getAmountOfAvailablePlaces()));
+        if (event.getAmountOfAvailablePlaces() < paymentRequest.amountOfTickets()) {
+            throw new InvalidRequestException("Количество запрошенных билетов превышает доступное. Доступное количество мест на мероприятие: %s".formatted(event.getAmountOfAvailablePlaces()));
+        }
+        if (paymentRequest.amountOfTickets() > 5) {
+            throw new InvalidRequestException("Нельзя покупать более 5 билетов за раз.");
+        }
+        if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) > paymentRequest.amountOfMoney()) {
+            throw new InvalidRequestException("Переданной суммы денег недостаточно для покупки билетов");
         }
         if (event.getOrganizerUser().getId().equals(user.getId())) {
             throw new InvalidRequestException("Организатор не может бронировать места на свои же мероприятия");
         }
-        for (int i = 0; i < numberOfPlaces; i++) {
+        paymentService.payForTickets(new PaymentServiceRequest(
+                paymentRequest.cardNumber(),
+                "%s %s".formatted(user.getFirstName(), user.getLastName()),
+                paymentRequest.expiryDate(),
+                paymentRequest.cvv(),
+                paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
+        ));
+        for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
             bookingService.save(new Booking(event, user));
         }
-        event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - numberOfPlaces);
+        event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
         return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"
                 .formatted(
-                        numberOfPlaces,
+                        paymentRequest.amountOfTickets(),
                         event.getTitle(),
                         user.getFirstName(),
                         user.getLastName()

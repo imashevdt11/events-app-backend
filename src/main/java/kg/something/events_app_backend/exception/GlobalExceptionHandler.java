@@ -25,6 +25,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ServiceNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceNotAvailableException(ServiceNotAvailableException ex) {
+//        log.error("InvalidRequestException: ({})", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleProductException(ResourceAlreadyExistsException ex) {
 //        log.error("ResourceAlreadyExistsException: ({})", ex.getMessage());
