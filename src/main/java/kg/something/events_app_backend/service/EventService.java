@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Event;
@@ -42,4 +43,6 @@ public interface EventService {
     String saveEventAsBookmark(UUID eventId);
 
     String removeEventAsBookmark(UUID eventId);
+
+    List<SalesByEventDto> getSalesStatisticForEvents();
 }

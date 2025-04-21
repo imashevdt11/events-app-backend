@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.enums.EventGrade;
@@ -143,5 +144,11 @@ public class EventController {
     @DeleteMapping("/remove-as-bookmark/{id}")
     public ResponseEntity<String> removeEventAsBookmark(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.removeEventAsBookmark(eventId));
+    }
+
+    @Operation(summary = "Статистика по продажам билетов на мероприятия, созданные указанным пользователем")
+    @GetMapping("/stats/sales-for-events")
+    public ResponseEntity<List<SalesByEventDto>> getSalesStatisticForEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getSalesStatisticForEvents());
     }
 }

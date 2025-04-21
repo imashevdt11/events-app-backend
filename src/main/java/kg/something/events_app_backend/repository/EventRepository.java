@@ -1,5 +1,6 @@
 package kg.something.events_app_backend.repository;
 
+import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.User;
@@ -29,4 +30,22 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventComments WHERE e.organizerUser = :organizerUser")
     List<Event> findEventsByOrganizerUser(User organizerUser);
+
+    @Query("""
+    SELECT new kg.something.events_app_backend.dto.SalesByEventDto(
+        e.id,
+        e.title,
+        COUNT(b.id),
+        CASE WHEN e.amountOfPlaces > 0
+             THEN CAST(COUNT(b.id) * 100.0 / e.amountOfPlaces AS INTEGER)
+             ELSE 0 END,
+        CASE WHEN COUNT(b.id) > 0
+            THEN SUM(e.price)
+            ELSE CAST(0 AS BIGDECIMAL) END)
+        FROM Event e
+    LEFT JOIN e.eventBookings b
+    WHERE e.organizerUser.id = :organizerId
+    GROUP BY e.id, e.title, e.amountOfPlaces, e.price
+    """)
+    List<SalesByEventDto> findSalesByEventForOrganizer(@Param("organizerId") UUID organizerId);
 }

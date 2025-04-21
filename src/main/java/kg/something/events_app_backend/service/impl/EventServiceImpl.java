@@ -9,6 +9,7 @@ import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.request.PaymentServiceRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
+import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.entity.Booking;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Comment;
@@ -360,5 +361,14 @@ public class EventServiceImpl implements EventService {
             savedEventService.delete(savedEvent);
             return "Мероприятие удаленно из 'Избранного'";
         }
+    }
+
+    public List<SalesByEventDto> getSalesStatisticForEvents() {
+        User user = userService.getAuthenticatedUser();
+
+        if (user.getRole().getName().equals("ROLE_USER")) {
+            throw new InvalidRequestException("Статистика доступна только организаторам");
+        }
+        return repository.findSalesByEventForOrganizer(user.getId());
     }
 }
