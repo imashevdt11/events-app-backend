@@ -11,7 +11,7 @@ import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.request.PaymentServiceRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.dto.SalesByEventDto;
-import kg.something.events_app_backend.entity.Booking;
+import kg.something.events_app_backend.entity.Ticket;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Comment;
 import kg.something.events_app_backend.entity.Event;
@@ -24,7 +24,7 @@ import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.EventMapper;
 import kg.something.events_app_backend.repository.EventRepository;
-import kg.something.events_app_backend.service.BookingService;
+import kg.something.events_app_backend.service.TicketService;
 import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.CommentService;
@@ -60,11 +60,11 @@ public class EventServiceImpl implements EventService {
     private final Validator validator;
     private final GradeService gradeService;
     private final CommentService commentService;
-    private final BookingService bookingService;
+    private final TicketService ticketService;
     private final SavedEventService savedEventService;
     private final PaymentService paymentService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, BookingService bookingService, SavedEventService savedEventService, PaymentService paymentService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, TicketService ticketService, SavedEventService savedEventService, PaymentService paymentService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
@@ -74,7 +74,7 @@ public class EventServiceImpl implements EventService {
         this.validator = validator;
         this.gradeService = gradeService;
         this.commentService = commentService;
-        this.bookingService = bookingService;
+        this.ticketService = ticketService;
         this.savedEventService = savedEventService;
         this.paymentService = paymentService;
     }
@@ -315,7 +315,7 @@ public class EventServiceImpl implements EventService {
                 paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
         ));
         for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
-            bookingService.save(new Booking(event, user));
+            ticketService.save(new Ticket(event, user));
         }
         event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
         return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"

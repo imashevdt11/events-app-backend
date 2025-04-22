@@ -36,15 +36,15 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     SELECT new kg.something.events_app_backend.dto.SalesByEventDto(
         e.id,
         e.title,
-        COUNT(b.id),
+        COUNT(t.id),
         CASE WHEN e.amountOfPlaces > 0
-             THEN CAST(COUNT(b.id) * 100.0 / e.amountOfPlaces AS INTEGER)
+             THEN CAST(COUNT(t.id) * 100.0 / e.amountOfPlaces AS INTEGER)
              ELSE 0 END,
-        CASE WHEN COUNT(b.id) > 0
+        CASE WHEN COUNT(t.id) > 0
             THEN SUM(e.price)
             ELSE CAST(0 AS BIGDECIMAL) END)
         FROM Event e
-    LEFT JOIN e.eventBookings b
+    LEFT JOIN e.eventTickets t
     WHERE e.organizerUser.id = :organizerId
     GROUP BY e.id, e.title, e.amountOfPlaces, e.price
     """)
@@ -54,15 +54,15 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     SELECT new kg.something.events_app_backend.dto.SalesByParticipantDto(
         u.firstName,
         u.lastName,
-        COUNT(b.id),
+        COUNT(t.id),
         SUM(e.price)
     )
-    FROM Booking b
-    JOIN b.user u
-    JOIN b.event e
+    FROM Ticket t
+    JOIN t.user u
+    JOIN t.event e
     WHERE e.organizerUser.id = :organizerId
     GROUP BY u.id, u.firstName, u.lastName
-    ORDER BY COUNT(b.id) DESC
+    ORDER BY COUNT(t.id) DESC
     """)
     List<SalesByParticipantDto> findParticipantStatsByOrganizer(@Param("organizerId") UUID organizerId);
 }

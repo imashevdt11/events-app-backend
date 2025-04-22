@@ -97,7 +97,7 @@ public class User implements UserDetails {
     private List<Comment> eventComments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Booking> eventBookings = new ArrayList<>();
+    private List<Ticket> eventTickets = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SavedEvent> savedEvents = new ArrayList<>();
@@ -218,12 +218,12 @@ public class User implements UserDetails {
         this.updatedAt = updatedAt;
     }
 
-    public List<Booking> getEventBookings() {
-        return eventBookings;
+    public List<Ticket> getEventBookings() {
+        return eventTickets;
     }
 
-    public void setEventBookings(List<Booking> eventBookings) {
-        this.eventBookings = eventBookings;
+    public void setEventBookings(List<Ticket> eventTickets) {
+        this.eventTickets = eventTickets;
     }
 
     public List<Comment> getEventComments() {

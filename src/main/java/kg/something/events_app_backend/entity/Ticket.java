@@ -9,17 +9,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "bookings")
-public class Booking {
+@Table(name = "tickets")
+public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "number", updatable = false, unique = true)
+    @SequenceGenerator(name = "ticket_number_seq", sequenceName = "ticket_number_sequence")
+    private Long number;
+
+    @Column(name = "used", nullable = false, columnDefinition = "boolean default false")
+    private Boolean used = false;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -46,9 +54,9 @@ public class Booking {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Booking() {}
+    public Ticket() {}
 
-    public Booking(Event event, User user) {
+    public Ticket(Event event, User user) {
         this.event = event;
         this.user = user;
     }
@@ -91,5 +99,21 @@ public class Booking {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Long getNumber() {
+        return number;
+    }
+
+    public void setNumber(Long number) {
+        this.number = number;
+    }
+
+    public Boolean getUsed() {
+        return used;
+    }
+
+    public void setUsed(Boolean used) {
+        this.used = used;
     }
 }
