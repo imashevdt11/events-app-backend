@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByEventDto;
+import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.enums.EventGrade;
@@ -146,9 +147,15 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.removeEventAsBookmark(eventId));
     }
 
-    @Operation(summary = "Статистика по продажам билетов на мероприятия, созданные указанным пользователем")
+    @Operation(summary = "Статистика по продажам билетов на мероприятия, созданные аутентифицированным пользователем")
     @GetMapping("/stats/sales-for-events")
     public ResponseEntity<List<SalesByEventDto>> getSalesStatisticForEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getSalesStatisticForEvents());
+    }
+
+    @Operation(summary = "Статистика по количеству билетов и сумме, потраченной на них, для каждого участника")
+    @GetMapping("/stats/sales-by-participants")
+    public ResponseEntity<List<SalesByParticipantDto>> getSalesStatisticsByParticipants() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getSalesStatisticsByParticipants());
     }
 }

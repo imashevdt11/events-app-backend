@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.repository;
 
 import kg.something.events_app_backend.dto.SalesByEventDto;
+import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.User;
@@ -48,4 +49,20 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     GROUP BY e.id, e.title, e.amountOfPlaces, e.price
     """)
     List<SalesByEventDto> findSalesByEventForOrganizer(@Param("organizerId") UUID organizerId);
+
+    @Query("""
+    SELECT new kg.something.events_app_backend.dto.SalesByParticipantDto(
+        u.firstName,
+        u.lastName,
+        COUNT(b.id),
+        SUM(e.price)
+    )
+    FROM Booking b
+    JOIN b.user u
+    JOIN b.event e
+    WHERE e.organizerUser.id = :organizerId
+    GROUP BY u.id, u.firstName, u.lastName
+    ORDER BY COUNT(b.id) DESC
+    """)
+    List<SalesByParticipantDto> findParticipantStatsByOrganizer(@Param("organizerId") UUID organizerId);
 }

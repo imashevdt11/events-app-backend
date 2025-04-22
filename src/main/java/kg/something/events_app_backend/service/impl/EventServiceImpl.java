@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.request.PaymentServiceRequest;
@@ -300,6 +301,8 @@ public class EventServiceImpl implements EventService {
         }
         if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) > paymentRequest.amountOfMoney()) {
             throw new InvalidRequestException("Переданной суммы денег недостаточно для покупки билетов");
+        } else if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) < paymentRequest.amountOfMoney()) {
+            throw new InvalidRequestException("Переданная сумма выше необходимой для оплаты билетов");
         }
         if (event.getOrganizerUser().getId().equals(user.getId())) {
             throw new InvalidRequestException("Организатор не может бронировать места на свои же мероприятия");
@@ -370,5 +373,15 @@ public class EventServiceImpl implements EventService {
             throw new InvalidRequestException("Статистика доступна только организаторам");
         }
         return repository.findSalesByEventForOrganizer(user.getId());
+    }
+
+    public List<SalesByParticipantDto> getSalesStatisticsByParticipants() {
+        User user = userService.getAuthenticatedUser();
+
+        if (user.getRole().getName().equals("ROLE_USER")) {
+            throw new InvalidRequestException("Статистика доступна только организаторам");
+        }
+        return repository.findParticipantStatsByOrganizer(user.getId());
+
     }
 }
