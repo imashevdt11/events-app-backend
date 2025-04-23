@@ -2,6 +2,8 @@ package kg.something.events_app_backend.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -23,6 +25,7 @@ public record UserRegistrationRequest (
         @JsonProperty("phone_number")
         String phoneNumber,
 
+        @NotNull
         @JsonProperty("date_of_birth")
         LocalDate dateOfBirth,
 
@@ -34,6 +37,7 @@ public record UserRegistrationRequest (
         @JsonProperty("password")
         String password,
 
+        @NotBlank
         @JsonProperty("role")
         String role
 ) {}
