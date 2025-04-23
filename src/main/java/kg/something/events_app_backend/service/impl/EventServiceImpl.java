@@ -311,7 +311,7 @@ public class EventServiceImpl implements EventService {
         }
         paymentService.payForTickets(new PaymentServiceRequest(
                 paymentRequest.cardNumber(),
-                "%s %s".formatted(user.getFirstName(), user.getLastName()),
+                paymentRequest.cardHolder(),
                 paymentRequest.expiryDate(),
                 paymentRequest.cvv(),
                 paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()

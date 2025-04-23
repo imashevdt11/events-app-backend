@@ -6,6 +6,9 @@ public record PaymentRequest (
     @JsonProperty("card_number")
     String cardNumber,
 
+    @JsonProperty("card_holder")
+    String cardHolder,
+
     @JsonProperty("expiry_date")
     String expiryDate,
 

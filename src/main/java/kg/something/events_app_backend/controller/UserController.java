@@ -35,28 +35,32 @@ public class UserController {
         this.service = service;
     }
 
+    @Operation(summary = "Изменение роли пользователя")
     @PutMapping("/change-user-role/{id}")
     public ResponseEntity<String> changeUserRole(@PathVariable UUID id,
                                                  @RequestParam("role") String role) {
         return new ResponseEntity<>(service.changeUserRole(id, role), HttpStatus.OK);
     }
 
+    @Operation(summary = "Разблокировать/активировать учетную запись пользователя")
     @PutMapping("/change-user-status/{id}")
     public ResponseEntity<String> changeUserStatus(@PathVariable UUID id) {
         return new ResponseEntity<>(service.changeUserStatus(id), HttpStatus.OK);
     }
 
+    @Operation(summary = "Получение списка всех пользователей")
     @GetMapping("/admin")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(service.getAllUsers());
     }
 
+    @Operation(summary = "Получение информации о пользователе по ID")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserPersonalInfo(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(service.getUserById(id), HttpStatus.OK);
     }
 
-    @Operation(summary = "Update user's personal info")
+    @Operation(summary = "Изменение данных пользователя")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUserPersonalInfo(@PathVariable("id") UUID id,
                                                                @RequestBody UserUpdateRequest request) {
@@ -64,8 +68,7 @@ public class UserController {
     }
 
     @Operation(
-            summary = "UPLOAD PROFILE IMAGE",
-            description = "Sets an image to user, removes previous image from the Cloudinary",
+            summary = "Установка новой фотографии профиля пользователя",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Profile image has been uploaded"),
                     @ApiResponse(responseCode = "400", description = "Current request is not a multipart request"),
@@ -80,25 +83,25 @@ public class UserController {
         return ResponseEntity.ok(service.uploadProfileImage(userId, image));
     }
 
-    @Operation(summary = "SUBSCRIBE TO USER")
+    @Operation(summary = "Подписка на пользователя")
     @PostMapping("/subscribe/{id}")
     public ResponseEntity<String> subscribeToUser(@PathVariable("id") UUID userId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.subscribeToUser(userId));
     }
 
-    @Operation(summary = "UNSUBSCRIBE FROM USER")
+    @Operation(summary = "Отписка от пользователя")
     @DeleteMapping("/unsubscribe/{id}")
     public ResponseEntity<String> unsubscribeFromUser(@PathVariable("id") UUID userId) {
         return ResponseEntity.status(HttpStatus.OK).body(service.unsubscribeFromUser(userId));
     }
 
-    @Operation(summary = "USER'S SUBSCRIPTIONS")
+    @Operation(summary = "Получение списка организаторов, на которых подписан пользователь")
     @GetMapping("/subscriptions/{id}")
     public ResponseEntity<List<UserOrganizerDto>> getUserSubscriptions(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersUserFollows(id));
     }
 
-    @Operation(summary = "ORGANIZER'S SUBSCRIBERS")
+    @Operation(summary = "Получение списка всех подписчиков пользователя")
     @GetMapping("/subscribers/{id}")
     public ResponseEntity<List<UserSubscriberDto>> getOrganizerSubscribers(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersSubscribers(id));

@@ -41,7 +41,7 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    @Operation(summary = "CREATE EVENT")
+    @Operation(summary = "Создание мероприятия")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Event has been created"),
             @ApiResponse(responseCode = "400", description = "Required parameter(s) is not present"),
@@ -55,70 +55,70 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event, image));
     }
 
-    @Operation(summary = "GET ALL EVENTS")
+    @Operation(summary = "Получение списка всех мероприятий")
     @GetMapping
     public ResponseEntity<List<EventListDto>> getAllEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());
     }
 
-    @Operation(summary = "GET EVENTS BY CATEGORY")
+    @Operation(summary = "Получение списка мероприятий по категории")
     @GetMapping("/category")
     public ResponseEntity<List<EventListDto>> getEventsByCategory(@RequestParam("category") String category) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
     }
 
-    @Operation(summary = "GET EVENTS CREATED IN SPECIFIED PERIOD")
+    @Operation(summary = "Получение списка мероприятий, созданных в указанные период")
     @GetMapping("/creation-time-period")
     public ResponseEntity<List<EventListDto>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,
                                                                            @RequestParam("endDate") LocalDate endDate) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCreationTimePeriod(startDate, endDate));
     }
 
-    @Operation(summary = "GET EVENTS THAT WILL BE STARTED IN SPECIFIED PERIOD")
+    @Operation(summary = "Получение списка мероприятий, запланированных на указанный период")
     @GetMapping("/start-time-period")
     public ResponseEntity<List<EventListDto>> getEventsByStartTimePeriod(@RequestParam("startDate") LocalDate startDate,
                                                                          @RequestParam("endDate") LocalDate endDate) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByStartTimePeriod(startDate, endDate));
     }
 
-    @Operation(summary = "GET EVENT INFORMATION BY ID")
+    @Operation(summary = "Получение информации о мероприятии по ID")
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable("id") UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventById(id));
     }
 
-    @Operation(summary = "RATE (LIKE) EVENT")
+    @Operation(summary = "Поставить лайк мероприятию")
     @PostMapping("/like/{id}")
     public ResponseEntity<String> likeEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.LIKE));
     }
 
-    @Operation(summary = "REMOVE RATE (LIKE) FROM EVENT")
+    @Operation(summary = "Убрать, поставленный мероприятию лайк")
     @DeleteMapping("/remove-like/{id}")
     public ResponseEntity<String> removeLikeFromEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeRate(eventId, EventGrade.LIKE));
     }
 
-    @Operation(summary = "RATE (DISLIKE) EVENT")
+    @Operation(summary = "Поставить дизлайк мероприятию")
     @PostMapping("/dislike/{id}")
     public ResponseEntity<String> dislikeEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.DISLIKE));
     }
 
-    @Operation(summary = "REMOVE RATE (DISLIKE) FROM EVENT")
+    @Operation(summary = "Убрать, поставленный мероприятию дизлайк")
     @DeleteMapping("/remove-dislike/{id}")
     public ResponseEntity<String> removeDislikeFromEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
     }
 
-    @Operation(summary = "ADD COMMENT TO EVENT")
+    @Operation(summary = "Оставить комментарий к мероприятию")
     @PostMapping("/comment/{id}")
     public ResponseEntity<String> addComment(@PathVariable("id") UUID eventId,
                                              @RequestParam("comment") String comment) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.addComment(eventId, comment));
     }
 
-    @Operation(summary = "REMOVE COMMENT FROM EVENT")
+    @Operation(summary = "Удалить комментарий, оставленный к мероприятию")
     @DeleteMapping("/remove-comment/{id}")
     public ResponseEntity<String> removeComment(@PathVariable("id") UUID eventId,
                                                 @RequestParam("commentId") UUID commentId) {
@@ -132,19 +132,19 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.buyTickets(eventId, paymentRequest));
     }
 
-    @Operation(summary = "GET EVENTS CREATED BY USER")
+    @Operation(summary = "Получение списка мероприятий, созданных указанным пользователем")
     @GetMapping("/created-by/{userId}")
     public ResponseEntity<List<EventListDto>> getEventsByUser(@PathVariable("userId") UUID userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUser(userId));
     }
 
-    @Operation(summary = "SAVE EVENT AS BOOKMARK")
+    @Operation(summary = "Добавить мероприятие в 'Сохраненные'")
     @PostMapping("/save-as-bookmark/{id}")
     public ResponseEntity<String> saveEventAsBookmark(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveEventAsBookmark(eventId));
     }
 
-    @Operation(summary = "REMOVE EVENT AS BOOKMARK")
+    @Operation(summary = "Удалить мероприятие из 'Сохраненных'")
     @DeleteMapping("/remove-as-bookmark/{id}")
     public ResponseEntity<String> removeEventAsBookmark(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.removeEventAsBookmark(eventId));
