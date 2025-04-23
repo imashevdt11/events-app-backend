@@ -3,6 +3,7 @@ package kg.something.events_app_backend.service;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
+import kg.something.events_app_backend.dto.request.EventUpdateRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Event;
@@ -48,4 +49,6 @@ public interface EventService {
     List<SalesByEventDto> getSalesStatisticForEvents();
 
     List<SalesByParticipantDto> getSalesStatisticsByParticipants();
+
+    String updateEvent(UUID eventId, EventUpdateRequest request);
 }

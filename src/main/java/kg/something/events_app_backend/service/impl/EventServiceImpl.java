@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
+import kg.something.events_app_backend.dto.request.EventUpdateRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.request.PaymentServiceRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
@@ -383,5 +384,39 @@ public class EventServiceImpl implements EventService {
         }
         return repository.findParticipantStatsByOrganizer(user.getId());
 
+    }
+
+    @Transactional
+    public String updateEvent(UUID eventId, EventUpdateRequest request) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+        int amountOfSoldTickets = event.getAmountOfPlaces() - event.getAmountOfAvailablePlaces();
+
+        if (!event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Пользователь не может менять информацию не своего мероприятия");
+        }
+        if (request.amountOfPlaces() < amountOfSoldTickets) {
+            throw new InvalidRequestException("Общее количество мест не может быть меньше количества проданных билетов");
+        }
+        Set<Category> categories = new HashSet<>();
+        for (String categoryName: request.categories()) {
+            Category category = categoryService.findCategoryByName(categoryName);
+            if (category == null) {
+                throw new ResourceNotFoundException("Категория с названием '%s' не найдена в базе данных");
+            }
+            categories.add(category);
+        }
+        event.setTitle(request.title());
+        event.setDescription(request.description());
+        event.setLocation(request.location());
+        event.setMinimumAge(request.minimumAge());
+        event.setStartTime(request.startTime());
+        event.setPrice(request.price());
+        event.setAmountOfPlaces(request.amountOfPlaces());
+        event.setAmountOfAvailablePlaces(request.amountOfPlaces() - amountOfSoldTickets);
+        event.setCategories(categories);
+        repository.save(event);
+
+        return "Изменения о мероприятии внесены";
     }
 }
