@@ -168,4 +168,10 @@ public class EventController {
                                               @RequestBody @Valid EventUpdateRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.updateEvent(eventId, request));
     }
+
+    @Operation(summary = "Удаление мероприятия")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.deleteEvent(eventId));
+    }
 }

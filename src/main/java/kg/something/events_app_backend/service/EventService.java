@@ -51,4 +51,6 @@ public interface EventService {
     List<SalesByParticipantDto> getSalesStatisticsByParticipants();
 
     String updateEvent(UUID eventId, EventUpdateRequest request);
+
+    String deleteEvent(UUID eventId);
 }

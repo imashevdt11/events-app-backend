@@ -44,6 +44,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.List;
 import java.util.Set;
@@ -418,5 +419,21 @@ public class EventServiceImpl implements EventService {
         repository.save(event);
 
         return "Изменения о мероприятии внесены";
+    }
+
+    @Transactional
+    public String deleteEvent(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (!event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Пользователь не может удалять не своё мероприятие");
+        }
+        if (!Objects.equals(event.getAmountOfAvailablePlaces(), event.getAmountOfPlaces())) {
+            throw new InvalidRequestException("Пользователь не может удалить мероприятие, на которое забронированы билеты");
+        }
+        repository.delete(event);
+
+        return "Мероприятие удалено";
     }
 }
