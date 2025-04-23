@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
+
 public record UserRegistrationRequest (
 
         @Size(min = 2, max = 20, message = "Имя должно содержать от 2 до 20 символов")
@@ -20,6 +22,9 @@ public record UserRegistrationRequest (
         @Pattern(regexp = "^\\+?\\d{7,15}$", message = "Номер телефона должен содержать от 10 до 15 цифр ('+' допустим в начале)")
         @JsonProperty("phone_number")
         String phoneNumber,
+
+        @JsonProperty("date_of_birth")
+        LocalDate dateOfBirth,
 
         @Email(message = "Невалидный формат адреса электронной почты")
         @JsonProperty("email")

@@ -21,6 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +52,9 @@ public class User implements UserDetails {
             max = 20
     )
     private String lastName;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @NotBlank
     @Column(name = "phone_number")
@@ -111,10 +115,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscribersSubscriptions = new ArrayList<>();
 
-    public User(String firstName, String lastName, String phoneNumber, String email, String password, Role role, boolean enabled) {
+    public User(String firstName, String lastName, String phoneNumber, LocalDate dateOfBirth, String email, String password, Role role, boolean enabled) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
+        this.dateOfBirth = dateOfBirth;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -164,6 +169,14 @@ public class User implements UserDetails {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public String getEmail() {
@@ -218,11 +231,11 @@ public class User implements UserDetails {
         this.updatedAt = updatedAt;
     }
 
-    public List<Ticket> getEventBookings() {
+    public List<Ticket> getEventTickets() {
         return eventTickets;
     }
 
-    public void setEventBookings(List<Ticket> eventTickets) {
+    public void setEventTickets(List<Ticket> eventTickets) {
         this.eventTickets = eventTickets;
     }
 

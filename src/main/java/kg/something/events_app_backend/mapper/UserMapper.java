@@ -24,6 +24,7 @@ public class UserMapper {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getPhoneNumber(),
+                user.getDateOfBirth(),
                 user.getEmail(),
                 user.getImage() == null ? null : user.getImage().getUrl()
         );
@@ -34,6 +35,7 @@ public class UserMapper {
                 request.firstName(),
                 request.lastName(),
                 request.phoneNumber(),
+                request.dateOfBirth(),
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 role,

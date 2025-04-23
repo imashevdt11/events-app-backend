@@ -25,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -75,6 +77,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     public UserResponse register(UserRegistrationRequest request) {
+        if (request.dateOfBirth().getYear() - LocalDate.now().getYear() < 14) {
+            throw new InvalidRequestException("Пользователю должно быть не меньше 14 лет");
+        }
         checkUniqueFieldsForExistingBeforeRegistration(request);
         Role role = roleService.findRoleByName(request.role());
 

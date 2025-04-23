@@ -301,21 +301,23 @@ public class EventServiceImpl implements EventService {
         if (paymentRequest.amountOfTickets() > 5) {
             throw new InvalidRequestException("Нельзя покупать более 5 билетов за раз.");
         }
-        if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) > paymentRequest.amountOfMoney()) {
-            throw new InvalidRequestException("Переданной суммы денег недостаточно для покупки билетов");
-        } else if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) < paymentRequest.amountOfMoney()) {
-            throw new InvalidRequestException("Переданная сумма выше необходимой для оплаты билетов");
-        }
         if (event.getOrganizerUser().getId().equals(user.getId())) {
             throw new InvalidRequestException("Организатор не может бронировать места на свои же мероприятия");
         }
-        paymentService.payForTickets(new PaymentServiceRequest(
-                paymentRequest.cardNumber(),
-                paymentRequest.cardHolder(),
-                paymentRequest.expiryDate(),
-                paymentRequest.cvv(),
-                paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
-        ));
+        if (event.getPrice().intValue() > 0) {
+            if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) > paymentRequest.amountOfMoney()) {
+                throw new InvalidRequestException("Переданной суммы денег недостаточно для покупки билетов");
+            } else if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) < paymentRequest.amountOfMoney()) {
+                throw new InvalidRequestException("Переданная сумма выше необходимой для оплаты билетов");
+            }
+            paymentService.payForTickets(new PaymentServiceRequest(
+                    paymentRequest.cardNumber(),
+                    paymentRequest.cardHolder(),
+                    paymentRequest.expiryDate(),
+                    paymentRequest.cvv(),
+                    paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
+            ));
+        }
         for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
             ticketService.save(new Ticket(event, user));
         }
