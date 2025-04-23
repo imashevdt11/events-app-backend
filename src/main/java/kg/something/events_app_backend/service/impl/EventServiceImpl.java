@@ -40,6 +40,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -437,5 +438,36 @@ public class EventServiceImpl implements EventService {
         repository.delete(event);
 
         return "Мероприятие удалено";
+    }
+
+    @Transactional
+    public String changeEventImage(UUID eventId, MultipartFile image) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (!event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Пользователь не может изменить фотографию мероприятия, созданного не ним");
+        }
+        String imageUrl;
+        try {
+            imageUrl = cloudinaryService.uploadImage(image);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (event.getImage() != null) {
+            if (!event.getImage().getUrl().isEmpty()) {
+                try {
+                    cloudinaryService.deleteImage(event.getImage().getUrl());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            event.getImage().setUrl(imageUrl);
+        } else {
+            event.setImage(new Image(imageUrl));
+        }
+        repository.save(event);
+
+        return "Изображение мероприятия изменено";
     }
 }

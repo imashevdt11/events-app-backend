@@ -139,7 +139,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email '%s' не найден в базе данных".formatted(email)));
     }
 
-
     @Transactional
     public String uploadProfileImage(UUID userId, MultipartFile image) {
         User user = getAuthenticatedUser();

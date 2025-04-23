@@ -53,4 +53,6 @@ public interface EventService {
     String updateEvent(UUID eventId, EventUpdateRequest request);
 
     String deleteEvent(UUID eventId);
+
+    String changeEventImage(UUID eventId, MultipartFile image);
 }

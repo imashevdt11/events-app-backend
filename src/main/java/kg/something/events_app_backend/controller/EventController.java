@@ -174,4 +174,11 @@ public class EventController {
     public ResponseEntity<String> deleteEvent(@PathVariable("id") UUID eventId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.deleteEvent(eventId));
     }
+
+    @Operation(summary = "Установка новой фотографии для мероприятия")
+    @PostMapping("/change-image/{eventId}")
+    public ResponseEntity<?> changeEventImage(@PathVariable("eventId") UUID eventId,
+                                                @RequestParam("image") MultipartFile image) {
+        return ResponseEntity.ok(eventService.changeEventImage(eventId, image));
+    }
 }
