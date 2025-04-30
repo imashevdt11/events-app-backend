@@ -1,4 +1,4 @@
-package kg.something.events_app_backend.controller;
+package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -23,11 +23,11 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequestMapping("/api/roles")
-public class RoleController {
+public class RoleControllerApi {
 
     private final RoleService service;
 
-    public RoleController(RoleService service) {
+    public RoleControllerApi(RoleService service) {
         this.service = service;
     }
 

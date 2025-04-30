@@ -1,4 +1,4 @@
-package kg.something.events_app_backend.controller;
+package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -16,11 +16,11 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequestMapping("/api/categories")
-public class CategoryController {
+public class CategoryControllerApi {
 
     private final CategoryService service;
 
-    public CategoryController(CategoryService service) {
+    public CategoryControllerApi(CategoryService service) {
         this.service = service;
     }
 

@@ -1,4 +1,4 @@
-package kg.something.events_app_backend.controller;
+package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class AuthControllerApi {
 
     private final AuthService service;
 
-    public AuthController(AuthService service) {
+    public AuthControllerApi(AuthService service) {
         this.service = service;
     }
 

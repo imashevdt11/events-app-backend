@@ -1,4 +1,4 @@
-package kg.something.events_app_backend.controller;
+package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,11 +27,11 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class UserControllerApi {
 
     private final UserService service;
 
-    public UserController(UserService service) {
+    public UserControllerApi(UserService service) {
         this.service = service;
     }
 

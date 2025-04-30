@@ -1,4 +1,4 @@
-package kg.something.events_app_backend.controller;
+package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,11 +33,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/events")
-public class EventController {
+public class EventControllerApi {
 
     private final EventService eventService;
 
-    public EventController(EventService eventService) {
+    public EventControllerApi(EventService eventService) {
         this.eventService = eventService;
     }
 

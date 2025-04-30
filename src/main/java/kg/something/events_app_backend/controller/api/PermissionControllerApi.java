@@ -1,4 +1,4 @@
-package kg.something.events_app_backend.controller;
+package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -23,11 +23,11 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequestMapping("/api/permissions")
-public class PermissionController {
+public class PermissionControllerApi {
 
     private final PermissionService service;
 
-    public PermissionController(PermissionService service) {
+    public PermissionControllerApi(PermissionService service) {
         this.service = service;
     }
 
