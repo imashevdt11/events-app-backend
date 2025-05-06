@@ -1,0 +1,177 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Категории</title>
+    <style>
+        body {
+            align-items: center;
+            background: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+        form {
+            display: inline-block;
+            text-align: left;
+            padding: 30px 50px 30px 30px;
+            background: #000000;
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .table-container {
+            background-color: #2c2c2c;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            margin-top: 40px;
+            padding: 20px;
+            width: 90%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #444;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #333;
+        }
+        tr:hover {
+            background-color: #555;
+        }
+        td {
+            color: #bbb;
+        }
+        .navbar {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+        .navbar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .navbar a:hover {
+            background: #333;
+            border-radius: 5px;
+        }
+        .modal {
+            align-items: center;
+            background-color: rgba(73, 73, 73, 0.61);
+            display: none;
+            height: 100%;
+            justify-content: center;
+            left: 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #000000;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .modal-buttons {
+            margin-top: 15px;
+        }
+        .btn {
+            background: #fff;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            cursor: pointer;
+            flex: 2;
+            font-size: 18px;
+            padding: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #000000;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/categories">Категории</a>
+    <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
+</nav>
+<h1>Категории мероприятий</h1>
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Дата создания</th>
+            <th>Дата последнего обновления</th>
+            <th>Создатель</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="category : ${categories}">
+            <td th:text="${category.name}"></td>
+            <td th:text="${category.createdAt}"></td>
+            <td th:text="${category.updatedAt}"></td>
+            <td>
+                <span th:text="${category.name}"></span>
+                <span th:text="${category.name}"></span>
+            </td>
+            <td><a th:href="@{/categories/update/{id}(id=${category.id})}" class="btn" style = "text-decoration: none">Изменить</a></td>
+            <td><button class="btn" th:attr="data-id=${category.id}" onclick="openModal(this)">Удалить</button></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <p>Вы уверены, что хотите удалить категорию?</p>
+        <div class="modal-buttons">
+            <button class="btn btn-delete" id="confirmDelete">Удалить</button>
+            <button class="btn btn-edit" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+<script>
+    let categoryId = null;
+
+    function openModal(button) {
+        categoryId = button.getAttribute("data-id");
+        document.getElementById("deleteModal").style.display = "flex";
+    }
+    function closeModal() {
+        document.getElementById("deleteModal").style.display = "none";
+    }
+    document.getElementById("confirmDelete").addEventListener("click", function() {
+        if (categoryId) {
+            window.location.href = "/categories/delete/" + categoryId;
+        }
+    });
+</script>
+</body>
+</html>

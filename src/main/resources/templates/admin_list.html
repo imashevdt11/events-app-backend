@@ -51,13 +51,8 @@
 </head>
 <body>
 <nav class="navbar">
-<!--    <a href="/users/register">Добавить администратора</a>-->
-<!--    <a href="/products/add-product">Добавить товар</a>-->
-<!--    <a href="/users">Администраторы</a>-->
-<!--    <a href="/clients">Клиенты</a>-->
-<!--    <a href="/orders/admin">Заказы</a>-->
-<!--    <a href="/products/admin">Товары</a>-->
-<!--    <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>-->
+    <a href="/categories">Категории</a>
+    <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
 <div th:each="userResponse : ${users}" class="user-card">
     <div class="username" th:text="${userResponse.firstName()}"></div>
