@@ -42,9 +42,8 @@ public class Category {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Category() {
+    public Category() {}
 
-    }
     public Category(String name, User user) {
         this.name = name;
         this.user = user;
