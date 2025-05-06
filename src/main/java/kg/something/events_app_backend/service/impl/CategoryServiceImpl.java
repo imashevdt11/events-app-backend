@@ -3,11 +3,13 @@ package kg.something.events_app_backend.service.impl;
 import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.CategoryListDto;
 import kg.something.events_app_backend.entity.Category;
+import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.CategoryRepository;
 import kg.something.events_app_backend.service.CategoryService;
+import kg.something.events_app_backend.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,32 +20,35 @@ import java.util.UUID;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository repository;
+    private final UserService userService;
 
-    public CategoryServiceImpl(CategoryRepository repository) {
+    public CategoryServiceImpl(CategoryRepository repository, UserService userService) {
         this.repository = repository;
+        this.userService = userService;
     }
 
     public String createCategory(CategoryDto category) {
+        User user = userService.getAuthenticatedUser();
         if (repository.existsByName(category.name())) {
-            throw new ResourceAlreadyExistsException("Категория с названием '" + category.name() + "' уже есть в базе данных");
+            throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.name()));
         }
-        repository.save(new Category(category.name()));
+        repository.save(new Category(category.name(), user));
 
-        return "Категория '" + category.name() + "' сохранена";
+        return "Категория '%s' сохранена".formatted(category.name());
     }
 
     @Override
     public String deleteCategory(UUID id) {
         Category category = repository.findCategoryById(id);
         if (category == null) {
-            throw new ResourceNotFoundException("Категория с id " + id + " не найдена");
+            throw new ResourceNotFoundException("Категория с id '%s' не найдена".formatted(id));
         }
         if (repository.countEventsByCategory(category.getId()) > 0) {
             throw new InvalidRequestException("Категория не может быть удаленна поскольку привязана к мероприятиям");
         }
         repository.delete(category);
 
-        return "Категория '" + category.getName() + "' удалена";
+        return "Категория '%s' удалена".formatted(category.getName());
     }
 
     public Category findCategoryByName(String name) {
@@ -65,6 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
                         new CategoryListDto(
                                 category.getId(),
                                 category.getName(),
+                                "%s %s".formatted(category.getUser().getFirstName(), category.getUser().getLastName()),
                                 category.getCreatedAt(),
                                 category.getUpdatedAt(),
                                 getAmountOfEventsByCategory(category.getId()))
@@ -79,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category getCategoryById(UUID id) {
         Category category = repository.findCategoryById(id);
         if (category == null) {
-            throw new ResourceNotFoundException("Категория с id " + id + " не найдена");
+            throw new ResourceNotFoundException("Категория с id '%s' не найдена");
         }
         return category;
     }
@@ -87,7 +93,7 @@ public class CategoryServiceImpl implements CategoryService {
     public String updateCategory(CategoryDto categoryDto, UUID id) {
         Category category = repository.findCategoryById(id);
         if (category == null) {
-            throw new ResourceNotFoundException("Категория с id " + id + " не найдена");
+            throw new ResourceNotFoundException("Категория с id '%s' не найдена");
         }
 
         String oldCategoryName = category.getName();
@@ -95,11 +101,11 @@ public class CategoryServiceImpl implements CategoryService {
             return "Категория не изменена. Данные из запроса и записи в базе данных идентичны";
         }
         if (repository.existsByName(categoryDto.name())) {
-            throw new ResourceAlreadyExistsException("Категория с названием '" + category.getName() + "' уже есть в базе данных");
+            throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.getName()));
         }
         category.setName(categoryDto.name());
         repository.save(category);
 
-        return "Название категории изменено с '" + oldCategoryName + "' на '" + category.getName() + "'";
+        return "Название категории изменено с '%s' на '%s'".formatted(oldCategoryName, category.getName());
     }
 }

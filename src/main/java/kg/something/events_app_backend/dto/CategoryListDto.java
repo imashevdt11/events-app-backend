@@ -8,6 +8,8 @@ import java.util.UUID;
 public record CategoryListDto(
         UUID id,
         String name,
+        @JsonProperty("creator_name")
+        String creatorName,
         @JsonProperty("created_at")
         LocalDateTime createdAt,
         @JsonProperty("updated_at")
