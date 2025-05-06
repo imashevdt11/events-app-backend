@@ -129,19 +129,21 @@
             <th>Дата создания</th>
             <th>Дата последнего обновления</th>
             <th>Создатель</th>
+            <th>Количество использований</th>
             <th></th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="category : ${categories}">
-            <td th:text="${category.name}"></td>
-            <td th:text="${category.createdAt}"></td>
-            <td th:text="${category.updatedAt}"></td>
+            <td th:text="${category.name()}"></td>
+            <td th:text="${category.createdAt()}"></td>
+            <td th:text="${category.updatedAt()}"></td>
             <td>
-                <span th:text="${category.name}"></span>
-                <span th:text="${category.name}"></span>
+                <span th:text="${category.name()}"></span>
+                <span th:text="${category.name()}"></span>
             </td>
+            <td th:text="${category.amountOfEventsWithCategory()}"></td>
             <td><a th:href="@{/categories/update/{id}(id=${category.id})}" class="btn" style = "text-decoration: none">Изменить</a></td>
             <td><button class="btn" th:attr="data-id=${category.id}" onclick="openModal(this)">Удалить</button></td>
         </tr>

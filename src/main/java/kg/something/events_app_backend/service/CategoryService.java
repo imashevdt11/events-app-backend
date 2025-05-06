@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.CategoryDto;
+import kg.something.events_app_backend.dto.CategoryListDto;
 import kg.something.events_app_backend.entity.Category;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface CategoryService {
     Category getCategoryById(UUID id);
 
     String updateCategory(CategoryDto categoryDto, UUID id);
+
+    List<CategoryListDto> getCategoriesForList();
+
+    Integer getAmountOfEventsByCategory(UUID categoryId);
 }

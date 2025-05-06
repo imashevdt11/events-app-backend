@@ -1,7 +1,9 @@
 package kg.something.events_app_backend.service.impl;
 
 import kg.something.events_app_backend.dto.CategoryDto;
+import kg.something.events_app_backend.dto.CategoryListDto;
 import kg.something.events_app_backend.entity.Category;
+import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.CategoryRepository;
@@ -36,6 +38,9 @@ public class CategoryServiceImpl implements CategoryService {
         if (category == null) {
             throw new ResourceNotFoundException("Категория с id " + id + " не найдена");
         }
+        if (repository.countEventsByCategory(category.getId()) > 0) {
+            throw new InvalidRequestException("Категория не может быть удаленна поскольку привязана к мероприятиям");
+        }
         repository.delete(category);
 
         return "Категория '" + category.getName() + "' удалена";
@@ -52,6 +57,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     public List<Category> getAllCategories() {
         return repository.findAll();
+    }
+
+    public List<CategoryListDto> getCategoriesForList() {
+        return repository.findAll().stream()
+                .map(category ->
+                        new CategoryListDto(
+                                category.getId(),
+                                category.getName(),
+                                category.getCreatedAt(),
+                                category.getUpdatedAt(),
+                                getAmountOfEventsByCategory(category.getId()))
+                )
+                .toList();
+    }
+
+    public Integer getAmountOfEventsByCategory(UUID categoryId) {
+        return repository.countEventsByCategory(categoryId);
     }
 
     public Category getCategoryById(UUID id) {
