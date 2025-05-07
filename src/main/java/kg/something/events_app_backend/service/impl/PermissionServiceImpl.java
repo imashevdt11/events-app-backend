@@ -32,24 +32,24 @@ public class PermissionServiceImpl implements PermissionService {
     public String createPermission(PermissionDto permission) {
         User user = userService.getAuthenticatedUser();
         if (repository.existsByName(permission.getName())) {
-            throw new ResourceAlreadyExistsException("Право доступа с названием '" + permission.getName() + "' уже есть в базе данных");
+            throw new ResourceAlreadyExistsException("Право доступа с названием '%s' уже есть в базе данных".formatted(permission.getName()));
         }
         repository.save(new Permission(permission.getName(), user));
 
-        return "Право доступа '" + permission.getName() + "' сохранено";
+        return "Право доступа '%s' сохранено".formatted(permission.getName());
     }
 
     public String deletePermission(UUID id) {
         Permission permission = repository.findPermissionById(id);
         if (permission == null) {
-            throw new ResourceNotFoundException("Право доступа с id " + id + " не найдено");
+            throw new ResourceNotFoundException("Право доступа с id '%s' не найдено".formatted(id));
         }
         if (repository.countRolesByPermission(permission.getId()) > 0) {
             throw new InvalidRequestException("Право доступа не может быть удаленна поскольку привязана к мероприятиям");
         }
         repository.delete(permission);
 
-        return "Право доступа '" + permission.getName() + "' удалено";
+        return "Право доступа '%s' удалено".formatted(permission.getName());
     }
 
     public Permission findPermissionByName(String name) {
@@ -67,7 +67,7 @@ public class PermissionServiceImpl implements PermissionService {
     public Permission getPermissionById(UUID id) {
         Permission permission = repository.findPermissionById(id);
         if (permission == null) {
-            throw new ResourceNotFoundException("Право доступа с id " + id + " не найдено");
+            throw new ResourceNotFoundException("Право доступа с id '%s' не найдено".formatted(id));
         }
         return permission;
     }
@@ -75,20 +75,19 @@ public class PermissionServiceImpl implements PermissionService {
     public String updatePermission(PermissionDto permissionDto, UUID id) {
         Permission permission = repository.findPermissionById(id);
         if (permission == null) {
-            throw new ResourceNotFoundException("Право доступа с id " + id + " не найдено");
+            throw new ResourceNotFoundException("Право доступа с id '%s' не найдено".formatted(id));
         }
-
         String oldPermissionName = permission.getName();
         if (permission.getName().equals(permissionDto.getName())) {
-            return "Право доступа не изменена. Данные из запроса и записи в базе данных идентичны";
+            return "Право доступа не изменено. Данные из запроса и записи в базе данных идентичны";
         }
         if (repository.existsByName(permissionDto.getName())) {
-            throw new ResourceAlreadyExistsException("Право доступа с названием '" + permission.getName() + "' уже есть в базе данных");
+            throw new ResourceAlreadyExistsException("Право доступа с названием '%s' уже есть в базе данных".formatted(permission.getName()));
         }
         permission.setName(permissionDto.getName());
         repository.save(permission);
 
-        return "Название права доступа изменено с '" + oldPermissionName + "' на '" + permission.getName() + "'";
+        return "Название права доступа изменено с '%s' на '%s'".formatted(oldPermissionName, permission.getName());
     }
 
     public Set<Permission> getExistingPermissions(Set<String> permissionsSet) {
