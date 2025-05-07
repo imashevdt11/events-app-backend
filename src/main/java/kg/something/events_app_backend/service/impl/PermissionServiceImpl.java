@@ -4,6 +4,7 @@ import kg.something.events_app_backend.dto.PermissionDto;
 import kg.something.events_app_backend.dto.PermissionListDto;
 import kg.something.events_app_backend.entity.Permission;
 import kg.something.events_app_backend.entity.User;
+import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.PermissionRepository;
@@ -42,6 +43,9 @@ public class PermissionServiceImpl implements PermissionService {
         Permission permission = repository.findPermissionById(id);
         if (permission == null) {
             throw new ResourceNotFoundException("Право доступа с id " + id + " не найдено");
+        }
+        if (repository.countRolesByPermission(permission.getId()) > 0) {
+            throw new InvalidRequestException("Право доступа не может быть удаленна поскольку привязана к мероприятиям");
         }
         repository.delete(permission);
 
