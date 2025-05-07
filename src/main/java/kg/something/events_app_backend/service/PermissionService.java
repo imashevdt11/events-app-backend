@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.PermissionDto;
+import kg.something.events_app_backend.dto.PermissionListDto;
 import kg.something.events_app_backend.entity.Permission;
 
 import java.util.List;
@@ -24,4 +25,6 @@ public interface PermissionService {
     String updatePermission(PermissionDto permissionDto, UUID id);
 
     Set<Permission> getExistingPermissions(Set<String> permissionsSet);
+
+    List<PermissionListDto> getPermissionsForList();
 }

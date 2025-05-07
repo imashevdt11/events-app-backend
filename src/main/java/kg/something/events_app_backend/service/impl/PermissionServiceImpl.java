@@ -1,11 +1,15 @@
 package kg.something.events_app_backend.service.impl;
 
 import kg.something.events_app_backend.dto.PermissionDto;
+import kg.something.events_app_backend.dto.PermissionListDto;
 import kg.something.events_app_backend.entity.Permission;
+import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.repository.PermissionRepository;
 import kg.something.events_app_backend.service.PermissionService;
+import kg.something.events_app_backend.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -17,16 +21,19 @@ import java.util.UUID;
 public class PermissionServiceImpl implements PermissionService {
 
     private final PermissionRepository repository;
+    private final UserService userService;
 
-    public PermissionServiceImpl(PermissionRepository repository) {
+    public PermissionServiceImpl(PermissionRepository repository, @Lazy UserService userService) {
         this.repository = repository;
+        this.userService = userService;
     }
 
     public String createPermission(PermissionDto permission) {
+        User user = userService.getAuthenticatedUser();
         if (repository.existsByName(permission.getName())) {
             throw new ResourceAlreadyExistsException("Право доступа с названием '" + permission.getName() + "' уже есть в базе данных");
         }
-        repository.save(new Permission(permission.getName()));
+        repository.save(new Permission(permission.getName(), user));
 
         return "Право доступа '" + permission.getName() + "' сохранено";
     }
@@ -90,5 +97,23 @@ public class PermissionServiceImpl implements PermissionService {
             permissions.add(permission);
         }
         return permissions;
+    }
+
+    public List<PermissionListDto> getPermissionsForList() {
+        return repository.findAll().stream()
+                .map(permission ->
+                        new PermissionListDto(
+                                permission.getId(),
+                                permission.getName(),
+                                "%s %s".formatted(permission.getUser().getFirstName(), permission.getUser().getLastName()),
+                                permission.getCreatedAt(),
+                                permission.getUpdatedAt(),
+                                getAmountOfRolesByPermission(permission.getId()))
+                )
+                .toList();
+    }
+
+    public Integer getAmountOfRolesByPermission(UUID permissionId) {
+        return repository.countRolesByPermission(permissionId);
     }
 }
