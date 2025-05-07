@@ -29,11 +29,8 @@ public class PermissionController {
     @GetMapping
     public String getPermissions(Model model) {
         try {
-            System.out.println("asdf1");
             List<PermissionListDto> permissions = service.getPermissionsForList();
-            System.out.println("asdf2");
             model.addAttribute("permissions", permissions);
-            System.out.println("asdf3");
             return "permission_list";
         } catch (Exception e) {
             return "error";
