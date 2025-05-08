@@ -1,8 +1,10 @@
 package kg.something.events_app_backend.service.impl;
 
 import kg.something.events_app_backend.dto.RoleDto;
+import kg.something.events_app_backend.dto.RoleListDto;
 import kg.something.events_app_backend.entity.Permission;
 import kg.something.events_app_backend.entity.Role;
+import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
@@ -34,19 +36,20 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     public String createRole(RoleDto role) {
+        User user = userService.getAuthenticatedUser();
         if (repository.existsByName(role.getName())) {
-            throw new ResourceAlreadyExistsException("Роль с названием '" + role.getName() + "' уже есть в базе данных");
+            throw new ResourceAlreadyExistsException("Роль с названием '%s' уже есть в базе данных".formatted(role.getName()));
         }
         Set<Permission> permissions = permissionService.getExistingPermissions(role.getPermissions());
-        repository.save(new Role(role.getName(), permissions));
+        repository.save(new Role(role.getName(), permissions, user));
 
-        return "Роль '" + role.getName() + "' сохранена";
+        return "Роль '%s' сохранена".formatted(role.getName());
     }
 
     public String deleteRole(UUID id) {
         Role role = repository.findRoleById(id);
         if (role == null) {
-            throw new ResourceNotFoundException("Роль с id " + id + " не найдена");
+            throw new ResourceNotFoundException("Роль с id '%s' не найдена".formatted(id));
         }
         if (!userService.findUsersByRoleId(role.getId()).isEmpty()) {
             throw new InvalidRequestException("Удаление роли запрещено. Роль привязана к пользователям");
@@ -54,7 +57,7 @@ public class RoleServiceImpl implements RoleService {
         role.getPermissions().clear();
         repository.delete(role);
 
-        return "Роль '" + role.getName() + "' удалена";
+        return "Роль '%s' удалена".formatted(role.getName());
     }
 
     public Role findRoleByName(String name) {
@@ -73,7 +76,7 @@ public class RoleServiceImpl implements RoleService {
     public Role getRoleById(UUID id) {
         Role role = repository.findRoleById(id);
         if (role == null) {
-            throw new ResourceNotFoundException("Роль с id " + id + " не найдена");
+            throw new ResourceNotFoundException("Роль с id '%s' не найдена".formatted(id));
         }
         return role;
     }
@@ -81,11 +84,11 @@ public class RoleServiceImpl implements RoleService {
     public String updateRole(RoleDto roleDto, UUID id) {
         Role role = repository.findRoleById(id);
         if (role == null) {
-            throw new ResourceNotFoundException("Роль с id " + id + " не найдена");
+            throw new ResourceNotFoundException("Роль с id '%s' не найдена".formatted(id));
         }
 
         if (repository.existsByName(roleDto.getName()) && !roleDto.getName().equals(role.getName())) {
-            throw new ResourceAlreadyExistsException("Роль с названием '" + roleDto.getName() + "' уже есть в базе данных");
+            throw new ResourceAlreadyExistsException("Роль с названием '%s' уже есть в базе данных".formatted(roleDto.getName()));
         }
         Set<Permission> permissions = permissionService.getExistingPermissions(roleDto.getPermissions());
 
@@ -95,5 +98,23 @@ public class RoleServiceImpl implements RoleService {
         repository.save(role);
 
         return "Изменения роли внесены в базу данных";
+    }
+
+    public List<RoleListDto> getRolesForList() {
+        return repository.findAll().stream()
+                .map(role ->
+                        new RoleListDto(
+                                role.getId(),
+                                role.getName(),
+                                "%s %s".formatted(role.getUser().getFirstName(), role.getUser().getLastName()),
+                                role.getCreatedAt(),
+                                role.getUpdatedAt(),
+                                getAmountOfUsersByRole(role.getId()))
+                )
+                .toList();
+    }
+
+    public Integer getAmountOfUsersByRole(UUID roleId) {
+        return repository.countUsersByRole(roleId);
     }
 }

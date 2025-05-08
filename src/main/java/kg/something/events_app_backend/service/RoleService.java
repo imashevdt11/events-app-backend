@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.RoleDto;
+import kg.something.events_app_backend.dto.RoleListDto;
 import kg.something.events_app_backend.entity.Role;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface RoleService {
     Role getRoleById(UUID id);
 
     String updateRole(RoleDto roleDto, UUID id);
+
+    List<RoleListDto> getRolesForList();
+
+    Integer getAmountOfUsersByRole(UUID roleId);
 }

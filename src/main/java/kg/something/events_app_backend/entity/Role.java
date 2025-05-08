@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -43,6 +44,11 @@ public class Role {
     )
     private Set<Permission> permissions;
 
+//    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_user")
+    private User user;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -51,9 +57,10 @@ public class Role {
 
     public Role() {}
 
-    public Role(String name, Set<Permission> permissions) {
+    public Role(String name, Set<Permission> permissions, User user) {
         this.name = name;
         this.permissions = permissions;
+        this.user = user;
     }
 
     @PrePersist
@@ -89,6 +96,14 @@ public class Role {
 
     public void setPermissions(Set<Permission> permissions) {
         this.permissions = permissions;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDateTime getCreatedAt() {
