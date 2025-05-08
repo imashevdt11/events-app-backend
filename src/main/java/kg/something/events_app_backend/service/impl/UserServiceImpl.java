@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.service.impl;
 
 import jakarta.transaction.Transactional;
+import kg.something.events_app_backend.dto.UserListDto;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
@@ -235,5 +236,17 @@ public class UserServiceImpl implements UserService {
 
     public boolean existsByPhoneNumber(String phoneNumber) {
         return repository.existsByPhoneNumber(phoneNumber);
+    }
+
+    public List<UserListDto> getUsersForList() {
+        return repository.findAll().stream()
+                .map(user ->
+                        new UserListDto(
+                                user.getId(),
+                                "%s %s".formatted(user.getFirstName(), user.getLastName()),
+                                user.getRole().getName(),
+                                user.getCreatedAt()
+                        ))
+                .toList();
     }
 }

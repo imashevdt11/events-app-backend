@@ -1,6 +1,6 @@
 package kg.something.events_app_backend.controller.mvc;
 
-import kg.something.events_app_backend.dto.response.UserResponse;
+import kg.something.events_app_backend.dto.UserListDto;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,12 +19,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/admins")
-    public String getAllAdmins(Model model) {
+    @GetMapping
+    public String getUsers(Model model) {
         try {
-            List<UserResponse> admins = userService.getAllUsers();
-            model.addAttribute("users", admins);
-            return "admin_list";
+            List<UserListDto> users = userService.getUsersForList();
+            model.addAttribute("users", users);
+            return "user_list";
         } catch (Exception e) {
             return "error";
         }

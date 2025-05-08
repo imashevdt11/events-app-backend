@@ -1,5 +1,6 @@
 package kg.something.events_app_backend.service;
 
+import kg.something.events_app_backend.dto.UserListDto;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
@@ -47,4 +48,6 @@ public interface UserService {
     boolean existsByEmail(String phoneNumber);
 
     boolean existsByPhoneNumber(String phoneNumber);
+
+    List<UserListDto> getUsersForList();
 }
