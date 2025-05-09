@@ -47,6 +47,10 @@ public class Permission {
 
     public Permission() {}
 
+    public Permission(String name) {
+        this.name = name;
+    }
+
     public Permission(String name, User user) {
         this.name = name;
         this.user = user;

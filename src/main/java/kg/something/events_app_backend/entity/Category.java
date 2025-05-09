@@ -44,6 +44,10 @@ public class Category {
 
     public Category() {}
 
+    public Category(String name) {
+        this.name = name;
+    }
+
     public Category(String name, User user) {
         this.name = name;
         this.user = user;

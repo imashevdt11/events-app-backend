@@ -58,6 +58,11 @@ public class Role {
 
     public Role() {}
 
+    public Role(String name, Set<Permission> permissions) {
+        this.name = name;
+        this.permissions = permissions;
+    }
+
     public Role(String name, Set<Permission> permissions, User user) {
         this.name = name;
         this.permissions = permissions;
