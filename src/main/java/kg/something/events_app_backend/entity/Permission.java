@@ -34,7 +34,7 @@ public class Permission {
     )
     private String name;
 
-    @NotNull
+//    @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_user")
     private User user;
