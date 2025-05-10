@@ -2,6 +2,7 @@ package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.CategoryListDto;
 import kg.something.events_app_backend.dto.request.CategoryRequest;
+import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.dto.response.CategoryResponse;
 import kg.something.events_app_backend.entity.Category;
 
@@ -18,11 +19,11 @@ public interface CategoryService {
 
     List<CategoryResponse> getAllCategories();
 
-    Category getCategoryById(UUID id);
-
-    String updateCategory(CategoryRequest categoryRequest, UUID id);
+    Integer getAmountOfEventsByCategory(UUID categoryId);
 
     List<CategoryListDto> getCategoriesForList();
 
-    Integer getAmountOfEventsByCategory(UUID categoryId);
+    CategoryDetailedResponse getCategoryById(UUID id);
+
+    String updateCategory(CategoryRequest categoryRequest, UUID id);
 }

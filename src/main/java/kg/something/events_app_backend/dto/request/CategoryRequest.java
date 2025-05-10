@@ -5,6 +5,6 @@ import jakarta.validation.constraints.Size;
 
 public record CategoryRequest(
         @NotBlank(message = "Название категории не должно быть пустым")
-        @Size(min = 2, max = 50, message = "Название категории должно содержать от 2 до 50 символов")
+        @Size(min = 2, max = 30, message = "Название категории должно содержать от 2 до 30 символов")
         String name
 ) {}

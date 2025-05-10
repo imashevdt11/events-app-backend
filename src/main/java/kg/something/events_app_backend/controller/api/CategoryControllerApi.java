@@ -3,13 +3,20 @@ package kg.something.events_app_backend.controller.api;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.request.CategoryRequest;
+import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.dto.response.CategoryResponse;
-import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,12 +38,6 @@ public class CategoryControllerApi {
         return new ResponseEntity<>(service.createCategory(category), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Удаление категории")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable UUID id) {
-        return new ResponseEntity<>(service.deleteCategory(id), HttpStatus.OK);
-    }
-
     @Operation(summary = "Получение списка всех категорий")
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
@@ -45,7 +46,7 @@ public class CategoryControllerApi {
 
     @Operation(summary = "Получение информации о категории по ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategory(@PathVariable("id") UUID id) {
+    public ResponseEntity<CategoryDetailedResponse> getCategory(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(service.getCategoryById(id), HttpStatus.OK);
     }
 
@@ -54,5 +55,11 @@ public class CategoryControllerApi {
     public ResponseEntity<String> updateCategory(@Valid @RequestBody CategoryRequest category,
                                                  @PathVariable UUID id) {
         return new ResponseEntity<>(service.updateCategory(category, id), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Удаление категории")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable UUID id) {
+        return new ResponseEntity<>(service.deleteCategory(id), HttpStatus.OK);
     }
 }

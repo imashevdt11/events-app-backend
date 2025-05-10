@@ -3,7 +3,7 @@ package kg.something.events_app_backend.controller.mvc;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.CategoryListDto;
 import kg.something.events_app_backend.dto.request.CategoryRequest;
-import kg.something.events_app_backend.entity.Category;
+import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.service.CategoryService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,7 +49,7 @@ public class CategoryController {
 
     @GetMapping("/update/{id}")
     public String editCategory(@PathVariable UUID id, Model model) {
-        Category category = service.getCategoryById(id);
+        CategoryDetailedResponse category = service.getCategoryById(id);
         model.addAttribute("category", category);
         return "category_edit_form";
     }
