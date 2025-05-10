@@ -1,8 +1,8 @@
 package kg.something.events_app_backend.mapper;
 
-import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.CommentDto;
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.request.CategoryRequest;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
 import kg.something.events_app_backend.entity.Category;
@@ -43,8 +43,8 @@ public class EventMapper {
         );
     }
     public EventResponse toEventResponse(Event event, Boolean isLiked, Boolean isDisliked) {
-        Set<CategoryDto> categories = event.getCategories().stream()
-                .map(c -> new CategoryDto(c.getName()))
+        Set<CategoryRequest> categories = event.getCategories().stream()
+                .map(c -> new CategoryRequest(c.getName()))
                 .collect(Collectors.toSet());
         Set<CommentDto> commentDtoSet = event.getEventComments().stream()
                 .map(commentMapper::toCommentDto)

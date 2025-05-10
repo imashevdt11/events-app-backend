@@ -1,8 +1,8 @@
 package kg.something.events_app_backend.controller.mvc;
 
 import jakarta.validation.Valid;
-import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.CategoryListDto;
+import kg.something.events_app_backend.dto.request.CategoryRequest;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.service.CategoryService;
 import org.springframework.stereotype.Controller;
@@ -55,7 +55,7 @@ public class CategoryController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@PathVariable UUID id, @Valid @ModelAttribute CategoryDto category) {
+    public String updateProduct(@PathVariable UUID id, @Valid @ModelAttribute CategoryRequest category) {
         try {
             service.updateCategory(category, id);
         } catch (Exception e) {
