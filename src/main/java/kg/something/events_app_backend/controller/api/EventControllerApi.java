@@ -67,6 +67,12 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
     }
 
+    @Operation(summary = "Получение мероприятий из списка 'Сохраненные'")
+    @GetMapping("/saved")
+    public ResponseEntity<List<EventListDto>> getSavedEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getSavedEvents());
+    }
+
     @Operation(summary = "Получение списка мероприятий, созданных в указанные период")
     @GetMapping("/creation-time-period")
     public ResponseEntity<List<EventListDto>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,

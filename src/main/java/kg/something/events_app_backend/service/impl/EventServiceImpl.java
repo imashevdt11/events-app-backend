@@ -240,6 +240,16 @@ public class EventServiceImpl implements EventService {
                 .toList();
     }
 
+    public List<EventListDto> getSavedEvents() {
+        User user = userService.getAuthenticatedUser();
+        List<SavedEvent> savedEvents = savedEventService.findSavedEventsByUser(user);
+
+        return savedEvents.stream()
+                .map(SavedEvent::getEvent)
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
     public List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
         List<Event> events = repository.findEventsCreatedBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
         return events.stream()
@@ -347,14 +357,14 @@ public class EventServiceImpl implements EventService {
         SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
         if (savedEvent == null) {
             savedEventService.save(new SavedEvent(event, user));
-            return "Пользователь '%s %s' добавил мероприятие '%s' в 'Избранное'"
+            return "Пользователь '%s %s' добавил мероприятие '%s' в 'Сохраненные'"
                     .formatted(
                             user.getFirstName(),
                             user.getLastName(),
                             event.getTitle()
                     );
         } else {
-            throw new InvalidRequestException("Аутентифицированный пользователь уже добавил мероприятие в избранное");
+            throw new InvalidRequestException("Мероприятие уже находится в 'Сохраненных'");
         }
     }
 

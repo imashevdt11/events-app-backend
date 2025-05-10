@@ -7,6 +7,8 @@ import kg.something.events_app_backend.repository.SavedEventRepository;
 import kg.something.events_app_backend.service.SavedEventService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SavedEventServiceImpl implements SavedEventService {
 
@@ -18,6 +20,10 @@ public class SavedEventServiceImpl implements SavedEventService {
 
     public SavedEvent findSavedEventByEventAndUser(Event event, User user) {
         return repository.findSavedEventByEventAndUser(event, user);
+    }
+
+    public List<SavedEvent> findSavedEventsByUser(User user) {
+        return repository.findSavedEventsByUser(user);
     }
 
     public void save(SavedEvent savedEvent) {

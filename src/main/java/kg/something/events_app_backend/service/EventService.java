@@ -55,4 +55,6 @@ public interface EventService {
     String deleteEvent(UUID eventId);
 
     String changeEventImage(UUID eventId, MultipartFile image);
+
+    List<EventListDto> getSavedEvents();
 }
