@@ -186,7 +186,7 @@ public class EventServiceImpl implements EventService {
         Grade grade = gradeService.findGradeByEventAndUser(event, user);
         if (grade == null) {
             gradeService.save(new Grade(rate, event, user));
-            return "Пользователь '%s %s' поставил оценку '%s' мероприятию '%s'"
+            return "Пользователь '%s %s' поставил '%s' мероприятию '%s'"
                     .formatted(
                             user.getFirstName(),
                             user.getLastName(),
@@ -195,11 +195,11 @@ public class EventServiceImpl implements EventService {
                     );
         } else {
             if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
-                throw new InvalidRequestException("Аутентифицированный пользователь не может поставить лайк мероприятию, потому что поставил дизлайк");
+                throw new InvalidRequestException("Пользователь не может поставить лайк мероприятию, потому что поставил дизлайк");
             } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
-                throw new InvalidRequestException("Аутентифицированный пользователь не может поставить дизлайк мероприятию, потому что поставил лайк");
+                throw new InvalidRequestException("Пользователь не может поставить дизлайк мероприятию, потому что поставил лайк");
             } else {
-                throw new InvalidRequestException("Аутентифицированный пользователь уже поставил '%s' мероприятию".formatted(grade.getName()));
+                throw new InvalidRequestException("Пользователь уже поставил '%s' мероприятию".formatted(grade.getName()));
             }
         }
     }
@@ -246,6 +246,26 @@ public class EventServiceImpl implements EventService {
 
         return savedEvents.stream()
                 .map(SavedEvent::getEvent)
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    public List<EventListDto> getLikedEvents() {
+        User user = userService.getAuthenticatedUser();
+        List<Grade> likedEvents = gradeService.findGradesByUserAndName(user, EventGrade.LIKE);
+
+        return likedEvents.stream()
+                .map(Grade::getEvent)
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    public List<EventListDto> getDislikedEvents() {
+        User user = userService.getAuthenticatedUser();
+        List<Grade> dislikedEvents = gradeService.findGradesByUserAndName(user, EventGrade.DISLIKE);
+
+        return dislikedEvents.stream()
+                .map(Grade::getEvent)
                 .map(eventMapper::toEventListDto)
                 .toList();
     }

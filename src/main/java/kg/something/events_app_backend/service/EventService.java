@@ -57,4 +57,8 @@ public interface EventService {
     String changeEventImage(UUID eventId, MultipartFile image);
 
     List<EventListDto> getSavedEvents();
+
+    List<EventListDto> getLikedEvents();
+
+    List<EventListDto> getDislikedEvents();
 }

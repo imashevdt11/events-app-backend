@@ -8,6 +8,8 @@ import kg.something.events_app_backend.repository.GradeRepository;
 import kg.something.events_app_backend.service.GradeService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GradeServiceImpl implements GradeService {
 
@@ -19,6 +21,10 @@ public class GradeServiceImpl implements GradeService {
 
     public Grade findGradeByEventAndUser(Event event, User user) {
         return repository.findByEventAndUser(event, user);
+    }
+
+    public List<Grade> findGradesByUserAndName(User user, EventGrade eventGrade) {
+        return repository.findGradesByUserAndName(user, eventGrade);
     }
 
     public void save(Grade grade) {

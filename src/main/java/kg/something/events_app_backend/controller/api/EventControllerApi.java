@@ -73,6 +73,18 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getSavedEvents());
     }
 
+    @Operation(summary = "Получение мероприятий, которым был поставлен 'LIKE'")
+    @GetMapping("/liked")
+    public ResponseEntity<List<EventListDto>> getLikedEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getLikedEvents());
+    }
+
+    @Operation(summary = "Получение мероприятий, которым был поставлен 'DISLIKE'")
+    @GetMapping("/disliked")
+    public ResponseEntity<List<EventListDto>> getDislikedEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getDislikedEvents());
+    }
+
     @Operation(summary = "Получение списка мероприятий, созданных в указанные период")
     @GetMapping("/creation-time-period")
     public ResponseEntity<List<EventListDto>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,
@@ -102,7 +114,7 @@ public class EventControllerApi {
     @Operation(summary = "Убрать, поставленный мероприятию лайк")
     @DeleteMapping("/remove-like/{id}")
     public ResponseEntity<String> removeLikeFromEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.removeRate(eventId, EventGrade.LIKE));
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.LIKE));
     }
 
     @Operation(summary = "Поставить дизлайк мероприятию")
