@@ -1,7 +1,7 @@
 package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.CategoryListDto;
-import kg.something.events_app_backend.dto.request.CategoryRequest;
+import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.dto.response.CategoryResponse;
 import kg.something.events_app_backend.entity.Category;
@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface CategoryService {
 
-    String createCategory(CategoryRequest category);
+    String createCategory(CategoryDto category);
 
     String deleteCategory(UUID id);
 
@@ -25,5 +25,5 @@ public interface CategoryService {
 
     CategoryDetailedResponse getCategoryById(UUID id);
 
-    String updateCategory(CategoryRequest categoryRequest, UUID id);
+    String updateCategory(CategoryDto categoryDto, UUID id);
 }

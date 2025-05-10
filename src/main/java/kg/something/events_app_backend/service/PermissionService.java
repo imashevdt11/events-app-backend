@@ -2,6 +2,8 @@ package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.PermissionDto;
 import kg.something.events_app_backend.dto.PermissionListDto;
+import kg.something.events_app_backend.dto.response.PermissionDetailedResponse;
+import kg.something.events_app_backend.dto.response.PermissionResponse;
 import kg.something.events_app_backend.entity.Permission;
 
 import java.util.List;
@@ -12,15 +14,13 @@ public interface PermissionService {
 
     String createPermission(PermissionDto permission);
 
-    Permission findPermissionByName(String name);
-
     String deletePermission(UUID id);
 
-    List<PermissionDto> getAllPermissionsNames();
+    Permission findPermissionByName(String name);
 
-    List<Permission> getAllPermissions();
+    List<PermissionResponse> getAllPermissions();
 
-    Permission getPermissionById(UUID id);
+    PermissionDetailedResponse getPermissionById(UUID id);
 
     String updatePermission(PermissionDto permissionDto, UUID id);
 

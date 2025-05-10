@@ -1,7 +1,7 @@
 package kg.something.events_app_backend.service.impl;
 
 import kg.something.events_app_backend.dto.CategoryListDto;
-import kg.something.events_app_backend.dto.request.CategoryRequest;
+import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.dto.response.CategoryResponse;
 import kg.something.events_app_backend.entity.Category;
@@ -32,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryMapper = categoryMapper;
     }
 
-    public String createCategory(CategoryRequest category) {
+    public String createCategory(CategoryDto category) {
         User user = userService.getAuthenticatedUser();
         if (repository.existsByName(category.name())) {
             throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.name()));
@@ -92,16 +92,16 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryDetailedResponse(category);
     }
 
-    public String updateCategory(CategoryRequest categoryRequest, UUID id) {
+    public String updateCategory(CategoryDto categoryDto, UUID id) {
         Category category = findCategoryById(id);
         String oldCategoryName = category.getName();
-        if (category.getName().equals(categoryRequest.name())) {
+        if (category.getName().equals(categoryDto.name())) {
             return "Категория не изменена. Данные из запроса и записи в базе данных идентичны";
         }
-        if (repository.existsByName(categoryRequest.name())) {
+        if (repository.existsByName(categoryDto.name())) {
             throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.getName()));
         }
-        category.setName(categoryRequest.name());
+        category.setName(categoryDto.name());
         repository.save(category);
 
         return "Название категории изменено с '%s' на '%s'".formatted(oldCategoryName, category.getName());

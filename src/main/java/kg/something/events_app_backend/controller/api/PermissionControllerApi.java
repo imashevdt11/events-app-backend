@@ -3,7 +3,8 @@ package kg.something.events_app_backend.controller.api;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.PermissionDto;
-import kg.something.events_app_backend.entity.Permission;
+import kg.something.events_app_backend.dto.response.PermissionDetailedResponse;
+import kg.something.events_app_backend.dto.response.PermissionResponse;
 import kg.something.events_app_backend.service.PermissionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,27 +38,15 @@ public class PermissionControllerApi {
         return new ResponseEntity<>(service.createPermission(permissionDto), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Удаление права доступа")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePermission(@PathVariable UUID id) {
-        return new ResponseEntity<>(service.deletePermission(id), HttpStatus.OK);
-    }
-
     @Operation(summary = "Получение списка всех прав доступа")
-    @GetMapping("/admin")
-    public ResponseEntity<List<Permission>> getAllPermissions() {
-        return new ResponseEntity<>(service.getAllPermissions(), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Получение списка всех названий прав доступа")
     @GetMapping
-    public ResponseEntity<List<PermissionDto>> getAllPermissionsNames() {
-        return new ResponseEntity<>(service.getAllPermissionsNames(), HttpStatus.OK);
+    public ResponseEntity<List<PermissionResponse>> getAllPermissions() {
+        return new ResponseEntity<>(service.getAllPermissions(), HttpStatus.OK);
     }
 
     @Operation(summary = "Получение информации о праве доступа по ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Permission> getPermission(@PathVariable("id") UUID id) {
+    public ResponseEntity<PermissionDetailedResponse> getPermissionById(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(service.getPermissionById(id), HttpStatus.OK);
     }
 
@@ -67,5 +56,10 @@ public class PermissionControllerApi {
                                                    @PathVariable UUID id) {
         return new ResponseEntity<>(service.updatePermission(permission, id), HttpStatus.OK);
     }
-}
 
+    @Operation(summary = "Удаление права доступа")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePermission(@PathVariable UUID id) {
+        return new ResponseEntity<>(service.deletePermission(id), HttpStatus.OK);
+    }
+}

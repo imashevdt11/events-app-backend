@@ -2,7 +2,7 @@ package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import kg.something.events_app_backend.dto.request.CategoryRequest;
+import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.dto.response.CategoryResponse;
 import kg.something.events_app_backend.service.CategoryService;
@@ -34,7 +34,7 @@ public class CategoryControllerApi {
 
     @Operation(summary = "Создание категории")
     @PostMapping
-    public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryRequest category) {
+    public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryDto category) {
         return new ResponseEntity<>(service.createCategory(category), HttpStatus.CREATED);
     }
 
@@ -52,7 +52,7 @@ public class CategoryControllerApi {
 
     @Operation(summary = "Изменение информации о категории")
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@Valid @RequestBody CategoryRequest category,
+    public ResponseEntity<String> updateCategory(@Valid @RequestBody CategoryDto category,
                                                  @PathVariable UUID id) {
         return new ResponseEntity<>(service.updateCategory(category, id), HttpStatus.OK);
     }

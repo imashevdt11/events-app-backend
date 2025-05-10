@@ -3,7 +3,7 @@ package kg.something.events_app_backend.controller.mvc;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.PermissionDto;
 import kg.something.events_app_backend.dto.PermissionListDto;
-import kg.something.events_app_backend.entity.Permission;
+import kg.something.events_app_backend.dto.response.PermissionDetailedResponse;
 import kg.something.events_app_backend.service.PermissionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,7 +49,7 @@ public class PermissionController {
 
     @GetMapping("/update/{id}")
     public String editPermission(@PathVariable UUID id, Model model) {
-        Permission permission = service.getPermissionById(id);
+        PermissionDetailedResponse permission = service.getPermissionById(id);
         model.addAttribute("permission", permission);
         return "permission_edit_form";
     }
