@@ -47,7 +47,6 @@ public class Event {
     private String description;
 
     @NotBlank
-    @Size(min = 20, max = 100)
     @Column(name = "location")
     private String location;
 

@@ -142,8 +142,6 @@ public class EventServiceImpl implements EventService {
 
             if (StringUtils.isBlank(eventRequest.location())) {
                 throw new InvalidRequestException("Location cannot be empty");
-            } else if (eventRequest.location().length() < 20 || eventRequest.location().length() > 100) {
-                throw new InvalidRequestException("Location size must be between 20 and 100");
             }
 
             if (eventRequest.minimumAge() != null && eventRequest.minimumAge() < 0) {
