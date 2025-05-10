@@ -106,7 +106,7 @@ public class RoleServiceImpl implements RoleService {
                         new RoleListDto(
                                 role.getId(),
                                 role.getName(),
-                                "%s %s".formatted(role.getUser().getFirstName(), role.getUser().getLastName()),
+                                role.getUser() == null ? "-": "%s %s".formatted(role.getUser().getFirstName(), role.getUser().getLastName()),
                                 role.getCreatedAt(),
                                 role.getUpdatedAt(),
                                 getAmountOfUsersByRole(role.getId()))

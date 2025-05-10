@@ -108,7 +108,7 @@ public class PermissionServiceImpl implements PermissionService {
                         new PermissionListDto(
                                 permission.getId(),
                                 permission.getName(),
-                                "%s %s".formatted(permission.getUser().getFirstName(), permission.getUser().getLastName()),
+                                permission.getUser() == null ? "-": "%s %s".formatted(permission.getUser().getFirstName(), permission.getUser().getLastName()),
                                 permission.getCreatedAt(),
                                 permission.getUpdatedAt(),
                                 getAmountOfRolesByPermission(permission.getId()))

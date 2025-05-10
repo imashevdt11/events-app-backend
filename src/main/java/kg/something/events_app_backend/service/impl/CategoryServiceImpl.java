@@ -70,7 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
                         new CategoryListDto(
                                 category.getId(),
                                 category.getName(),
-                                "%s %s".formatted(category.getUser().getFirstName(), category.getUser().getLastName()),
+                                category.getUser() == null ? "-" : "%s %s".formatted(category.getUser().getFirstName(), category.getUser().getLastName()),
                                 category.getCreatedAt(),
                                 category.getUpdatedAt(),
                                 getAmountOfEventsByCategory(category.getId()))
