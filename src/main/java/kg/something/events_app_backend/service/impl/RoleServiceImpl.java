@@ -2,12 +2,15 @@ package kg.something.events_app_backend.service.impl;
 
 import kg.something.events_app_backend.dto.RoleDto;
 import kg.something.events_app_backend.dto.RoleListDto;
+import kg.something.events_app_backend.dto.response.RoleDetailedResponse;
+import kg.something.events_app_backend.dto.response.RoleResponse;
 import kg.something.events_app_backend.entity.Permission;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
+import kg.something.events_app_backend.mapper.RoleMapper;
 import kg.something.events_app_backend.repository.RoleRepository;
 import kg.something.events_app_backend.service.PermissionService;
 import kg.something.events_app_backend.service.RoleService;
@@ -27,11 +30,13 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository repository;
     private final PermissionService permissionService;
     private final UserService userService;
+    private final RoleMapper roleMapper;
 
-    public RoleServiceImpl(RoleRepository repository, PermissionService permissionService, @Lazy UserService userService) {
+    public RoleServiceImpl(RoleRepository repository, PermissionService permissionService, @Lazy UserService userService, RoleMapper roleMapper) {
         this.repository = repository;
         this.permissionService = permissionService;
         this.userService = userService;
+        this.roleMapper = roleMapper;
     }
 
     @Transactional
@@ -43,21 +48,23 @@ public class RoleServiceImpl implements RoleService {
         Set<Permission> permissions = permissionService.getExistingPermissions(role.getPermissions());
         repository.save(new Role(role.getName(), permissions, user));
 
-        return "Роль '%s' сохранена".formatted(role.getName());
+        return "Роль создана";
     }
 
     public String deleteRole(UUID id) {
-        Role role = repository.findRoleById(id);
-        if (role == null) {
-            throw new ResourceNotFoundException("Роль с id '%s' не найдена".formatted(id));
-        }
+        Role role = findRoleById(id);
         if (!userService.findUsersByRoleId(role.getId()).isEmpty()) {
             throw new InvalidRequestException("Удаление роли запрещено. Роль привязана к пользователям");
         }
         role.getPermissions().clear();
         repository.delete(role);
 
-        return "Роль '%s' удалена".formatted(role.getName());
+        return "Роль удалена";
+    }
+
+    public Role findRoleById(UUID id) {
+        return Optional.ofNullable(repository.findRoleById(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Роль c id '%s' не найдена в базе данных".formatted(id)));
     }
 
     public Role findRoleByName(String name) {
@@ -65,39 +72,19 @@ public class RoleServiceImpl implements RoleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Роль '%s' не найдена в базе данных".formatted(name)));
     }
 
-    public List<Role> getAllRoles() {
-        return repository.findAll();
+    public List<RoleResponse> getAllRoles() {
+        return repository.findAll().stream()
+                .map(roleMapper::toRoleResponse)
+                .toList();
     }
 
-    public List<RoleDto> getAllRolesNames() {
-        return repository.getAllRolesNames();
+    public Integer getAmountOfUsersByRole(UUID roleId) {
+        return repository.countUsersByRole(roleId);
     }
 
-    public Role getRoleById(UUID id) {
-        Role role = repository.findRoleById(id);
-        if (role == null) {
-            throw new ResourceNotFoundException("Роль с id '%s' не найдена".formatted(id));
-        }
-        return role;
-    }
-
-    public String updateRole(RoleDto roleDto, UUID id) {
-        Role role = repository.findRoleById(id);
-        if (role == null) {
-            throw new ResourceNotFoundException("Роль с id '%s' не найдена".formatted(id));
-        }
-
-        if (repository.existsByName(roleDto.getName()) && !roleDto.getName().equals(role.getName())) {
-            throw new ResourceAlreadyExistsException("Роль с названием '%s' уже есть в базе данных".formatted(roleDto.getName()));
-        }
-        Set<Permission> permissions = permissionService.getExistingPermissions(roleDto.getPermissions());
-
-        role.setName(roleDto.getName());
-        role.getPermissions().clear();
-        role.setPermissions(permissions);
-        repository.save(role);
-
-        return "Изменения роли внесены в базу данных";
+    public RoleDetailedResponse getRoleById(UUID id) {
+        Role role = findRoleById(id);
+        return roleMapper.toRoleDetailedResponse(role);
     }
 
     public List<RoleListDto> getRolesForList() {
@@ -114,7 +101,18 @@ public class RoleServiceImpl implements RoleService {
                 .toList();
     }
 
-    public Integer getAmountOfUsersByRole(UUID roleId) {
-        return repository.countUsersByRole(roleId);
+    public String updateRole(RoleDto roleDto, UUID id) {
+        Role role = findRoleById(id);
+        if (repository.existsByName(roleDto.getName()) && !roleDto.getName().equals(role.getName())) {
+            throw new ResourceAlreadyExistsException("Роль с названием '%s' уже есть в базе данных".formatted(roleDto.getName()));
+        }
+        Set<Permission> permissions = permissionService.getExistingPermissions(roleDto.getPermissions());
+
+        role.setName(roleDto.getName());
+        role.getPermissions().clear();
+        role.setPermissions(permissions);
+        repository.save(role);
+
+        return "Изменения роли внесены в базу данных";
     }
 }

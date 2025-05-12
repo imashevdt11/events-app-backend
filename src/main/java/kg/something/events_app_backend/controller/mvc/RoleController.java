@@ -3,7 +3,7 @@ package kg.something.events_app_backend.controller.mvc;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.RoleDto;
 import kg.something.events_app_backend.dto.RoleListDto;
-import kg.something.events_app_backend.entity.Role;
+import kg.something.events_app_backend.dto.response.RoleDetailedResponse;
 import kg.something.events_app_backend.service.RoleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,7 +49,7 @@ public class RoleController {
 
     @GetMapping("/update/{id}")
     public String editRole(@PathVariable UUID id, Model model) {
-        Role role = service.getRoleById(id);
+        RoleDetailedResponse role = service.getRoleById(id);
         model.addAttribute("role", role);
         return "role_edit_form";
     }

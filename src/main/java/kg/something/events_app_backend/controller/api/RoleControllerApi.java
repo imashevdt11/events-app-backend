@@ -3,7 +3,8 @@ package kg.something.events_app_backend.controller.api;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.RoleDto;
-import kg.something.events_app_backend.entity.Role;
+import kg.something.events_app_backend.dto.response.RoleDetailedResponse;
+import kg.something.events_app_backend.dto.response.RoleResponse;
 import kg.something.events_app_backend.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,27 +38,15 @@ public class RoleControllerApi {
         return new ResponseEntity<>(service.createRole(role), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Удаление роли")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteRole(@PathVariable UUID id) {
-        return new ResponseEntity<>(service.deleteRole(id), HttpStatus.OK);
-    }
-
     @Operation(summary = "Получение списка всех ролей")
-    @GetMapping("/admin")
-    public ResponseEntity<List<Role>> getAllRoles() {
-        return new ResponseEntity<>(service.getAllRoles(), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Получение списка названий всех ролей")
     @GetMapping
-    public ResponseEntity<List<RoleDto>> getAllRolesNames() {
-        return new ResponseEntity<>(service.getAllRolesNames(), HttpStatus.OK);
+    public ResponseEntity<List<RoleResponse>> getAllRoles() {
+        return new ResponseEntity<>(service.getAllRoles(), HttpStatus.OK);
     }
 
     @Operation(summary = "Получение информации о роли по ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Role> getRole(@PathVariable("id") UUID id) {
+    public ResponseEntity<RoleDetailedResponse> getRoleById(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(service.getRoleById(id), HttpStatus.OK);
     }
 
@@ -66,5 +55,11 @@ public class RoleControllerApi {
     public ResponseEntity<String> updateRole(@Valid @RequestBody RoleDto role,
                                              @PathVariable UUID id) {
         return new ResponseEntity<>(service.updateRole(role, id), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Удаление роли")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRole(@PathVariable UUID id) {
+        return new ResponseEntity<>(service.deleteRole(id), HttpStatus.OK);
     }
 }

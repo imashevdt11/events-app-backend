@@ -61,7 +61,7 @@ public class WebSecurityConfig {
 //                    .anyMatch(grantedAuthority ->
 //                            grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 //            if (isUser) {
-                response.sendRedirect("/users/admins");
+                response.sendRedirect("/users");
 //            }
         };
     }
