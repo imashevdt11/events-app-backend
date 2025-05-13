@@ -247,7 +247,8 @@ public class UserServiceImpl implements UserService {
                                 "%s %s".formatted(user.getFirstName(), user.getLastName()),
                                 user.getRole().getName(),
                                 user.getEnabled(),
-                                user.getCreatedAt()
+                                user.getCreatedAt(),
+                                user.getImage() == null ? "https://res.cloudinary.com/dn0akydmv/image/upload/v1743943629/dg950peh7y1hj82svuvt.jpg": user.getImage().getUrl()
                         ))
                 .toList();
     }

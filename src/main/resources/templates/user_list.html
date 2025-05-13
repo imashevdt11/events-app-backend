@@ -143,6 +143,7 @@
     <table>
         <thead>
         <tr>
+            <th></th>
             <th>Пользователь</th>
             <th>Роль</th>
             <th>Дата создания</th>
@@ -153,6 +154,9 @@
         </thead>
         <tbody>
         <tr th:each="user : ${users}">
+            <td>
+                <img th:src="${user.image()}" alt="Фото" style="width: 50px; height: 50px; border-radius: 50%;">
+            </td>
             <td th:text="${user.name()}"></td>
             <td>
                 <label>

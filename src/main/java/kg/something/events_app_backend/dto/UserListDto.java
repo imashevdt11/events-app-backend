@@ -11,5 +11,6 @@ public record UserListDto(
         String role,
         Boolean enabled,
         @JsonProperty("created_at")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String image
 ) {}
