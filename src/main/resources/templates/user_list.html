@@ -13,7 +13,7 @@
             font-family: Arial, sans-serif;
             justify-content: center;
             margin: 0;
-            padding: 0;
+            padding: 70px 0 0 0;
         }
         form {
             display: inline-block;
@@ -123,7 +123,8 @@
     <a href="/users">Пользователи</a>
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
-<h1>Роли</h1>
+<h1>Пользователи</h1>
+<a th:href="@{/users/create-form}" class="btn" style = "text-decoration: none">Создать пользователя +</a>
 <div class="table-container">
     <table>
         <thead>

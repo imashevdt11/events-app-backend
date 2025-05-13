@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создание права доступа</title>
+    <title>Создание пользователя</title>
     <style>
         body {
             align-items: center;
@@ -31,7 +31,7 @@
             padding: 10px;
             width: 100%;
         }
-        input, textarea {
+        input, textarea, select {
             background: #333;
             border: 1px solid #555;
             border-radius: 5px;
@@ -39,6 +39,11 @@
             margin: 5px 0;
             padding: 8px;
             width: 100%;
+        }
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
         }
         input::placeholder {
             color: #aaa;
@@ -80,13 +85,57 @@
     <a href="/users">Пользователи</a>
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
-<h1>СОЗДАНИЕ ПРАВА ДОСТУПА</h1>
-<form th:action="@{/permissions/create}" method="post">
-    <h2>Название</h2>
+<h1>СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ</h1>
+<form th:action="@{/users/create}" method="post">
+    <h4>Имя</h4>
+    <input type="text" name="firstName"
+           pattern="^([а-яА-ЯёЁ]+|[a-zA-Z]+)$"
+           minlength="2" maxlength="20"
+           required
+           title="Имя должно содержать от 2 до 20 букв кириллицы или латиницы без смешивания">
+
+    <h4>Фамилия</h4>
+    <input type="text" name="lastName"
+           pattern="^([а-яА-ЯёЁ]+|[a-zA-Z]+)$"
+           minlength="2" maxlength="20"
+           required
+           title="Фамилия должна содержать от 2 до 20 букв кириллицы или латиницы без смешивания">
+
+    <h4>Телефон</h4>
+    <input type="text" name="phoneNumber"
+           pattern="^\+?\d{7,15}$"
+           required
+           title="Введите телефон от 7 до 15 цифр, допустим '+' в начале">
+
+    <h4>Дата рождения</h4>
     <label>
-        <input type="text" name="name" required>
+        <input type="date" name="dateOfBirth" required>
+    </label>
+
+    <h4>Почта</h4>
+    <input type="email" name="email"
+           required
+           title="Введите корректный email">
+
+    <h4>Пароль</h4>
+    <input type="password" name="password"
+           minlength="8"
+           required
+           title="Пароль должен содержать минимум 8 символов">
+
+    <h4>Роль</h4>
+    <label>
+        <select name="role" required>
+            <option value="" disabled selected>Выберите роль</option>
+            <option th:each="role : ${roles}"
+                    th:value="${role.name()}"
+                    th:text="${role.name()}">
+            </option>
+        </select>
     </label>
     <button type="submit">Сохранить</button>
 </form>
 </body>
+<script>
+</script>
 </html>
