@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактирование категории</title>
+    <title>Создание категории</title>
     <style>
         body {
             align-items: center;
@@ -32,7 +32,7 @@
             padding: 10px;
             width: 100%;
         }
-        input, textarea{
+        input, textarea {
             background: #333;
             border: 1px solid #555;
             border-radius: 5px;
@@ -80,12 +80,11 @@
     <a href="/roles">Роли</a>
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
-<h1>РЕДАКТИРОВАНИЕ КАТЕГОРИИ</h1>
-<form th:action="@{/categories/update/{id}(id=${category.id})}" method="post">
-    <input type="hidden" name="id" th:value="${category.id}">
-    <label>Название:</label>
+<h1>СОЗДАНИЕ КАТЕГОРИИ</h1>
+<form th:action="@{/categories/create}" method="post">
+    <h2>Название</h2>
     <label>
-        <input type="text" name="name" th:value="${category.name}" required>
+        <input type="text" name="name" required>
     </label>
     <button type="submit">Сохранить</button>
 </form>

@@ -26,6 +26,21 @@ public class CategoryController {
         this.service = service;
     }
 
+    @GetMapping("/create-form")
+    public String moveToCreateCategoryForm() {
+        return "category_create_form";
+    }
+
+    @PostMapping("/create")
+    public String createCategory(@Valid @ModelAttribute CategoryDto category) {
+        try {
+            service.createCategory(category);
+        } catch (Exception e) {
+            return "error";
+        }
+        return "redirect:/categories";
+    }
+
     @GetMapping
     public String getCategories(Model model) {
         try {

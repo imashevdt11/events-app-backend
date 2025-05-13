@@ -13,7 +13,7 @@
             font-family: Arial, sans-serif;
             justify-content: center;
             margin: 0;
-            padding: 0;
+            padding: 70px 0 0 0;
         }
         form {
             display: inline-block;
@@ -124,6 +124,7 @@
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
 <h1>Права доступа</h1>
+<a th:href="@{/permissions/create-form}" class="btn" style = "text-decoration: none">Создать право доступа +</a>
 <div class="table-container">
     <table>
         <thead>

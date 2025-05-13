@@ -26,6 +26,21 @@ public class PermissionController {
         this.service = service;
     }
 
+    @GetMapping("/create-form")
+    public String moveToCreatePermissionForm() {
+        return "permission_create_form";
+    }
+
+    @PostMapping("/create")
+    public String createPermission(@Valid @ModelAttribute PermissionDto permission) {
+        try {
+            service.createPermission(permission);
+        } catch (Exception e) {
+            return "error";
+        }
+        return "redirect:/permissions";
+    }
+
     @GetMapping
     public String getPermissions(Model model) {
         try {

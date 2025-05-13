@@ -14,7 +14,7 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            padding: 0;
+            padding: 70px 0 0 0;
         }
         form {
             background: #1e1e1e;
@@ -80,7 +80,7 @@
     <a href="/roles">Роли</a>
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
-<h1>Редактирование информации о праве доступа</h1>
+<h1>РЕДАКТИРОВАНИЕ ПРАВА ДОСТУПА</h1>
 <form th:action="@{/permissions/update/{id}(id=${permission.id})}" method="post">
     <input type="hidden" name="id" th:value="${permission.id}">
     <label>Название:</label>
