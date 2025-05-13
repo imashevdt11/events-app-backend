@@ -167,8 +167,14 @@
             </td>
             <td th:text="${user.createdAt()}"></td>
             <td><a th:href="@{/users/update/{id}(id=${user.id})}" class="btn" style = "text-decoration: none">Изменить</a></td>
-            <td><button class="btn" th:attr="data-id=${user.id}" onclick="openChangeStatusModal(this)">Заблокировать</button></td>
-            <td><button class="btn" th:attr="data-id=${user.id}" onclick="openDeleteModal(this)">Удалить</button></td>
+            <td>
+                <button
+                        class="btn"
+                        th:attr="data-id=${user.id}, data-enabled=${user.enabled}"
+                        th:text="${user.enabled} ? 'Заблокировать' : 'Разблокировать'"
+                        onclick="openChangeStatusModal(this)">
+                </button>
+            </td>            <td><button class="btn" th:attr="data-id=${user.id}" onclick="openDeleteModal(this)">Удалить</button></td>
         </tr>
         </tbody>
     </table>
@@ -194,7 +200,7 @@
 </div>
 <div id="changeStatusModal" class="modal">
     <div class="modal-content">
-        <p>Вы уверены, что хотите заблокировать пользователя?</p>
+        <p id="changeStatusText">Вы уверены, что хотите заблокировать пользователя?</p>
         <div class="modal-buttons">
             <button class="btn btn-delete" id="confirmChangeStatus">Заблокировать</button>
             <button class="btn btn-edit" onclick="closeChangeStatusModal()">Отмена</button>
@@ -203,6 +209,7 @@
 </div>
 <script>
     let userId = null;
+    let userEnabled = null;
 
     function openDeleteModal(button) {
         userId = button.getAttribute("data-id");
@@ -219,12 +226,27 @@
 
     function openChangeStatusModal(button) {
         userId = button.getAttribute("data-id");
+        userEnabled = button.getAttribute("data-enabled") === "true";
+
+        const modalText = document.getElementById("changeStatusText");
+        const confirmBtn = document.getElementById("confirmChangeStatus");
+
+        if (userEnabled) {
+            modalText.textContent = "Вы уверены, что хотите заблокировать пользователя?";
+            confirmBtn.textContent = "Заблокировать";
+        } else {
+            modalText.textContent = "Вы уверены, что хотите разблокировать пользователя?";
+            confirmBtn.textContent = "Разблокировать";
+        }
+
         document.getElementById("changeStatusModal").style.display = "flex";
     }
+
     function closeChangeStatusModal() {
         document.getElementById("changeStatusModal").style.display = "none";
     }
-    document.getElementById("confirmChangeStatus").addEventListener("click", function() {
+
+    document.getElementById("confirmChangeStatus").addEventListener("click", function () {
         if (userId) {
             window.location.href = "/users/change-status/" + userId;
         }

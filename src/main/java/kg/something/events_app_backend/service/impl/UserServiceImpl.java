@@ -245,6 +245,7 @@ public class UserServiceImpl implements UserService {
                                 user.getId(),
                                 "%s %s".formatted(user.getFirstName(), user.getLastName()),
                                 user.getRole().getName(),
+                                user.getEnabled(),
                                 user.getCreatedAt()
                         ))
                 .toList();

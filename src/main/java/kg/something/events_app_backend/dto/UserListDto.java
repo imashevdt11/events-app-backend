@@ -9,6 +9,7 @@ public record UserListDto(
         UUID id,
         String name,
         String role,
+        Boolean enabled,
         @JsonProperty("created_at")
         LocalDateTime createdAt
 ) {}
