@@ -3,7 +3,9 @@ package kg.something.events_app_backend.controller.mvc;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.RoleDto;
 import kg.something.events_app_backend.dto.RoleListDto;
+import kg.something.events_app_backend.dto.response.PermissionResponse;
 import kg.something.events_app_backend.dto.response.RoleDetailedResponse;
+import kg.something.events_app_backend.service.PermissionService;
 import kg.something.events_app_backend.service.RoleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,16 +22,18 @@ import java.util.UUID;
 @RequestMapping("/roles")
 public class RoleController {
 
-    private final RoleService service;
+    private final PermissionService permissionService;
+    private final RoleService roleService;
 
-    public RoleController(RoleService service) {
-        this.service = service;
+    public RoleController(PermissionService permissionService, RoleService roleService) {
+        this.permissionService = permissionService;
+        this.roleService = roleService;
     }
 
     @GetMapping
     public String getRoles(Model model) {
         try {
-            List<RoleListDto> roles = service.getRolesForList();
+            List<RoleListDto> roles = roleService.getRolesForList();
             model.addAttribute("roles", roles);
             return "role_list";
         } catch (Exception e) {
@@ -40,7 +44,7 @@ public class RoleController {
     @GetMapping("/delete/{id}")
     public String deleteRole(@PathVariable UUID id) {
         try {
-            service.deleteRole(id);
+            roleService.deleteRole(id);
         } catch (Exception e) {
             return "error";
         }
@@ -49,8 +53,10 @@ public class RoleController {
 
     @GetMapping("/update/{id}")
     public String editRole(@PathVariable UUID id, Model model) {
-        RoleDetailedResponse role = service.getRoleById(id);
+        RoleDetailedResponse role = roleService.getRoleById(id);
+        List<PermissionResponse> permissions = permissionService.getAllPermissions();
         model.addAttribute("role", role);
+        model.addAttribute("permissions", permissions);
         return "role_edit_form";
     }
 
@@ -58,7 +64,7 @@ public class RoleController {
     public String updateRole(@PathVariable UUID id,
                              @Valid @ModelAttribute RoleDto role) {
         try {
-            service.updateRole(role, id);
+            roleService.updateRole(role, id);
         } catch (Exception e) {
             return "error";
         }

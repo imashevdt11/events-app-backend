@@ -14,7 +14,7 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            padding: 0;
+            padding: 150px 0 0 0;
         }
         form {
             background: #1e1e1e;
@@ -32,7 +32,7 @@
             padding: 10px;
             width: 100%;
         }
-        input, textarea{
+        input, textarea {
             background: #333;
             border: 1px solid #555;
             border-radius: 5px;
@@ -71,6 +71,14 @@
             background: #333;
             border-radius: 5px;
         }
+        .permissions {
+            margin-top: 15px;
+            text-align: left;
+        }
+        .permissions label {
+            cursor: pointer;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -80,13 +88,23 @@
     <a href="/roles">Роли</a>
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
-<h1>Редактирование информации о роли</h1>
+<h1>РЕДАКТИРОВАНИЕ РОЛИ</h1>
 <form th:action="@{/roles/update/{id}(id=${role.id})}" method="post">
     <input type="hidden" name="id" th:value="${role.id}">
-    <label>Название:</label>
+    <h2>Название</h2>
     <label>
         <input type="text" name="name" th:value="${role.name}" required>
     </label>
+    <h2>Права доступа</h2>
+    <div class="permissions" th:each="permission : ${permissions}">
+        <label>
+            <input type="checkbox"
+                   name="permissions"
+                   th:value="${permission.name()}"
+                   th:text="${permission.name()}"
+                   th:checked="${role.permissions.contains(permission)}">
+        </label>
+    </div>
     <button type="submit">Сохранить</button>
 </form>
 </body>

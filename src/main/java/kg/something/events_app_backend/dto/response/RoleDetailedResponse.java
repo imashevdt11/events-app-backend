@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record RoleDetailedResponse(
@@ -8,5 +9,6 @@ public record RoleDetailedResponse(
         String name,
         String creator,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<PermissionResponse> permissions
 ) {}
