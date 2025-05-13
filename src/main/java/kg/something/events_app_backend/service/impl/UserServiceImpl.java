@@ -116,6 +116,7 @@ public class UserServiceImpl implements UserService {
         user.setLastName(request.lastName());
         user.setEmail(request.email());
         user.setPhoneNumber(request.phoneNumber());
+        user.setDateOfBirth(request.dateOfBirth());
         repository.save(user);
 
         return userMapper.toUserResponse(user);

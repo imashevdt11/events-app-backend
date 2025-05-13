@@ -2,6 +2,7 @@ package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
 import kg.something.events_app_backend.dto.UserUpdateRequest;
@@ -63,7 +64,7 @@ public class UserControllerApi {
     @Operation(summary = "Изменение данных пользователя")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUserPersonalInfo(@PathVariable("id") UUID id,
-                                                               @RequestBody UserUpdateRequest request) {
+                                                               @RequestBody @Valid UserUpdateRequest request) {
         return new ResponseEntity<>(service.updateUser(id, request), HttpStatus.OK);
     }
 
