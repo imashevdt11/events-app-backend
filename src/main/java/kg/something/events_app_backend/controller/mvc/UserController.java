@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,11 +56,24 @@ public class UserController {
     public String getUsers(Model model) {
         try {
             List<UserListDto> users = userService.getUsersForList();
+            List<RoleResponse> roles = roleService.getAllRoles();
             model.addAttribute("users", users);
+            model.addAttribute("roles", roles);
             return "user_list";
         } catch (Exception e) {
             return "error";
         }
+    }
+
+    @GetMapping("/change-role/{id}")
+    public String changeUserRole(@PathVariable UUID id,
+                                 @RequestParam("role") String role) {
+        try {
+            userService.changeUserRole(id, role);
+        } catch (Exception e) {
+            return "error";
+        }
+        return "redirect:/users";
     }
 
     @GetMapping("/change-status/{id}")
