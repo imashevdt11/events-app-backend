@@ -30,6 +30,23 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    @GetMapping("/create-form")
+    public String moveToCreateRoleForm(Model model) {
+        List<PermissionResponse> permissions = permissionService.getAllPermissions();
+        model.addAttribute("permissions", permissions);
+        return "role_create_form";
+    }
+
+    @PostMapping("/create")
+    public String createRole(@Valid @ModelAttribute RoleDto role) {
+        try {
+            roleService.createRole(role);
+        } catch (Exception e) {
+            return "error";
+        }
+        return "redirect:/roles";
+    }
+
     @GetMapping
     public String getRoles(Model model) {
         try {

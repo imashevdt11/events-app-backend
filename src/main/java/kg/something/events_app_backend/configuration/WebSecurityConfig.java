@@ -2,7 +2,6 @@ package kg.something.events_app_backend.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,7 +25,6 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-//                .csrf(AbstractHttpConfigurer::disable)
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
@@ -38,10 +36,11 @@ public class WebSecurityConfig {
                     return configuration;
                 }))
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers(HttpMethod.POST, "/api/permissions").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form
                         .loginPage("/auth/login")
@@ -51,6 +50,7 @@ public class WebSecurityConfig {
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/")
                         .permitAll());
+
         return http.build();
     }
 

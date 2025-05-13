@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактирование роли</title>
+    <title>Создание роли</title>
     <style>
         body {
             align-items: center;
@@ -88,12 +88,11 @@
     <a href="/roles">Роли</a>
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
-<h1>РЕДАКТИРОВАНИЕ РОЛИ</h1>
-<form th:action="@{/roles/update/{id}(id=${role.id})}" method="post">
-    <input type="hidden" name="id" th:value="${role.id}">
+<h1>СОЗДАНИЕ РОЛИ</h1>
+<form id="form" th:action="@{/roles/create}" method="post" onsubmit="return validateCheckboxes()">
     <h2>Название</h2>
     <label>
-        <input type="text" name="name" th:value="${role.name}" required>
+        <input type="text" name="name" required>
     </label>
     <h2>Права доступа</h2>
     <div class="permissions" th:each="permission : ${permissions}">
@@ -101,11 +100,25 @@
             <input type="checkbox"
                    name="permissions"
                    th:value="${permission.name()}"
-                   th:text="${permission.name()}"
-                   th:checked="${role.permissions.contains(permission)}">
+                   th:text="${permission.name()}">
         </label>
     </div>
+    <p id="checkboxError" style="color:red; display:none;">Выберите хотя бы одно право доступа.</p>
     <button type="submit">Сохранить</button>
 </form>
 </body>
+<script>
+    function validateCheckboxes() {
+        const checkboxes = document.querySelectorAll('input[name="permissions"]:checked');
+        const errorText = document.getElementById('checkboxError');
+
+        if (checkboxes.length === 0) {
+            errorText.style.display = 'block';
+            return false;
+        } else {
+            errorText.style.display = 'none';
+            return true;
+        }
+    }
+</script>
 </html>
