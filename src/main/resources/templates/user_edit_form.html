@@ -1,0 +1,125 @@
+<html xmlns:th="https://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование данных пользователя</title>
+    <style>
+        body {
+            align-items: center;
+            background: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            margin: 0;
+            padding: 70px 0 0 0;
+        }
+        form {
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            text-align: left;
+            width: 550px;
+        }
+        input, button {
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        input, textarea {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 5px;
+            color: white;
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+        }
+        input::placeholder {
+            color: #aaa;
+        }
+        button {
+            background-color: #000000;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .navbar {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+        .navbar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .navbar a:hover {
+            background: #333;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/categories">Категории</a>
+    <a href="/permissions">Права доступа</a>
+    <a href="/roles">Роли</a>
+    <a href="/users">Пользователи</a>
+    <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
+</nav>
+<h1>РЕДАКТИРОВАНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ</h1>
+<form th:action="@{/users/update/{id}(id=${user.id})}" method="post">
+    <input type="hidden" name="id" th:value="${user.id}">
+    <h4>Имя</h4>
+    <input type="text" name="firstName"
+           th:value="${user.firstName()}"
+           pattern="^([а-яА-ЯёЁ]+|[a-zA-Z]+)$"
+           minlength="2" maxlength="20"
+           required
+           title="Имя должно содержать от 2 до 20 букв кириллицы или латиницы без смешивания">
+
+    <h4>Фамилия</h4>
+    <input type="text" name="lastName"
+           th:value="${user.lastName()}"
+           pattern="^([а-яА-ЯёЁ]+|[a-zA-Z]+)$"
+           minlength="2" maxlength="20"
+           required
+           title="Фамилия должна содержать от 2 до 20 букв кириллицы или латиницы без смешивания">
+
+    <h4>Телефон</h4>
+    <input type="text" name="phoneNumber"
+           th:value="${user.phoneNumber()}"
+           pattern="^\+?\d{7,15}$"
+           required
+           title="Введите телефон от 7 до 15 цифр, допустим '+' в начале">
+
+    <h4>Дата рождения</h4>
+    <label>
+        <input type="date" name="dateOfBirth"
+               th:value="${user.dateOfBirth()}"
+               required>
+    </label>
+
+    <h4>Почта</h4>
+    <input type="email" name="email"
+           th:value="${user.email()}"
+           required
+           title="Введите корректный email">
+
+    <button type="submit">Сохранить</button>
+</form>
+</body>
+</html>

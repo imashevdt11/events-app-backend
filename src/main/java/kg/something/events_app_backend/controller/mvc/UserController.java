@@ -72,14 +72,14 @@ public class UserController {
         return "redirect:/users";
     }
 
-//    @GetMapping("/update/{id}")
-//    public String moveToUpdateUserForm(@PathVariable UUID id, Model model) {
-//        UserResponse user = userService.getUserById(id);
-//        List<RoleResponse> roles = roleService.getAllRoles();
-//        model.addAttribute("user", user);
-//        model.addAttribute("roles", roles);
-//        return "user_edit_form";
-//    }
+    @GetMapping("/update/{id}")
+    public String moveToUpdateUserForm(@PathVariable UUID id, Model model) {
+        UserResponse user = userService.getUserById(id);
+        List<RoleResponse> roles = roleService.getAllRoles();
+        model.addAttribute("user", user);
+        model.addAttribute("roles", roles);
+        return "user_edit_form";
+    }
 
     @PostMapping("/update/{id}")
     public String updateUser(@PathVariable UUID id,
