@@ -89,7 +89,7 @@
     <a href="/auth/logout" style="background: red; padding: 10px; border-radius: 5px;">Выйти</a>
 </nav>
 <h1>РЕДАКТИРОВАНИЕ РОЛИ</h1>
-<form th:action="@{/roles/update/{id}(id=${role.id})}" method="post">
+<form th:action="@{/roles/update/{id}(id=${role.id})}" method="post" onsubmit="return validateCheckboxes()">
     <input type="hidden" name="id" th:value="${role.id}">
     <h2>Название</h2>
     <label>
@@ -105,7 +105,22 @@
                    th:checked="${role.permissions.contains(permission)}">
         </label>
     </div>
+    <p id="checkboxError" style="color:red; display:none;">Выберите хотя бы одно право доступа.</p>
     <button type="submit">Сохранить</button>
 </form>
 </body>
+<script>
+    function validateCheckboxes() {
+        const checkboxes = document.querySelectorAll('input[name="permissions"]:checked');
+        const errorText = document.getElementById('checkboxError');
+
+        if (checkboxes.length === 0) {
+            errorText.style.display = 'block';
+            return false;
+        } else {
+            errorText.style.display = 'none';
+            return true;
+        }
+    }
+</script>
 </html>
