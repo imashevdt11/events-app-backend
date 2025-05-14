@@ -145,6 +145,7 @@
         <tr>
             <th></th>
             <th>Пользователь</th>
+            <th>Контакты</th>
             <th>Роль</th>
             <th>Дата создания</th>
             <th></th>
@@ -158,6 +159,10 @@
                 <img th:src="${user.image()}" alt="Фото" style="width: 50px; height: 50px; border-radius: 50%;">
             </td>
             <td th:text="${user.name()}"></td>
+            <td>
+                <p th:text="${user.phoneNumber()}"><br></p>
+                <p th:text="${user.email()}"><br></p>
+            </td>
             <td>
                 <label>
                     <select onchange="onRoleChange(this)" th:attr="data-id=${user.id}">

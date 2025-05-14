@@ -9,6 +9,9 @@ public record UserListDto(
         UUID id,
         String name,
         String role,
+        @JsonProperty("phone_number")
+        String phoneNumber,
+        String email,
         Boolean enabled,
         @JsonProperty("created_at")
         LocalDateTime createdAt,

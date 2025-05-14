@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @GetMapping
-    public String getUsers(Model model) {
+    public String getAllUsers(Model model) {
         try {
             List<UserListDto> users = userService.getUsersForList();
             List<RoleResponse> roles = roleService.getAllRoles();
