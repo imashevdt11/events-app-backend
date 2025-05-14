@@ -47,12 +47,7 @@ public class UserServiceImpl implements UserService {
         this.subscriptionService = subscriptionService;
     }
 
-    public List<UserResponse> getAllUsers() {
-        return repository.findAll().stream()
-                .map(userMapper::toUserResponse)
-                .toList();
-    }
-
+    @Override
     public String changeUserRole(UUID userId, String roleName) {
         User user = findUserById(userId);
         Role role = roleService.findRoleByName(roleName);
@@ -63,6 +58,7 @@ public class UserServiceImpl implements UserService {
         return "Роль пользователя '%s %s' изменена на '%s'".formatted(user.getFirstName(), user.getLastName(), roleName);
     }
 
+    @Override
     public String changeUserStatus(UUID userId) {
         User user = findUserById(userId);
 
@@ -75,6 +71,63 @@ public class UserServiceImpl implements UserService {
         return "Учетная запись пользователя '%s %s' заблокирована".formatted(user.getFirstName(), user.getLastName());
     }
 
+    @Override
+    public boolean existsByEmail(String email) {
+        return repository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByPhoneNumber(String phoneNumber) {
+        return repository.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Override
+    public List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId) {
+        User user = getAuthenticatedUser();
+        return subscriptionService.findAllOrganizersSubscribers(user)
+                .stream()
+                .map(userMapper::toUserSubscriberDto)
+                .toList();
+    }
+
+    @Override
+    public List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId) {
+        User user = getAuthenticatedUser();
+        return subscriptionService.findAllOrganizersUserFollows(user)
+                .stream()
+                .map(userMapper::toUserOrganizerDto)
+                .toList();
+    }
+
+    @Override
+    public List<User> findUsersByRoleId(UUID roleId) {
+        List<User> user = repository.findUsersByRole_Id(roleId);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователей с указанной ролью не найдены");
+        }
+        return user;
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return Optional.ofNullable(repository.findUsersByEmail(email))
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email '%s' не найден в базе данных".formatted(email)));
+    }
+
+    @Override
+    public User findUserById(UUID id) {
+        return Optional.ofNullable(repository.findUserById(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return repository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -85,6 +138,33 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Override
+    public UserResponse getUserById(UUID id) {
+        User user = repository.findUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователь с id '%s' не найден".formatted(id));
+        }
+        return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public List<UserListDto> getUsersForList() {
+        return repository.findAll().stream()
+                .map(user ->
+                        new UserListDto(
+                                user.getId(),
+                                "%s %s".formatted(user.getFirstName(), user.getLastName()),
+                                user.getRole().getName(),
+                                user.getPhoneNumber(),
+                                user.getEmail(),
+                                user.getEnabled(),
+                                user.getCreatedAt(),
+                                user.getImage() == null ? "https://res.cloudinary.com/dn0akydmv/image/upload/v1743943629/dg950peh7y1hj82svuvt.jpg": user.getImage().getUrl()
+                        ))
+                .toList();
+    }
+
+    @Override
     public boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null &&
@@ -92,22 +172,58 @@ public class UserServiceImpl implements UserService {
                 !(authentication instanceof AnonymousAuthenticationToken);
     }
 
-    public UserResponse getUserById(UUID id) {
-        User user = repository.findUserById(id);
-        if (user == null) {
-            throw new ResourceNotFoundException("Пользователь с id " + id + " не найден");
-        }
-        return userMapper.toUserResponse(user);
+    @Override
+    public void save(User user) {
+        repository.save(user);
     }
 
-    public List<User> findUsersByRoleId(UUID roleId) {
-        List<User> user = repository.findUsersByRole_Id(roleId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Пользователей с ролью " + roleId + " не найдено");
+    @Override
+    public String subscribeToUser(UUID userId) {
+        User subscriber = getAuthenticatedUser();
+        User organizer = findUserById(userId);
+
+        if (subscriber.getId().equals(organizer.getId())) {
+            throw new InvalidRequestException("Пользователь не может подписаться на самого себя");
         }
-        return user;
+        if (subscriber.getRole().getName().equals("ROLE_ORGANIZER")) {
+            throw new InvalidRequestException("Вы не можете подписаться на пользователя, поскольку он не является организатором");
+        }
+        Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
+        if (subscription != null) {
+            throw new ResourceAlreadyExistsException("Пользователь уже подписан на организатора");
+        }
+        subscriptionService.save(new Subscription(organizer, subscriber));
+
+        return "Пользователь '%s %s' подписался на '%s %s'"
+                .formatted(
+                        subscriber.getFirstName(),
+                        subscriber.getLastName(),
+                        organizer.getFirstName(),
+                        organizer.getLastName()
+                );
     }
 
+    @Override
+    public String unsubscribeFromUser(UUID userId) {
+        User subscriber = getAuthenticatedUser();
+        User organizer = findUserById(userId);
+
+        Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
+        if (subscription == null) {
+            throw new ResourceAlreadyExistsException("Пользователь не подписан на организатора");
+        }
+        subscriptionService.delete(subscription);
+
+        return "Пользователь '%s %s' отписался от '%s %s'"
+                .formatted(
+                        subscriber.getFirstName(),
+                        subscriber.getLastName(),
+                        organizer.getFirstName(),
+                        organizer.getLastName()
+                );
+    }
+
+    @Override
     public UserResponse updateUser(UUID userId, UserUpdateRequest request) {
         User user = findUserById(userId);
         checkUniqueFieldsForExistingBeforeUpdate(user, request);
@@ -122,25 +238,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
-    private void checkUniqueFieldsForExistingBeforeUpdate(User existingUser, UserUpdateRequest updateRequest) {
-        if (repository.existsByEmail(updateRequest.email()) && !existingUser.getEmail().equals(updateRequest.email())) {
-            throw new ResourceAlreadyExistsException("Пользователь с почтой '%s' уже есть в базе данных".formatted(updateRequest.email()));
-        }
-        if (repository.existsByPhoneNumber(updateRequest.phoneNumber()) && !existingUser.getPhoneNumber().equals(updateRequest.phoneNumber())) {
-            throw new ResourceAlreadyExistsException("Пользователь с номером телефона '%s' уже есть в базе данных".formatted(updateRequest.phoneNumber()));
-        }
-    }
-
-    public User findUserById(UUID id) {
-        return Optional.ofNullable(repository.findUserById(id))
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
-    }
-
-    public User findUserByEmail(String email) {
-        return Optional.ofNullable(repository.findUsersByEmail(email))
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email '%s' не найден в базе данных".formatted(email)));
-    }
-
+    @Override
     @Transactional
     public String uploadProfileImage(UUID userId, MultipartFile image) {
         User user = getAuthenticatedUser();
@@ -167,91 +265,12 @@ public class UserServiceImpl implements UserService {
         return "Изображение профиля сохранено";
     }
 
-    public String subscribeToUser(UUID userId) {
-        User subscriber = getAuthenticatedUser();
-        User organizer = findUserById(userId);
-
-        if (subscriber.getId().equals(organizer.getId())) {
-            throw new InvalidRequestException("Пользователь не может подписаться на самого себя");
+    private void checkUniqueFieldsForExistingBeforeUpdate(User existingUser, UserUpdateRequest updateRequest) {
+        if (repository.existsByEmail(updateRequest.email()) && !existingUser.getEmail().equals(updateRequest.email())) {
+            throw new ResourceAlreadyExistsException("Пользователь с почтой '%s' уже есть в базе данных".formatted(updateRequest.email()));
         }
-//        if (subscriber.getRole().getName().equals("ROLE_ORGANIZER")) {
-//            throw new InvalidRequestException("Вы не можете подписаться на пользователя, поскольку он не является организатором");
-//        }
-        Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
-        if (subscription != null) {
-            throw new ResourceAlreadyExistsException("Пользователь уже подписан на организатора");
+        if (repository.existsByPhoneNumber(updateRequest.phoneNumber()) && !existingUser.getPhoneNumber().equals(updateRequest.phoneNumber())) {
+            throw new ResourceAlreadyExistsException("Пользователь с номером телефона '%s' уже есть в базе данных".formatted(updateRequest.phoneNumber()));
         }
-        subscriptionService.save(new Subscription(organizer, subscriber));
-
-        return "Пользователь '%s %s' подписался на '%s %s'"
-                .formatted(
-                        subscriber.getFirstName(),
-                        subscriber.getLastName(),
-                        organizer.getFirstName(),
-                        organizer.getLastName()
-                );
-    }
-
-    public String unsubscribeFromUser(UUID userId) {
-        User subscriber = getAuthenticatedUser();
-        User organizer = findUserById(userId);
-
-        Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
-        if (subscription == null) {
-            throw new ResourceAlreadyExistsException("Пользователь не подписан на организатора");
-        }
-        subscriptionService.delete(subscription);
-
-        return "Пользователь '%s %s' отписался от '%s %s'"
-                .formatted(
-                        subscriber.getFirstName(),
-                        subscriber.getLastName(),
-                        organizer.getFirstName(),
-                        organizer.getLastName()
-                );
-    }
-
-    public List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId) {
-        User user = getAuthenticatedUser();
-        return subscriptionService.findAllOrganizersUserFollows(user)
-                .stream()
-                .map(userMapper::toUserOrganizerDto)
-                .toList();
-    }
-
-    public List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId) {
-        User user = getAuthenticatedUser();
-        return subscriptionService.findAllOrganizersSubscribers(user)
-                .stream()
-                .map(userMapper::toUserSubscriberDto)
-                .toList();
-    }
-
-    public void save(User user) {
-        repository.save(user);
-    }
-
-    public boolean existsByEmail(String email) {
-        return repository.existsByEmail(email);
-    }
-
-    public boolean existsByPhoneNumber(String phoneNumber) {
-        return repository.existsByPhoneNumber(phoneNumber);
-    }
-
-    public List<UserListDto> getUsersForList() {
-        return repository.findAll().stream()
-                .map(user ->
-                        new UserListDto(
-                                user.getId(),
-                                "%s %s".formatted(user.getFirstName(), user.getLastName()),
-                                user.getRole().getName(),
-                                user.getPhoneNumber(),
-                                user.getEmail(),
-                                user.getEnabled(),
-                                user.getCreatedAt(),
-                                user.getImage() == null ? "https://res.cloudinary.com/dn0akydmv/image/upload/v1743943629/dg950peh7y1hj82svuvt.jpg": user.getImage().getUrl()
-                        ))
-                .toList();
     }
 }

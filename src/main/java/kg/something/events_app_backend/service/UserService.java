@@ -17,37 +17,37 @@ public interface UserService {
 
     String changeUserStatus(UUID userId);
 
+    boolean existsByEmail(String phoneNumber);
+
+    boolean existsByPhoneNumber(String phoneNumber);
+
+    List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId);
+
+    List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId);
+
+    User findUserById(UUID id);
+
+    User findUserByEmail(String email);
+
     List<User> findUsersByRoleId(UUID roleId);
 
     List<UserResponse> getAllUsers();
 
     User getAuthenticatedUser();
 
-    boolean isAuthenticated();
-
     UserResponse getUserById(UUID id);
 
-    UserResponse updateUser(UUID userId, UserUpdateRequest request);
+    List<UserListDto> getUsersForList();
 
-    String uploadProfileImage(UUID userId, MultipartFile image);
+    boolean isAuthenticated();
 
     String subscribeToUser(UUID userId);
 
     String unsubscribeFromUser(UUID userId);
 
-    List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId);
+    UserResponse updateUser(UUID userId, UserUpdateRequest request);
 
-    List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId);
-
-    User findUserById(UUID id);
-
-    User findUserByEmail(String email);
+    String uploadProfileImage(UUID userId, MultipartFile image);
 
     void save(User user);
-
-    boolean existsByEmail(String phoneNumber);
-
-    boolean existsByPhoneNumber(String phoneNumber);
-
-    List<UserListDto> getUsersForList();
 }

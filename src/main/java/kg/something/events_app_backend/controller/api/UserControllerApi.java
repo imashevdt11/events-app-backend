@@ -1,7 +1,6 @@
 package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
@@ -50,34 +49,25 @@ public class UserControllerApi {
     }
 
     @Operation(summary = "Получение списка всех пользователей")
-    @GetMapping("/admin")
+    @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(service.getAllUsers());
     }
 
     @Operation(summary = "Получение информации о пользователе по ID")
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserPersonalInfo(@PathVariable("id") UUID id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") UUID id) {
         return new ResponseEntity<>(service.getUserById(id), HttpStatus.OK);
     }
 
     @Operation(summary = "Изменение данных пользователя")
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUserPersonalInfo(@PathVariable("id") UUID id,
+    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") UUID id,
                                                                @RequestBody @Valid UserUpdateRequest request) {
         return new ResponseEntity<>(service.updateUser(id, request), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Установка новой фотографии профиля пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Profile image has been uploaded"),
-                    @ApiResponse(responseCode = "400", description = "Current request is not a multipart request"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Invalid authorization type"),
-                    @ApiResponse(responseCode = "500", description = "Internal Server Error")
-            }
-    )
+    @Operation(summary = "Установка новой фотографии профиля пользователя")
     @PostMapping("/upload-profile-image/{userId}")
     public ResponseEntity<?> uploadProfileImage(@PathVariable("userId") UUID userId,
                                                 @RequestParam("image") MultipartFile image) {
