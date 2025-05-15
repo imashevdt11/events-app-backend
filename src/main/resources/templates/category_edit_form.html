@@ -85,7 +85,10 @@
     <input type="hidden" name="id" th:value="${category.id}">
     <label>Название:</label>
     <label>
-        <input type="text" name="name" th:value="${category.name}" required>
+        <input type="text" name="name" th:value="${category.name()}"
+               pattern="^([а-яА-ЯёЁ]+( [а-яА-ЯёЁ]+)*|[a-zA-Z]+( [a-zA-Z]+)*)$"
+               minlength="2" maxlength="20"
+               title="Название должно содержать от 2 до 20 букв кириллицы или латиницы без смешивания. Допустимы пробелы между словами">
     </label>
     <button type="submit">Сохранить</button>
 </form>

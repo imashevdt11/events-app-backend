@@ -50,7 +50,7 @@ public class CategoryControllerApi {
         return new ResponseEntity<>(service.getCategoryById(id), HttpStatus.OK);
     }
 
-    @Operation(summary = "Изменение информации о категории")
+    @Operation(summary = "Изменение названия категории")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@Valid @RequestBody CategoryDto category,
                                                  @PathVariable UUID id) {

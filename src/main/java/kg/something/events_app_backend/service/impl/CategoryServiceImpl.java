@@ -1,12 +1,12 @@
 package kg.something.events_app_backend.service.impl;
 
+import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.CategoryListDto;
 import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.response.CategoryDetailedResponse;
 import kg.something.events_app_backend.dto.response.CategoryResponse;
 import kg.something.events_app_backend.entity.Category;
 import kg.something.events_app_backend.entity.User;
-import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.CategoryMapper;
@@ -22,32 +22,32 @@ import java.util.UUID;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
+    private final CategoryMapper categoryMapper;
     private final CategoryRepository repository;
     private final UserService userService;
-    private final CategoryMapper categoryMapper;
 
-    public CategoryServiceImpl(CategoryRepository repository, UserService userService, CategoryMapper categoryMapper) {
+    public CategoryServiceImpl(CategoryMapper categoryMapper, CategoryRepository repository, UserService userService) {
+        this.categoryMapper = categoryMapper;
         this.repository = repository;
         this.userService = userService;
-        this.categoryMapper = categoryMapper;
-    }
-
-    public String createCategory(CategoryDto category) {
-        User user = userService.getAuthenticatedUser();
-        if (repository.existsByName(category.name())) {
-            throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.name()));
-        }
-        repository.save(new Category(category.name(), user));
-
-        return "Категория создана";
     }
 
     @Override
+    public String createCategory(CategoryDto category) {
+        User user = userService.getAuthenticatedUser();
+        if (repository.existsByNameIgnoreCase(category.name())) {
+            throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.name()));
+        }
+        repository.save(new Category(category.name().toUpperCase(), user));
+
+        return "Категория '%s' создана".formatted(category.name());
+    }
+
+    @Override
+    @Transactional
     public String deleteCategory(UUID id) {
         Category category = findCategoryById(id);
-        if (repository.countEventsByCategory(category.getId()) > 0) {
-            throw new InvalidRequestException("Категория не может быть удаленна поскольку привязана к мероприятиям");
-        }
+        repository.deleteConnectionsBetweenEventAndCategory(id);
         repository.delete(category);
 
         return "Категория удалена";
@@ -58,21 +58,25 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Категория с id '%s' не найдена в базе данных".formatted(id)));
     }
 
+    @Override
     public Category findCategoryByName(String name) {
         return Optional.ofNullable(repository.findCategoryByName(name))
                 .orElseThrow(() -> new ResourceNotFoundException("Категория с названием '%s' не найдена в базе данных".formatted(name)));
     }
 
+    @Override
     public List<CategoryResponse> getAllCategories() {
         return repository.findAll().stream()
                 .map(categoryMapper::toCategoryResponse)
                 .toList();
     }
 
+    @Override
     public Integer getAmountOfEventsByCategory(UUID categoryId) {
         return repository.countEventsByCategory(categoryId);
     }
 
+    @Override
     public List<CategoryListDto> getCategoriesForList() {
         return repository.findAll().stream()
                 .map(category ->
@@ -87,19 +91,21 @@ public class CategoryServiceImpl implements CategoryService {
                 .toList();
     }
 
+    @Override
     public CategoryDetailedResponse getCategoryById(UUID id) {
         Category category = findCategoryById(id);
         return categoryMapper.toCategoryDetailedResponse(category);
     }
 
+    @Override
     public String updateCategory(CategoryDto categoryDto, UUID id) {
         Category category = findCategoryById(id);
         String oldCategoryName = category.getName();
         if (category.getName().equals(categoryDto.name())) {
             return "Категория не изменена. Данные из запроса и записи в базе данных идентичны";
         }
-        if (repository.existsByName(categoryDto.name())) {
-            throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.getName()));
+        if (repository.existsByNameIgnoreCase(categoryDto.name())) {
+            throw new ResourceAlreadyExistsException("Категория с названием '%s' уже есть в базе данных".formatted(category.getName().toUpperCase()));
         }
         category.setName(categoryDto.name());
         repository.save(category);

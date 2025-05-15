@@ -2,6 +2,7 @@ package kg.something.events_app_backend.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -36,6 +37,7 @@ public class WebSecurityConfig {
                     return configuration;
                 }))
                 .authorizeHttpRequests(req -> req
+                        .requestMatchers(HttpMethod.POST, "/api/categories").authenticated()
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()

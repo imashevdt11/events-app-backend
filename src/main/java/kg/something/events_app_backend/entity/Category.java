@@ -13,6 +13,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,11 @@ public class Category {
 
     @NotBlank
     @Column(name = "name")
-    @Size(min = 2, max = 30)
+    @Size(min = 2, max = 20)
+    @Pattern(
+            regexp = "^([а-яА-ЯёЁ]+( [а-яА-ЯёЁ]+)*|[a-zA-Z]+( [a-zA-Z]+)*)$",
+            message = "Название должно содержать от 2 до 20 букв кириллицы или латиницы без смешивания. Допустимы пробелы между словами"
+    )
     private String name;
 
     @NotNull

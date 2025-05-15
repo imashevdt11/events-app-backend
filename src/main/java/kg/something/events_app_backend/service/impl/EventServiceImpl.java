@@ -54,18 +54,18 @@ import java.util.UUID;
 @Service
 public class EventServiceImpl implements EventService {
 
+    private final EventMapper eventMapper;
+    private final ObjectMapper objectMapper;
     private final EventRepository repository;
     private final CategoryService categoryService;
     private final CloudinaryService cloudinaryService;
-    private final EventMapper eventMapper;
-    private final ObjectMapper objectMapper;
+    private final CommentService commentService;
+    private final GradeService gradeService;
+    private final PaymentService paymentService;
+    private final SavedEventService savedEventService;
+    private final TicketService ticketService;
     private final UserService userService;
     private final Validator validator;
-    private final GradeService gradeService;
-    private final CommentService commentService;
-    private final TicketService ticketService;
-    private final SavedEventService savedEventService;
-    private final PaymentService paymentService;
 
     public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, TicketService ticketService, SavedEventService savedEventService, PaymentService paymentService) {
         this.categoryService = categoryService;
@@ -118,8 +118,13 @@ public class EventServiceImpl implements EventService {
         Boolean isDisliked = null;
         if (userService.isAuthenticated()) {
             Grade grade = gradeService.findGradeByEventAndUser(event, userService.getAuthenticatedUser());
-            isLiked = grade.getName().equals(EventGrade.LIKE);
-            isDisliked = grade.getName().equals(EventGrade.DISLIKE);
+            if (grade == null) {
+                isLiked = false;
+                isDisliked = false;
+            } else {
+                isLiked = grade.getName().equals(EventGrade.LIKE);
+                isDisliked = !isLiked;
+            }
         }
         return eventMapper.toEventResponse(event, isLiked, isDisliked);
     }
