@@ -204,7 +204,7 @@ public class EventServiceImpl implements EventService {
             throw new InvalidRequestException("Пользователь не может удалять не своё мероприятие");
         }
         if (!Objects.equals(event.getAmountOfAvailablePlaces(), event.getAmountOfPlaces())) {
-            throw new InvalidRequestException("Пользователь не может удалить мероприятие, на которое забронированы билеты");
+            throw new InvalidRequestException("Пользователь не может удалить мероприятие, на которое уже забронированы билеты");
         }
         repository.delete(event);
 
@@ -460,9 +460,6 @@ public class EventServiceImpl implements EventService {
         Set<Category> categories = new HashSet<>();
         for (String categoryName: request.categories()) {
             Category category = categoryService.findCategoryByName(categoryName);
-            if (category == null) {
-                throw new ResourceNotFoundException("Категория с названием '%s' не найдена в базе данных");
-            }
             categories.add(category);
         }
         event.setTitle(request.title());

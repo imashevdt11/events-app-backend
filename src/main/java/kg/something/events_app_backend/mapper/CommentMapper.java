@@ -15,6 +15,7 @@ public class CommentMapper {
                 image == null ? null : image.getUrl(),
                 comment.getUser().getFirstName(),
                 comment.getUser().getLastName(),
+                comment.getId(),
                 comment.getComment(),
                 comment.getCreatedAt()
         );

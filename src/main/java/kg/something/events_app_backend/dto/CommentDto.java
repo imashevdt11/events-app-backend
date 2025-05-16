@@ -8,6 +8,7 @@ public record CommentDto(
         String authorImage,
         String authorFirstName,
         String authorLastName,
+        UUID commentId,
         String comment,
         LocalDateTime commentDate
 ) {}
