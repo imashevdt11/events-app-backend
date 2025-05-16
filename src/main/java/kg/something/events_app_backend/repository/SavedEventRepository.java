@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SavedEventRepository extends JpaRepository<SavedEvent, UUID> {
+
     SavedEvent findSavedEventByEventAndUser(Event event, User user);
 
     List<SavedEvent> findSavedEventsByUser(User user);

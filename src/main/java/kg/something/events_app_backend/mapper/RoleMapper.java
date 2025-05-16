@@ -14,15 +14,6 @@ public class RoleMapper {
         this.permissionMapper = permissionMapper;
     }
 
-    public RoleResponse toRoleResponse(Role role) {
-        return new RoleResponse(
-                role.getId(),
-                role.getName(),
-                role.getUser() == null ? "-" : "%s %s"
-                        .formatted(role.getUser().getFirstName(), role.getUser().getLastName())
-        );
-    }
-
     public RoleDetailedResponse toRoleDetailedResponse(Role role) {
         return new RoleDetailedResponse(
                 role.getId(),
@@ -34,6 +25,15 @@ public class RoleMapper {
                 role.getPermissions().stream()
                         .map(permissionMapper::toPermissionResponse)
                         .toList()
+        );
+    }
+
+    public RoleResponse toRoleResponse(Role role) {
+        return new RoleResponse(
+                role.getId(),
+                role.getName(),
+                role.getUser() == null ? "-" : "%s %s"
+                        .formatted(role.getUser().getFirstName(), role.getUser().getLastName())
         );
     }
 }

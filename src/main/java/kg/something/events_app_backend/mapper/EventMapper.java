@@ -42,6 +42,20 @@ public class EventMapper {
                 categories
         );
     }
+
+    public EventListDto toEventListDto(Event event) {
+        return new EventListDto(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getPrice(),
+                event.getPriceCurrency(),
+                event.getAmountOfAvailablePlaces(),
+                event.getAmountOfPlaces() - event.getAmountOfAvailablePlaces(),
+                event.getImage().getUrl()
+        );
+    }
+
     public EventResponse toEventResponse(Event event, Boolean isLiked, Boolean isDisliked) {
         Set<CategoryDto> categories = event.getCategories().stream()
                 .map(c -> new CategoryDto(c.getName()))
@@ -68,19 +82,6 @@ public class EventMapper {
                 gradeService.getEventAmountOfDislikes(event),
                 isLiked,
                 isDisliked
-        );
-    }
-
-    public EventListDto toEventListDto(Event event) {
-        return new EventListDto(
-                event.getId(),
-                event.getTitle(),
-                event.getDescription(),
-                event.getPrice(),
-                event.getPriceCurrency(),
-                event.getAmountOfAvailablePlaces(),
-                event.getAmountOfPlaces() - event.getAmountOfAvailablePlaces(),
-                event.getImage().getUrl()
         );
     }
 }

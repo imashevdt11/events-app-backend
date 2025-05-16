@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
-import kg.something.events_app_backend.dto.UserUpdateRequest;
+import kg.something.events_app_backend.dto.request.UserUpdateRequest;
 import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.http.HttpStatus;

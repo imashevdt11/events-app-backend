@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.UserListDto;
 import kg.something.events_app_backend.dto.UserOrganizerDto;
 import kg.something.events_app_backend.dto.UserSubscriberDto;
-import kg.something.events_app_backend.dto.UserUpdateRequest;
+import kg.something.events_app_backend.dto.request.UserUpdateRequest;
 import kg.something.events_app_backend.dto.response.UserResponse;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.Role;

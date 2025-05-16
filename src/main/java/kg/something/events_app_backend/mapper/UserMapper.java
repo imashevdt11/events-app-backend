@@ -19,18 +19,6 @@ public class UserMapper {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserResponse toUserResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhoneNumber(),
-                user.getDateOfBirth(),
-                user.getEmail(),
-                user.getImage() == null ? null : user.getImage().getUrl()
-        );
-    }
-
     public User toEntityFromRegistrationRequest(UserRegistrationRequest request, Role role) {
         return new User(
                 request.firstName(),
@@ -51,6 +39,18 @@ public class UserMapper {
                 subscription.getOrganizer().getLastName(),
                 subscription.getOrganizer().getImage() == null ? null : subscription.getOrganizer().getImage().getUrl(),
                 subscription.getCreatedAt()
+        );
+    }
+
+    public UserResponse toUserResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber(),
+                user.getDateOfBirth(),
+                user.getEmail(),
+                user.getImage() == null ? null : user.getImage().getUrl()
         );
     }
 

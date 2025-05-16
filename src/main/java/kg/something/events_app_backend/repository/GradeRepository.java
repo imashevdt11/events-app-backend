@@ -12,9 +12,10 @@ import java.util.UUID;
 
 @Repository
 public interface GradeRepository extends JpaRepository<Grade, UUID> {
-    Grade findByEventAndUser(Event event, User user);
 
     Integer countGradesByEventAndName(Event event, EventGrade name);
+
+    Grade findByEventAndUser(Event event, User user);
 
     List<Grade> findGradesByUserAndName(User user, EventGrade name);
 }

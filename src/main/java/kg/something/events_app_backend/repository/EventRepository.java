@@ -22,6 +22,9 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     List<Event> findEventsByCategories(Set<Category> categories);
 
+    @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventComments WHERE e.organizerUser = :organizerUser")
+    List<Event> findEventsByOrganizerUser(User organizerUser);
+
     @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventComments WHERE e.createdAt BETWEEN :startDate AND :endDate")
     List<Event> findEventsCreatedBetweenDates(@Param("startDate") LocalDateTime startDate,
                                               @Param("endDate") LocalDateTime endDate);
@@ -30,8 +33,21 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     List<Event> findEventsWhichStartBetweenDates(@Param("startDate") LocalDateTime startDate,
                                                  @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventComments WHERE e.organizerUser = :organizerUser")
-    List<Event> findEventsByOrganizerUser(User organizerUser);
+    @Query("""
+    SELECT new kg.something.events_app_backend.dto.SalesByParticipantDto(
+        u.firstName,
+        u.lastName,
+        COUNT(t.id),
+        SUM(e.price)
+    )
+    FROM Ticket t
+    JOIN t.user u
+    JOIN t.event e
+    WHERE e.organizerUser.id = :organizerId
+    GROUP BY u.id, u.firstName, u.lastName
+    ORDER BY COUNT(t.id) DESC
+    """)
+    List<SalesByParticipantDto> findParticipantStatsByOrganizer(@Param("organizerId") UUID organizerId);
 
     @Query("""
     SELECT new kg.something.events_app_backend.dto.SalesByEventDto(
@@ -50,20 +66,4 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     GROUP BY e.id, e.title, e.amountOfPlaces, e.price
     """)
     List<SalesByEventDto> findSalesByEventForOrganizer(@Param("organizerId") UUID organizerId);
-
-    @Query("""
-    SELECT new kg.something.events_app_backend.dto.SalesByParticipantDto(
-        u.firstName,
-        u.lastName,
-        COUNT(t.id),
-        SUM(e.price)
-    )
-    FROM Ticket t
-    JOIN t.user u
-    JOIN t.event e
-    WHERE e.organizerUser.id = :organizerId
-    GROUP BY u.id, u.firstName, u.lastName
-    ORDER BY COUNT(t.id) DESC
-    """)
-    List<SalesByParticipantDto> findParticipantStatsByOrganizer(@Param("organizerId") UUID organizerId);
 }

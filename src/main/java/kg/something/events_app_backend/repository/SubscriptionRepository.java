@@ -10,9 +10,10 @@ import java.util.UUID;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
-    Subscription findSubscribeByOrganizerAndSubscriber(User organizer, User subscriber);
+
+    List<Subscription> findAllByOrganizer(User organizer);
 
     List<Subscription> findAllBySubscriber(User subscriber);
 
-    List<Subscription> findAllByOrganizer(User organizer);
+    Subscription findSubscribeByOrganizerAndSubscriber(User organizer, User subscriber);
 }

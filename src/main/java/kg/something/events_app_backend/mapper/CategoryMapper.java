@@ -8,15 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CategoryMapper {
 
-    public CategoryResponse toCategoryResponse(Category category) {
-        return new CategoryResponse(
-                category.getId(),
-                category.getName(),
-                category.getUser() == null ? "-" : "%s %s"
-                        .formatted(category.getUser().getFirstName(), category.getUser().getLastName())
-        );
-    }
-
     public CategoryDetailedResponse toCategoryDetailedResponse(Category category) {
         return new CategoryDetailedResponse(
                 category.getId(),
@@ -25,6 +16,15 @@ public class CategoryMapper {
                         .formatted(category.getUser().getFirstName(), category.getUser().getLastName()),
                 category.getCreatedAt(),
                 category.getUpdatedAt()
+        );
+    }
+
+    public CategoryResponse toCategoryResponse(Category category) {
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getUser() == null ? "-" : "%s %s"
+                        .formatted(category.getUser().getFirstName(), category.getUser().getLastName())
         );
     }
 }

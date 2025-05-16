@@ -8,15 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class PermissionMapper {
 
-    public PermissionResponse toPermissionResponse(Permission permission) {
-        return new PermissionResponse(
-                permission.getId(),
-                permission.getName(),
-                permission.getUser() == null ? "-" : "%s %s"
-                        .formatted(permission.getUser().getFirstName(), permission.getUser().getLastName())
-        );
-    }
-
     public PermissionDetailedResponse toPermissionDetailedResponse(Permission permission) {
         return new PermissionDetailedResponse(
                 permission.getId(),
@@ -25,6 +16,15 @@ public class PermissionMapper {
                         .formatted(permission.getUser().getFirstName(), permission.getUser().getLastName()),
                 permission.getCreatedAt(),
                 permission.getUpdatedAt()
+        );
+    }
+
+    public PermissionResponse toPermissionResponse(Permission permission) {
+        return new PermissionResponse(
+                permission.getId(),
+                permission.getName(),
+                permission.getUser() == null ? "-" : "%s %s"
+                        .formatted(permission.getUser().getFirstName(), permission.getUser().getLastName())
         );
     }
 }

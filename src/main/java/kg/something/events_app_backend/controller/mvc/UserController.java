@@ -2,7 +2,7 @@ package kg.something.events_app_backend.controller.mvc;
 
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.UserListDto;
-import kg.something.events_app_backend.dto.UserUpdateRequest;
+import kg.something.events_app_backend.dto.request.UserUpdateRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
 import kg.something.events_app_backend.dto.response.RoleResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;

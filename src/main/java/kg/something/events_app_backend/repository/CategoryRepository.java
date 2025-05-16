@@ -10,12 +10,6 @@ import java.util.UUID;
 
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
-    boolean existsByNameIgnoreCase(String name);
-
-    Category findCategoryById(UUID id);
-
-    Category findCategoryByName(String name);
-
     @Query(value = """
     SELECT COUNT(*)
     FROM events_categories
@@ -29,4 +23,10 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     WHERE category_id = :categoryId
     """, nativeQuery = true)
     void deleteConnectionsBetweenEventAndCategory(@Param("categoryId") UUID categoryId);
+
+    boolean existsByNameIgnoreCase(String name);
+
+    Category findCategoryById(UUID id);
+
+    Category findCategoryByName(String name);
 }
