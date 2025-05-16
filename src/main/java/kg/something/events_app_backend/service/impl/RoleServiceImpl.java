@@ -39,6 +39,7 @@ public class RoleServiceImpl implements RoleService {
         this.roleMapper = roleMapper;
     }
 
+    @Override
     @Transactional
     public String createRole(RoleDto role) {
         User user = userService.getAuthenticatedUser();
@@ -51,6 +52,7 @@ public class RoleServiceImpl implements RoleService {
         return "Роль создана";
     }
 
+    @Override
     public String deleteRole(UUID id) {
         Role role = findRoleById(id);
         if (!userService.findUsersByRoleId(role.getId()).isEmpty()) {
@@ -67,26 +69,31 @@ public class RoleServiceImpl implements RoleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Роль c id '%s' не найдена в базе данных".formatted(id)));
     }
 
+    @Override
     public Role findRoleByName(String name) {
         return Optional.ofNullable(repository.findRoleByName(name))
                 .orElseThrow(() -> new ResourceNotFoundException("Роль '%s' не найдена в базе данных".formatted(name)));
     }
 
+    @Override
     public List<RoleResponse> getAllRoles() {
         return repository.findAll().stream()
                 .map(roleMapper::toRoleResponse)
                 .toList();
     }
 
+    @Override
     public Integer getAmountOfUsersByRole(UUID roleId) {
         return repository.countUsersByRole(roleId);
     }
 
+    @Override
     public RoleDetailedResponse getRoleById(UUID id) {
         Role role = findRoleById(id);
         return roleMapper.toRoleDetailedResponse(role);
     }
 
+    @Override
     public List<RoleListDto> getRolesForList() {
         return repository.findAll().stream()
                 .map(role ->
@@ -101,6 +108,7 @@ public class RoleServiceImpl implements RoleService {
                 .toList();
     }
 
+    @Override
     public String updateRole(RoleDto roleDto, UUID id) {
         Role role = findRoleById(id);
         if (repository.existsByName(roleDto.getName()) && !roleDto.getName().equals(role.getName())) {

@@ -1,8 +1,6 @@
 package kg.something.events_app_backend.controller.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByEventDto;
@@ -41,18 +39,44 @@ public class EventControllerApi {
         this.eventService = eventService;
     }
 
+    @Operation(summary = "Оставить комментарий к мероприятию")
+    @PostMapping("/comment/{id}")
+    public ResponseEntity<String> addComment(@PathVariable("id") UUID eventId,
+                                             @RequestParam("comment") String comment) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.addComment(eventId, comment));
+    }
+
+    @Operation(summary = "Установка новой фотографии для мероприятия")
+    @PostMapping("/change-image/{eventId}")
+    public ResponseEntity<?> changeEventImage(@PathVariable("eventId") UUID eventId,
+                                              @RequestParam("image") MultipartFile image) {
+        return ResponseEntity.ok(eventService.changeEventImage(eventId, image));
+    }
+
     @Operation(summary = "Создание мероприятия")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Event has been created"),
-            @ApiResponse(responseCode = "400", description = "Required parameter(s) is not present"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Invalid authorization type"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
     @PostMapping
     public ResponseEntity<EventResponse> createEvent(@RequestPart("event") String event,
                                                      @RequestPart("image") MultipartFile image) throws InvalidRequestException {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event, image));
+    }
+
+    @Operation(summary = "Купить билет")
+    @PostMapping("/buy-ticket/{eventId}")
+    public ResponseEntity<String> butTicket(@PathVariable("eventId") UUID eventId,
+                                            @RequestBody PaymentRequest paymentRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.buyTickets(eventId, paymentRequest));
+    }
+
+    @Operation(summary = "Поставить дизлайк мероприятию")
+    @PostMapping("/dislike/{id}")
+    public ResponseEntity<String> dislikeEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.DISLIKE));
+    }
+
+    @Operation(summary = "Поставить лайк мероприятию")
+    @PostMapping("/like/{id}")
+    public ResponseEntity<String> likeEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.LIKE));
     }
 
     @Operation(summary = "Получение списка всех мероприятий")
@@ -61,28 +85,22 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());
     }
 
-    @Operation(summary = "Получение списка мероприятий по категории")
-    @GetMapping("/category")
-    public ResponseEntity<List<EventListDto>> getEventsByCategory(@RequestParam("category") String category) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
-    }
-
-    @Operation(summary = "Получение мероприятий из списка 'Сохраненные'")
-    @GetMapping("/saved")
-    public ResponseEntity<List<EventListDto>> getSavedEvents() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getSavedEvents());
-    }
-
-    @Operation(summary = "Получение мероприятий, которым был поставлен 'LIKE'")
-    @GetMapping("/liked")
-    public ResponseEntity<List<EventListDto>> getLikedEvents() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getLikedEvents());
-    }
-
     @Operation(summary = "Получение мероприятий, которым был поставлен 'DISLIKE'")
     @GetMapping("/disliked")
     public ResponseEntity<List<EventListDto>> getDislikedEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getDislikedEvents());
+    }
+
+    @Operation(summary = "Получение информации о мероприятии по ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEventById(@PathVariable("id") UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventById(id));
+    }
+
+    @Operation(summary = "Получение списка мероприятий по категории")
+    @GetMapping("/category")
+    public ResponseEntity<List<EventListDto>> getEventsByCategory(@RequestParam("category") String category) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
     }
 
     @Operation(summary = "Получение списка мероприятий, созданных в указанные период")
@@ -99,73 +117,16 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByStartTimePeriod(startDate, endDate));
     }
 
-    @Operation(summary = "Получение информации о мероприятии по ID")
-    @GetMapping("/{id}")
-    public ResponseEntity<EventResponse> getEventById(@PathVariable("id") UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventById(id));
-    }
-
-    @Operation(summary = "Поставить лайк мероприятию")
-    @PostMapping("/like/{id}")
-    public ResponseEntity<String> likeEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.LIKE));
-    }
-
-    @Operation(summary = "Убрать, поставленный мероприятию лайк")
-    @DeleteMapping("/remove-like/{id}")
-    public ResponseEntity<String> removeLikeFromEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.LIKE));
-    }
-
-    @Operation(summary = "Поставить дизлайк мероприятию")
-    @PostMapping("/dislike/{id}")
-    public ResponseEntity<String> dislikeEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.DISLIKE));
-    }
-
-    @Operation(summary = "Убрать, поставленный мероприятию дизлайк")
-    @DeleteMapping("/remove-dislike/{id}")
-    public ResponseEntity<String> removeDislikeFromEvent(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
-    }
-
-    @Operation(summary = "Оставить комментарий к мероприятию")
-    @PostMapping("/comment/{id}")
-    public ResponseEntity<String> addComment(@PathVariable("id") UUID eventId,
-                                             @RequestParam("comment") String comment) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.addComment(eventId, comment));
-    }
-
-    @Operation(summary = "Удалить комментарий, оставленный к мероприятию")
-    @DeleteMapping("/remove-comment/{id}")
-    public ResponseEntity<String> removeComment(@PathVariable("id") UUID eventId,
-                                                @RequestParam("commentId") UUID commentId) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeComment(eventId, commentId));
-    }
-
-    @Operation(summary = "Купить билет")
-    @PostMapping("/buy-ticket/{eventId}")
-    public ResponseEntity<String> bookPlace(@PathVariable("eventId") UUID eventId,
-                                            @RequestBody PaymentRequest paymentRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.buyTickets(eventId, paymentRequest));
-    }
-
     @Operation(summary = "Получение списка мероприятий, созданных указанным пользователем")
     @GetMapping("/created-by/{userId}")
     public ResponseEntity<List<EventListDto>> getEventsByUser(@PathVariable("userId") UUID userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUser(userId));
     }
 
-    @Operation(summary = "Добавить мероприятие в 'Сохраненные'")
-    @PostMapping("/save-as-bookmark/{id}")
-    public ResponseEntity<String> saveEventAsBookmark(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveEventAsBookmark(eventId));
-    }
-
-    @Operation(summary = "Удалить мероприятие из 'Сохраненных'")
-    @DeleteMapping("/remove-as-bookmark/{id}")
-    public ResponseEntity<String> removeEventAsBookmark(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeEventAsBookmark(eventId));
+    @Operation(summary = "Получение мероприятий, которым был поставлен 'LIKE'")
+    @GetMapping("/liked")
+    public ResponseEntity<List<EventListDto>> getLikedEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getLikedEvents());
     }
 
     @Operation(summary = "Статистика по продажам билетов на мероприятия, созданные аутентифицированным пользователем")
@@ -178,6 +139,18 @@ public class EventControllerApi {
     @GetMapping("/stats/sales-by-participants")
     public ResponseEntity<List<SalesByParticipantDto>> getSalesStatisticsByParticipants() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getSalesStatisticsByParticipants());
+    }
+
+    @Operation(summary = "Получение мероприятий из списка 'Сохраненные'")
+    @GetMapping("/saved")
+    public ResponseEntity<List<EventListDto>> getSavedEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getSavedEvents());
+    }
+
+    @Operation(summary = "Добавить мероприятие в 'Сохраненные'")
+    @PostMapping("/save-as-bookmark/{id}")
+    public ResponseEntity<String> saveEventAsBookmark(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveEventAsBookmark(eventId));
     }
 
     @Operation(summary = "Обновление информации о мероприятии")
@@ -193,10 +166,28 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.deleteEvent(eventId));
     }
 
-    @Operation(summary = "Установка новой фотографии для мероприятия")
-    @PostMapping("/change-image/{eventId}")
-    public ResponseEntity<?> changeEventImage(@PathVariable("eventId") UUID eventId,
-                                              @RequestParam("image") MultipartFile image) {
-        return ResponseEntity.ok(eventService.changeEventImage(eventId, image));
+    @Operation(summary = "Удалить комментарий, оставленный к мероприятию")
+    @DeleteMapping("/remove-comment/{id}")
+    public ResponseEntity<String> removeComment(@PathVariable("id") UUID eventId,
+                                                @RequestParam("commentId") UUID commentId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeComment(eventId, commentId));
+    }
+
+    @Operation(summary = "Убрать, поставленный мероприятию дизлайк")
+    @DeleteMapping("/remove-dislike/{id}")
+    public ResponseEntity<String> removeDislikeFromEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.DISLIKE));
+    }
+
+    @Operation(summary = "Удалить мероприятие из 'Сохраненных'")
+    @DeleteMapping("/remove-as-bookmark/{id}")
+    public ResponseEntity<String> removeEventAsBookmark(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeEventAsBookmark(eventId));
+    }
+
+    @Operation(summary = "Убрать, поставленный мероприятию лайк")
+    @DeleteMapping("/remove-like/{id}")
+    public ResponseEntity<String> removeLikeFromEvent(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.removeRate(eventId, EventGrade.LIKE));
     }
 }

@@ -19,27 +19,33 @@ public class GradeServiceImpl implements GradeService {
         this.repository = repository;
     }
 
-    public Grade findGradeByEventAndUser(Event event, User user) {
-        return repository.findByEventAndUser(event, user);
-    }
-
-    public List<Grade> findGradesByUserAndName(User user, EventGrade eventGrade) {
-        return repository.findGradesByUserAndName(user, eventGrade);
-    }
-
-    public void save(Grade grade) {
-        repository.save(grade);
-    }
-
+    @Override
     public void delete(Grade grade) {
         repository.delete(grade);
     }
 
+    @Override
+    public Grade findGradeByEventAndUser(Event event, User user) {
+        return repository.findByEventAndUser(event, user);
+    }
+
+    @Override
+    public List<Grade> findGradesByUserAndName(User user, EventGrade eventGrade) {
+        return repository.findGradesByUserAndName(user, eventGrade);
+    }
+
+    @Override
+    public Integer getEventAmountOfDislikes(Event event) {
+        return repository.countGradesByEventAndName(event, EventGrade.DISLIKE);
+    }
+
+    @Override
     public Integer getEventAmountOfLikes(Event event) {
         return repository.countGradesByEventAndName(event, EventGrade.LIKE);
     }
 
-    public Integer getEventAmountOfDislikes(Event event) {
-        return repository.countGradesByEventAndName(event, EventGrade.DISLIKE);
+    @Override
+    public void save(Grade grade) {
+        repository.save(grade);
     }
 }

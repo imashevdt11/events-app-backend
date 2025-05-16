@@ -5,9 +5,11 @@ import kg.something.events_app_backend.entity.Comment;
 import java.util.UUID;
 
 public interface CommentService {
+
+    void delete(Comment comment);
+
     Comment findCommentById(UUID id);
 
     void save(Comment comment);
 
-    void delete(Comment comment);
 }

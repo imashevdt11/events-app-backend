@@ -23,11 +23,11 @@ public interface UserService {
 
     List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId);
 
-    List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId);
-
     User findUserById(UUID id);
 
     User findUserByEmail(String email);
+
+    List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId);
 
     List<User> findUsersByRoleId(UUID roleId);
 

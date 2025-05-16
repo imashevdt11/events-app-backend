@@ -14,6 +14,7 @@ public class TicketServiceImpl implements TicketService {
         this.repository = repository;
     }
 
+    @Override
     public void save(Ticket ticket) {
         repository.save(ticket);
     }

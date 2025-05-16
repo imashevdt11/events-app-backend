@@ -82,6 +82,95 @@ public class EventServiceImpl implements EventService {
         this.paymentService = paymentService;
     }
 
+    @Override
+    @Transactional
+    public String addComment(UUID eventId, String commentText) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+        commentService.save(new Comment(commentText, event, user));
+
+        return "Пользователь '%s %s' оставил комментарий к мероприятию '%s'"
+                .formatted(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        event.getTitle()
+                );
+    }
+
+    @Transactional
+    public String buyTickets(UUID eventId, PaymentRequest paymentRequest) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (event.getAmountOfAvailablePlaces() < paymentRequest.amountOfTickets()) {
+            throw new InvalidRequestException("Количество запрошенных билетов превышает доступное. Доступное количество мест на мероприятие: %s".formatted(event.getAmountOfAvailablePlaces()));
+        }
+        if (paymentRequest.amountOfTickets() > 5) {
+            throw new InvalidRequestException("Нельзя покупать более 5 билетов за раз.");
+        }
+        if (event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Организатор не может бронировать места на свои же мероприятия");
+        }
+        if (event.getPrice().intValue() > 0) {
+            if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) > paymentRequest.amountOfMoney()) {
+                throw new InvalidRequestException("Переданной суммы денег недостаточно для покупки билетов");
+            } else if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) < paymentRequest.amountOfMoney()) {
+                throw new InvalidRequestException("Переданная сумма выше необходимой для оплаты билетов");
+            }
+            paymentService.payForTickets(new PaymentServiceRequest(
+                    paymentRequest.cardNumber(),
+                    paymentRequest.cardHolder(),
+                    paymentRequest.expiryDate(),
+                    paymentRequest.cvv(),
+                    paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
+            ));
+        }
+        for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
+            ticketService.save(new Ticket(event, user));
+        }
+        event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
+        return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"
+                .formatted(
+                        paymentRequest.amountOfTickets(),
+                        event.getTitle(),
+                        user.getFirstName(),
+                        user.getLastName()
+                );
+    }
+
+    @Override
+    @Transactional
+    public String changeEventImage(UUID eventId, MultipartFile image) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (!event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Пользователь не может изменить фотографию мероприятия, созданного не ним");
+        }
+        String imageUrl;
+        try {
+            imageUrl = cloudinaryService.uploadImage(image);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (event.getImage() != null) {
+            if (!event.getImage().getUrl().isEmpty()) {
+                try {
+                    cloudinaryService.deleteImage(event.getImage().getUrl());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            event.getImage().setUrl(imageUrl);
+        } else {
+            event.setImage(new Image(imageUrl));
+        }
+        repository.save(event);
+
+        return "Изображение мероприятия изменено";
+    }
+
+    @Override
     @Transactional
     public EventResponse createEvent(String eventRequestString, MultipartFile image) {
         User authenticatedUser = userService.getAuthenticatedUser();
@@ -105,6 +194,41 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventResponse(event, null, null);
     }
 
+    @Override
+    @Transactional
+    public String deleteEvent(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (!event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Пользователь не может удалять не своё мероприятие");
+        }
+        if (!Objects.equals(event.getAmountOfAvailablePlaces(), event.getAmountOfPlaces())) {
+            throw new InvalidRequestException("Пользователь не может удалить мероприятие, на которое забронированы билеты");
+        }
+        repository.delete(event);
+
+        return "Мероприятие удалено";
+    }
+
+    @Override
+    public Event findEventById(UUID id) {
+        return Optional.ofNullable(repository.findEventById(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Мероприятие с id '%s' не найдено в базе данных".formatted(id)));
+    }
+
+    @Override
+    public List<EventListDto> getDislikedEvents() {
+        User user = userService.getAuthenticatedUser();
+        List<Grade> dislikedEvents = gradeService.findGradesByUserAndName(user, EventGrade.DISLIKE);
+
+        return dislikedEvents.stream()
+                .map(Grade::getEvent)
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
     public List<EventListDto> getAllEvents() {
         List<Event> events = repository.findAll();
         return events.stream()
@@ -112,6 +236,7 @@ public class EventServiceImpl implements EventService {
                 .toList();
     }
 
+    @Override
     public EventResponse getEventById(UUID id) {
         Event event = findEventById(id);
         Boolean isLiked = null;
@@ -127,6 +252,231 @@ public class EventServiceImpl implements EventService {
             }
         }
         return eventMapper.toEventResponse(event, isLiked, isDisliked);
+    }
+
+    @Override
+    public List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
+        List<Event> events = repository.findEventsCreatedBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventListDto> getEventsByCategory(String categoryName) {
+        Category category = categoryService.findCategoryByName(categoryName);
+        Set<Category> categories = new HashSet<>();
+        categories.add(category);
+
+        List<Event> events = repository.findEventsByCategories(categories);
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventListDto> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate) {
+        List<Event> events = repository.findEventsWhichStartBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventListDto> getEventsByUser(UUID userId) {
+        User user = userService.findUserById(userId);
+        return repository.findEventsByOrganizerUser(user)
+                .stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventListDto> getLikedEvents() {
+        User user = userService.getAuthenticatedUser();
+        List<Grade> likedEvents = gradeService.findGradesByUserAndName(user, EventGrade.LIKE);
+
+        return likedEvents.stream()
+                .map(Grade::getEvent)
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<SalesByEventDto> getSalesStatisticForEvents() {
+        User user = userService.getAuthenticatedUser();
+
+        if (user.getRole().getName().equals("ROLE_USER")) {
+            throw new InvalidRequestException("Статистика доступна только организаторам");
+        }
+        return repository.findSalesByEventForOrganizer(user.getId());
+    }
+
+    @Override
+    public List<SalesByParticipantDto> getSalesStatisticsByParticipants() {
+        User user = userService.getAuthenticatedUser();
+
+        if (user.getRole().getName().equals("ROLE_USER")) {
+            throw new InvalidRequestException("Статистика доступна только организаторам");
+        }
+        return repository.findParticipantStatsByOrganizer(user.getId());
+
+    }
+
+    @Override
+    public List<EventListDto> getSavedEvents() {
+        User user = userService.getAuthenticatedUser();
+        List<SavedEvent> savedEvents = savedEventService.findSavedEventsByUser(user);
+
+        return savedEvents.stream()
+                .map(SavedEvent::getEvent)
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public String rateEvent(UUID eventId, EventGrade rate) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        Grade grade = gradeService.findGradeByEventAndUser(event, user);
+        if (grade == null) {
+            gradeService.save(new Grade(rate, event, user));
+            return "Пользователь '%s %s' поставил '%s' мероприятию '%s'"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName(),
+                            rate.name(),
+                            event.getTitle()
+                    );
+        } else {
+            if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
+                throw new InvalidRequestException("Пользователь не может поставить лайк мероприятию, потому что поставил дизлайк");
+            } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
+                throw new InvalidRequestException("Пользователь не может поставить дизлайк мероприятию, потому что поставил лайк");
+            } else {
+                throw new InvalidRequestException("Пользователь уже поставил '%s' мероприятию".formatted(grade.getName()));
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public String removeComment(UUID eventId, UUID commentId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+        Comment comment = commentService.findCommentById(commentId);
+
+        if (user.getId().equals(comment.getUser().getId())) {
+            commentService.delete(comment);
+            return "Пользователь '%s %s' удалил комментарий к мероприятию '%s'"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName(),
+                            event.getTitle()
+                    );
+        } else {
+            throw new InvalidRequestException("Пользователь '%s %s' не является автором указанного мероприятия"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName()
+                    ));
+        }
+    }
+
+    @Override
+    public String removeEventAsBookmark(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
+        if (savedEvent == null) {
+            throw new ResourceNotFoundException("Указанное мероприятие не сохранялось пользователем");
+        } else {
+            savedEventService.delete(savedEvent);
+            return "Мероприятие удаленно из 'Избранного'";
+        }
+    }
+
+    @Override
+    @Transactional
+    public String removeRate(UUID eventId, EventGrade rate) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        Grade grade = gradeService.findGradeByEventAndUser(event, user);
+        if (grade == null) {
+            throw new InvalidRequestException("Аутентифицированный пользователь не ставил оценку данному мероприятию");
+        } else {
+            if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
+                throw new InvalidRequestException("Аутентифицированный пользователь не ставил лайк данному мероприятию");
+            } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
+                throw new InvalidRequestException("Аутентифицированный пользователь не ставил дизлайк данному мероприятию");
+            }
+            gradeService.delete(grade);
+            return "Оценка '%s' от пользователя '%s %s' удалена с мероприятия '%s'"
+                    .formatted(
+                            rate.name(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            event.getTitle()
+                    );
+        }
+    }
+
+    @Override
+    public String saveEventAsBookmark(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
+        if (savedEvent == null) {
+            savedEventService.save(new SavedEvent(event, user));
+            return "Пользователь '%s %s' добавил мероприятие '%s' в 'Сохраненные'"
+                    .formatted(
+                            user.getFirstName(),
+                            user.getLastName(),
+                            event.getTitle()
+                    );
+        } else {
+            throw new InvalidRequestException("Мероприятие уже находится в 'Сохраненных'");
+        }
+    }
+
+    @Override
+    @Transactional
+    public String updateEvent(UUID eventId, EventUpdateRequest request) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+        int amountOfSoldTickets = event.getAmountOfPlaces() - event.getAmountOfAvailablePlaces();
+
+        if (!event.getOrganizerUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("Пользователь не может менять информацию не своего мероприятия");
+        }
+        if (request.amountOfPlaces() < amountOfSoldTickets) {
+            throw new InvalidRequestException("Общее количество мест не может быть меньше количества проданных билетов");
+        }
+        Set<Category> categories = new HashSet<>();
+        for (String categoryName: request.categories()) {
+            Category category = categoryService.findCategoryByName(categoryName);
+            if (category == null) {
+                throw new ResourceNotFoundException("Категория с названием '%s' не найдена в базе данных");
+            }
+            categories.add(category);
+        }
+        event.setTitle(request.title());
+        event.setDescription(request.description());
+        event.setLocation(request.location());
+        event.setMinimumAge(request.minimumAge());
+        event.setStartTime(request.startTime());
+        event.setPrice(request.price());
+        event.setAmountOfPlaces(request.amountOfPlaces());
+        event.setAmountOfAvailablePlaces(request.amountOfPlaces() - amountOfSoldTickets);
+        event.setCategories(categories);
+        repository.save(event);
+
+        return "Изменения о мероприятии внесены";
     }
 
     private EventRequest parseAndValidateEvent(String eventRequestString) {
@@ -174,333 +524,5 @@ public class EventServiceImpl implements EventService {
         } catch (JsonProcessingException e) {
             throw new InvalidRequestException(e.getMessage());
         }
-    }
-
-    public Event findEventById(UUID id) {
-        return Optional.ofNullable(repository.findEventById(id))
-                .orElseThrow(() -> new ResourceNotFoundException("Мероприятие с id '%s' не найдено в базе данных".formatted(id)));
-    }
-
-    @Transactional
-    public String rateEvent(UUID eventId, EventGrade rate) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        Grade grade = gradeService.findGradeByEventAndUser(event, user);
-        if (grade == null) {
-            gradeService.save(new Grade(rate, event, user));
-            return "Пользователь '%s %s' поставил '%s' мероприятию '%s'"
-                    .formatted(
-                            user.getFirstName(),
-                            user.getLastName(),
-                            rate.name(),
-                            event.getTitle()
-                    );
-        } else {
-            if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
-                throw new InvalidRequestException("Пользователь не может поставить лайк мероприятию, потому что поставил дизлайк");
-            } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
-                throw new InvalidRequestException("Пользователь не может поставить дизлайк мероприятию, потому что поставил лайк");
-            } else {
-                throw new InvalidRequestException("Пользователь уже поставил '%s' мероприятию".formatted(grade.getName()));
-            }
-        }
-    }
-
-    @Transactional
-    public String removeRate(UUID eventId, EventGrade rate) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        Grade grade = gradeService.findGradeByEventAndUser(event, user);
-        if (grade == null) {
-            throw new InvalidRequestException("Аутентифицированный пользователь не ставил оценку данному мероприятию");
-        } else {
-            if (grade.getName().equals(EventGrade.DISLIKE) && rate.equals(EventGrade.LIKE)) {
-                throw new InvalidRequestException("Аутентифицированный пользователь не ставил лайк данному мероприятию");
-            } else if (grade.getName().equals(EventGrade.LIKE) && rate.equals(EventGrade.DISLIKE)) {
-                throw new InvalidRequestException("Аутентифицированный пользователь не ставил дизлайк данному мероприятию");
-            }
-            gradeService.delete(grade);
-            return "Оценка '%s' от пользователя '%s %s' удалена с мероприятия '%s'"
-                    .formatted(
-                            rate.name(),
-                            user.getFirstName(),
-                            user.getLastName(),
-                            event.getTitle()
-                    );
-        }
-    }
-
-    public List<EventListDto> getEventsByCategory(String categoryName) {
-        Category category = categoryService.findCategoryByName(categoryName);
-        Set<Category> categories = new HashSet<>();
-        categories.add(category);
-
-        List<Event> events = repository.findEventsByCategories(categories);
-        return events.stream()
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    public List<EventListDto> getSavedEvents() {
-        User user = userService.getAuthenticatedUser();
-        List<SavedEvent> savedEvents = savedEventService.findSavedEventsByUser(user);
-
-        return savedEvents.stream()
-                .map(SavedEvent::getEvent)
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    public List<EventListDto> getLikedEvents() {
-        User user = userService.getAuthenticatedUser();
-        List<Grade> likedEvents = gradeService.findGradesByUserAndName(user, EventGrade.LIKE);
-
-        return likedEvents.stream()
-                .map(Grade::getEvent)
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    public List<EventListDto> getDislikedEvents() {
-        User user = userService.getAuthenticatedUser();
-        List<Grade> dislikedEvents = gradeService.findGradesByUserAndName(user, EventGrade.DISLIKE);
-
-        return dislikedEvents.stream()
-                .map(Grade::getEvent)
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    public List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate) {
-        List<Event> events = repository.findEventsCreatedBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-        return events.stream()
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    public List<EventListDto> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate) {
-        List<Event> events = repository.findEventsWhichStartBetweenDates(startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
-        return events.stream()
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    @Transactional
-    public String addComment(UUID eventId, String commentText) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        commentService.save(new Comment(commentText, event, user));
-        return "Пользователь '%s %s' оставил комментарий к мероприятию '%s'"
-                .formatted(
-                        user.getFirstName(),
-                        user.getLastName(),
-                        event.getTitle()
-                );
-    }
-
-    @Transactional
-    public String removeComment(UUID eventId, UUID commentId) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-        Comment comment = commentService.findCommentById(commentId);
-
-        if (user.getId().equals(comment.getUser().getId())) {
-            commentService.delete(comment);
-            return "Пользователь '%s %s' удалил комментарий к мероприятию '%s'"
-                    .formatted(
-                            user.getFirstName(),
-                            user.getLastName(),
-                            event.getTitle()
-                    );
-        } else {
-            throw new InvalidRequestException("Пользователь '%s %s' не является автором указанного мероприятия"
-                    .formatted(
-                            user.getFirstName(),
-                            user.getLastName()
-                    ));
-        }
-    }
-
-    @Transactional
-    public String buyTickets(UUID eventId, PaymentRequest paymentRequest) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        if (event.getAmountOfAvailablePlaces() < paymentRequest.amountOfTickets()) {
-            throw new InvalidRequestException("Количество запрошенных билетов превышает доступное. Доступное количество мест на мероприятие: %s".formatted(event.getAmountOfAvailablePlaces()));
-        }
-        if (paymentRequest.amountOfTickets() > 5) {
-            throw new InvalidRequestException("Нельзя покупать более 5 билетов за раз.");
-        }
-        if (event.getOrganizerUser().getId().equals(user.getId())) {
-            throw new InvalidRequestException("Организатор не может бронировать места на свои же мероприятия");
-        }
-        if (event.getPrice().intValue() > 0) {
-            if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) > paymentRequest.amountOfMoney()) {
-                throw new InvalidRequestException("Переданной суммы денег недостаточно для покупки билетов");
-            } else if ((event.getPrice().intValue() * paymentRequest.amountOfTickets()) < paymentRequest.amountOfMoney()) {
-                throw new InvalidRequestException("Переданная сумма выше необходимой для оплаты билетов");
-            }
-            paymentService.payForTickets(new PaymentServiceRequest(
-                    paymentRequest.cardNumber(),
-                    paymentRequest.cardHolder(),
-                    paymentRequest.expiryDate(),
-                    paymentRequest.cvv(),
-                    paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
-            ));
-        }
-        for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
-            ticketService.save(new Ticket(event, user));
-        }
-        event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
-        return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"
-                .formatted(
-                        paymentRequest.amountOfTickets(),
-                        event.getTitle(),
-                        user.getFirstName(),
-                        user.getLastName()
-                );
-    }
-
-    public List<EventListDto> getEventsByUser(UUID userId) {
-        User user = userService.findUserById(userId);
-        return repository.findEventsByOrganizerUser(user)
-                .stream()
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    public String saveEventAsBookmark(UUID eventId) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
-        if (savedEvent == null) {
-            savedEventService.save(new SavedEvent(event, user));
-            return "Пользователь '%s %s' добавил мероприятие '%s' в 'Сохраненные'"
-                    .formatted(
-                            user.getFirstName(),
-                            user.getLastName(),
-                            event.getTitle()
-                    );
-        } else {
-            throw new InvalidRequestException("Мероприятие уже находится в 'Сохраненных'");
-        }
-    }
-
-    public String removeEventAsBookmark(UUID eventId) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        SavedEvent savedEvent = savedEventService.findSavedEventByEventAndUser(event, user);
-        if (savedEvent == null) {
-            throw new ResourceNotFoundException("Указанное мероприятие не сохранялось пользователем");
-        } else {
-            savedEventService.delete(savedEvent);
-            return "Мероприятие удаленно из 'Избранного'";
-        }
-    }
-
-    public List<SalesByEventDto> getSalesStatisticForEvents() {
-        User user = userService.getAuthenticatedUser();
-
-        if (user.getRole().getName().equals("ROLE_USER")) {
-            throw new InvalidRequestException("Статистика доступна только организаторам");
-        }
-        return repository.findSalesByEventForOrganizer(user.getId());
-    }
-
-    public List<SalesByParticipantDto> getSalesStatisticsByParticipants() {
-        User user = userService.getAuthenticatedUser();
-
-        if (user.getRole().getName().equals("ROLE_USER")) {
-            throw new InvalidRequestException("Статистика доступна только организаторам");
-        }
-        return repository.findParticipantStatsByOrganizer(user.getId());
-
-    }
-
-    @Transactional
-    public String updateEvent(UUID eventId, EventUpdateRequest request) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-        int amountOfSoldTickets = event.getAmountOfPlaces() - event.getAmountOfAvailablePlaces();
-
-        if (!event.getOrganizerUser().getId().equals(user.getId())) {
-            throw new InvalidRequestException("Пользователь не может менять информацию не своего мероприятия");
-        }
-        if (request.amountOfPlaces() < amountOfSoldTickets) {
-            throw new InvalidRequestException("Общее количество мест не может быть меньше количества проданных билетов");
-        }
-        Set<Category> categories = new HashSet<>();
-        for (String categoryName: request.categories()) {
-            Category category = categoryService.findCategoryByName(categoryName);
-            if (category == null) {
-                throw new ResourceNotFoundException("Категория с названием '%s' не найдена в базе данных");
-            }
-            categories.add(category);
-        }
-        event.setTitle(request.title());
-        event.setDescription(request.description());
-        event.setLocation(request.location());
-        event.setMinimumAge(request.minimumAge());
-        event.setStartTime(request.startTime());
-        event.setPrice(request.price());
-        event.setAmountOfPlaces(request.amountOfPlaces());
-        event.setAmountOfAvailablePlaces(request.amountOfPlaces() - amountOfSoldTickets);
-        event.setCategories(categories);
-        repository.save(event);
-
-        return "Изменения о мероприятии внесены";
-    }
-
-    @Transactional
-    public String deleteEvent(UUID eventId) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        if (!event.getOrganizerUser().getId().equals(user.getId())) {
-            throw new InvalidRequestException("Пользователь не может удалять не своё мероприятие");
-        }
-        if (!Objects.equals(event.getAmountOfAvailablePlaces(), event.getAmountOfPlaces())) {
-            throw new InvalidRequestException("Пользователь не может удалить мероприятие, на которое забронированы билеты");
-        }
-        repository.delete(event);
-
-        return "Мероприятие удалено";
-    }
-
-    @Transactional
-    public String changeEventImage(UUID eventId, MultipartFile image) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-
-        if (!event.getOrganizerUser().getId().equals(user.getId())) {
-            throw new InvalidRequestException("Пользователь не может изменить фотографию мероприятия, созданного не ним");
-        }
-        String imageUrl;
-        try {
-            imageUrl = cloudinaryService.uploadImage(image);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        if (event.getImage() != null) {
-            if (!event.getImage().getUrl().isEmpty()) {
-                try {
-                    cloudinaryService.deleteImage(event.getImage().getUrl());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            event.getImage().setUrl(imageUrl);
-        } else {
-            event.setImage(new Image(imageUrl));
-        }
-        repository.save(event);
-
-        return "Изображение мероприятия изменено";
     }
 }

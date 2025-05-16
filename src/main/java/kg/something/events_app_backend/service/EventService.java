@@ -16,49 +16,49 @@ import java.util.UUID;
 
 public interface EventService {
 
+    String addComment(UUID eventId, String comment);
+
     String buyTickets(UUID eventId, PaymentRequest paymentRequest);
 
+    String changeEventImage(UUID eventId, MultipartFile image);
+
     EventResponse createEvent(String eventRequestString, MultipartFile image);
+
+    String deleteEvent(UUID eventId);
 
     Event findEventById(UUID id);
 
     List<EventListDto> getAllEvents();
 
+    List<EventListDto> getDislikedEvents();
+
     EventResponse getEventById(UUID id);
-
-    String rateEvent(UUID eventId, EventGrade rate);
-
-    String removeRate(UUID eventId, EventGrade rate);
-
-    List<EventListDto> getEventsByCategory(String categoryName);
 
     List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate);
 
+    List<EventListDto> getEventsByCategory(String categoryName);
+
     List<EventListDto> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate);
-
-    String addComment(UUID eventId, String comment);
-
-    String removeComment(UUID eventId, UUID commentId);
 
     List<EventListDto> getEventsByUser(UUID userId);
 
-    String saveEventAsBookmark(UUID eventId);
-
-    String removeEventAsBookmark(UUID eventId);
+    List<EventListDto> getLikedEvents();
 
     List<SalesByEventDto> getSalesStatisticForEvents();
 
     List<SalesByParticipantDto> getSalesStatisticsByParticipants();
 
-    String updateEvent(UUID eventId, EventUpdateRequest request);
-
-    String deleteEvent(UUID eventId);
-
-    String changeEventImage(UUID eventId, MultipartFile image);
-
     List<EventListDto> getSavedEvents();
 
-    List<EventListDto> getLikedEvents();
+    String removeComment(UUID eventId, UUID commentId);
 
-    List<EventListDto> getDislikedEvents();
+    String removeEventAsBookmark(UUID eventId);
+
+    String removeRate(UUID eventId, EventGrade rate);
+
+    String saveEventAsBookmark(UUID eventId);
+
+    String rateEvent(UUID eventId, EventGrade rate);
+
+    String updateEvent(UUID eventId, EventUpdateRequest request);
 }

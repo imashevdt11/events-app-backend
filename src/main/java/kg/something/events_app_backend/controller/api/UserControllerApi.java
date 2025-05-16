@@ -35,17 +35,17 @@ public class UserControllerApi {
         this.service = service;
     }
 
-    @Operation(summary = "Изменение роли пользователя")
-    @PutMapping("/change-user-role/{id}")
-    public ResponseEntity<String> changeUserRole(@PathVariable UUID id,
-                                                 @RequestParam("role") String role) {
-        return new ResponseEntity<>(service.changeUserRole(id, role), HttpStatus.OK);
+    @Operation(summary = "Подписка на пользователя")
+    @PostMapping("/subscribe/{id}")
+    public ResponseEntity<String> subscribeToUser(@PathVariable("id") UUID userId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.subscribeToUser(userId));
     }
 
-    @Operation(summary = "Разблокировать/активировать учетную запись пользователя")
-    @PutMapping("/change-user-status/{id}")
-    public ResponseEntity<String> changeUserStatus(@PathVariable UUID id) {
-        return new ResponseEntity<>(service.changeUserStatus(id), HttpStatus.OK);
+    @Operation(summary = "Установка новой фотографии профиля пользователя")
+    @PostMapping("/upload-profile-image/{userId}")
+    public ResponseEntity<?> uploadProfileImage(@PathVariable("userId") UUID userId,
+                                                @RequestParam("image") MultipartFile image) {
+        return ResponseEntity.ok(service.uploadProfileImage(userId, image));
     }
 
     @Operation(summary = "Получение списка всех пользователей")
@@ -60,30 +60,10 @@ public class UserControllerApi {
         return new ResponseEntity<>(service.getUserById(id), HttpStatus.OK);
     }
 
-    @Operation(summary = "Изменение данных пользователя")
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") UUID id,
-                                                               @RequestBody @Valid UserUpdateRequest request) {
-        return new ResponseEntity<>(service.updateUser(id, request), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Установка новой фотографии профиля пользователя")
-    @PostMapping("/upload-profile-image/{userId}")
-    public ResponseEntity<?> uploadProfileImage(@PathVariable("userId") UUID userId,
-                                                @RequestParam("image") MultipartFile image) {
-        return ResponseEntity.ok(service.uploadProfileImage(userId, image));
-    }
-
-    @Operation(summary = "Подписка на пользователя")
-    @PostMapping("/subscribe/{id}")
-    public ResponseEntity<String> subscribeToUser(@PathVariable("id") UUID userId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.subscribeToUser(userId));
-    }
-
-    @Operation(summary = "Отписка от пользователя")
-    @DeleteMapping("/unsubscribe/{id}")
-    public ResponseEntity<String> unsubscribeFromUser(@PathVariable("id") UUID userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.unsubscribeFromUser(userId));
+    @Operation(summary = "Получение списка всех подписчиков пользователя")
+    @GetMapping("/subscribers/{id}")
+    public ResponseEntity<List<UserSubscriberDto>> getOrganizerSubscribers(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersSubscribers(id));
     }
 
     @Operation(summary = "Получение списка организаторов, на которых подписан пользователь")
@@ -92,9 +72,29 @@ public class UserControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersUserFollows(id));
     }
 
-    @Operation(summary = "Получение списка всех подписчиков пользователя")
-    @GetMapping("/subscribers/{id}")
-    public ResponseEntity<List<UserSubscriberDto>> getOrganizerSubscribers(@PathVariable UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.findAllOrganizersSubscribers(id));
+    @Operation(summary = "Изменение роли пользователя")
+    @PutMapping("/change-user-role/{id}")
+    public ResponseEntity<String> changeUserRole(@PathVariable UUID id,
+                                                 @RequestParam("role") String role) {
+        return new ResponseEntity<>(service.changeUserRole(id, role), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Разблокировать/активировать учетную запись пользователя")
+    @PutMapping("/change-user-status/{id}")
+    public ResponseEntity<String> changeUserStatus(@PathVariable UUID id) {
+        return new ResponseEntity<>(service.changeUserStatus(id), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Изменение данных пользователя")
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") UUID id,
+                                                   @RequestBody @Valid UserUpdateRequest request) {
+        return new ResponseEntity<>(service.updateUser(id, request), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Отписка от пользователя")
+    @DeleteMapping("/unsubscribe/{id}")
+    public ResponseEntity<String> unsubscribeFromUser(@PathVariable("id") UUID userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.unsubscribeFromUser(userId));
     }
 }

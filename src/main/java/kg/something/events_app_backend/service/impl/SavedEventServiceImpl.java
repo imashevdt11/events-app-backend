@@ -18,19 +18,23 @@ public class SavedEventServiceImpl implements SavedEventService {
         this.repository = repository;
     }
 
+    @Override
+    public void delete(SavedEvent savedEvent) {
+        repository.delete(savedEvent);
+    }
+
+    @Override
     public SavedEvent findSavedEventByEventAndUser(Event event, User user) {
         return repository.findSavedEventByEventAndUser(event, user);
     }
 
+    @Override
     public List<SavedEvent> findSavedEventsByUser(User user) {
         return repository.findSavedEventsByUser(user);
     }
 
+    @Override
     public void save(SavedEvent savedEvent) {
         repository.save(savedEvent);
-    }
-
-    public void delete(SavedEvent savedEvent) {
-        repository.delete(savedEvent);
     }
 }

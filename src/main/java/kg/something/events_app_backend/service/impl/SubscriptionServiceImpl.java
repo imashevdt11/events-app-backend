@@ -17,23 +17,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         this.repository = repository;
     }
 
-    public Subscription findSubscribeByOrganizerAndSubscriber(User organizer, User user) {
-        return repository.findSubscribeByOrganizerAndSubscriber(organizer, user);
-    }
-
-    public void save(Subscription subscription) {
-        repository.save(subscription);
-    }
-
+    @Override
     public void delete(Subscription subscription) {
         repository.delete(subscription);
     }
 
+    @Override
+    public List<Subscription> findAllOrganizersSubscribers(User user) {
+        return repository.findAllByOrganizer(user);
+    }
+
+    @Override
     public List<Subscription> findAllOrganizersUserFollows(User user) {
         return repository.findAllBySubscriber(user);
     }
 
-    public List<Subscription> findAllOrganizersSubscribers(User user) {
-        return repository.findAllByOrganizer(user);
+    @Override
+    public Subscription findSubscribeByOrganizerAndSubscriber(User organizer, User user) {
+        return repository.findSubscribeByOrganizerAndSubscriber(organizer, user);
+    }
+
+    @Override
+    public void save(Subscription subscription) {
+        repository.save(subscription);
     }
 }

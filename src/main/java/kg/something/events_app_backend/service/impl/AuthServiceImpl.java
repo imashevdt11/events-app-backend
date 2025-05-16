@@ -48,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
         this.userService = userService;
     }
 
+    @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
         if (!StringUtils.hasText(request.email()) || !StringUtils.hasText(request.password())) {
@@ -64,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
         return new LoginResponse(user.getId(), jwtToken, refreshToken);
     }
 
+    @Override
     public AccessToken refreshToken(String refreshToken) {
         if (jwtUtil.isRefreshTokenExpired(refreshToken)) {
             throw new OutOfDateException("Срок действия токена истек");
@@ -75,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
         return new AccessToken(newAccessToken);
     }
 
+    @Override
     @Transactional
     public UserResponse register(UserRegistrationRequest request) {
         if (LocalDate.now().getYear() - request.dateOfBirth().getYear() < 14) {

@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface SubscriptionService {
 
-    Subscription findSubscribeByOrganizerAndSubscriber(User organizer, User subscriber);
-
-    void save(Subscription subscription);
-
     void delete(Subscription subscription);
 
     List<Subscription> findAllOrganizersUserFollows(User user);
 
     List<Subscription> findAllOrganizersSubscribers(User user);
+
+    Subscription findSubscribeByOrganizerAndSubscriber(User organizer, User subscriber);
+
+    void save(Subscription subscription);
 }

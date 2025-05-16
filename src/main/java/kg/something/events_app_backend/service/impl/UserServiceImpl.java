@@ -33,17 +33,17 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final CloudinaryService cloudinaryService;
-    private final RoleService roleService;
     private final UserMapper userMapper;
     private final UserRepository repository;
+    private final CloudinaryService cloudinaryService;
+    private final RoleService roleService;
     private final SubscriptionService subscriptionService;
 
     public UserServiceImpl(CloudinaryService cloudinaryService, RoleService roleService, UserMapper userMapper, UserRepository repository, SubscriptionService subscriptionService) {
-        this.cloudinaryService = cloudinaryService;
-        this.roleService = roleService;
         this.userMapper = userMapper;
         this.repository = repository;
+        this.cloudinaryService = cloudinaryService;
+        this.roleService = roleService;
         this.subscriptionService = subscriptionService;
     }
 
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserSubscriberDto> findAllOrganizersSubscribers(UUID userId) {
-        User user = getAuthenticatedUser();
+        User user = findUserById(userId);
         return subscriptionService.findAllOrganizersSubscribers(user)
                 .stream()
                 .map(userMapper::toUserSubscriberDto)
@@ -92,20 +92,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserOrganizerDto> findAllOrganizersUserFollows(UUID userId) {
-        User user = getAuthenticatedUser();
+        User user = findUserById(userId);
         return subscriptionService.findAllOrganizersUserFollows(user)
                 .stream()
                 .map(userMapper::toUserOrganizerDto)
                 .toList();
-    }
-
-    @Override
-    public List<User> findUsersByRoleId(UUID roleId) {
-        List<User> user = repository.findUsersByRole_Id(roleId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Пользователей с указанной ролью не найдены");
-        }
-        return user;
     }
 
     @Override
@@ -118,6 +109,15 @@ public class UserServiceImpl implements UserService {
     public User findUserById(UUID id) {
         return Optional.ofNullable(repository.findUserById(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id '%s' не найден в базе данных".formatted(id)));
+    }
+
+    @Override
+    public List<User> findUsersByRoleId(UUID roleId) {
+        List<User> user = repository.findUsersByRole_Id(roleId);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователей с указанной ролью не найдены");
+        }
+        return user;
     }
 
     @Override
@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserService {
         if (subscriber.getId().equals(organizer.getId())) {
             throw new InvalidRequestException("Пользователь не может подписаться на самого себя");
         }
-        if (subscriber.getRole().getName().equals("ROLE_ORGANIZER")) {
+        if (!subscriber.getRole().getName().equals("ROLE_ORGANIZER")) {
             throw new InvalidRequestException("Вы не можете подписаться на пользователя, поскольку он не является организатором");
         }
         Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);

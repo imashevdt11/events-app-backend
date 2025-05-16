@@ -18,16 +18,19 @@ public class CommentServiceImpl implements CommentService {
         this.repository = repository;
     }
 
-    public void save(Comment comment) {
-        repository.save(comment);
-    }
-
+    @Override
     public void delete(Comment comment) {
         repository.delete(comment);
     }
 
+    @Override
     public Comment findCommentById(UUID id) {
         return Optional.ofNullable(repository.findCommentById(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Комментарий с id '%s' не найден в базе данных".formatted(id)));
+    }
+
+    @Override
+    public void save(Comment comment) {
+        repository.save(comment);
     }
 }

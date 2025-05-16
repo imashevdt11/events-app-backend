@@ -20,11 +20,13 @@ public interface PermissionService {
 
     List<PermissionResponse> getAllPermissions();
 
+    Set<Permission> getExistingPermissions(Set<String> permissionsSet);
+
     PermissionDetailedResponse getPermissionById(UUID id);
+
+    List<PermissionListDto> getPermissionsForList();
 
     String updatePermission(PermissionDto permissionDto, UUID id);
 
-    Set<Permission> getExistingPermissions(Set<String> permissionsSet);
 
-    List<PermissionListDto> getPermissionsForList();
 }

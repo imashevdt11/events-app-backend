@@ -35,6 +35,7 @@ public class PermissionServiceImpl implements PermissionService {
         this.permissionMapper = permissionMapper;
     }
 
+    @Override
     public String createPermission(PermissionDto permission) {
         User user = userService.getAuthenticatedUser();
         if (repository.existsByName(permission.name())) {
@@ -45,6 +46,7 @@ public class PermissionServiceImpl implements PermissionService {
         return "Право доступа создано";
     }
 
+    @Override
     public String deletePermission(UUID id) {
         Permission permission = findPermissionById(id);
         if (repository.countRolesByPermission(permission.getId()) > 0) {
@@ -60,11 +62,13 @@ public class PermissionServiceImpl implements PermissionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Право доступа с id '%s' не найдено в базе данных".formatted(id)));
     }
 
+    @Override
     public Permission findPermissionByName(String name) {
         return Optional.ofNullable(repository.findPermissionByName(name))
                 .orElseThrow(() -> new ResourceNotFoundException("Право доступа с названием '%s' не найдено в базе данных".formatted(name)));
     }
 
+    @Override
     public List<PermissionResponse> getAllPermissions() {
         return repository.findAll().stream()
                 .map(permissionMapper::toPermissionResponse)
@@ -75,6 +79,7 @@ public class PermissionServiceImpl implements PermissionService {
         return repository.countRolesByPermission(permissionId);
     }
 
+    @Override
     public Set<Permission> getExistingPermissions(Set<String> permissionsSet) {
         Set<Permission> permissions = new HashSet<>();
         for (String permissionName: permissionsSet) {
@@ -84,11 +89,13 @@ public class PermissionServiceImpl implements PermissionService {
         return permissions;
     }
 
+    @Override
     public PermissionDetailedResponse getPermissionById(UUID id) {
         Permission permission = findPermissionById(id);
         return permissionMapper.toPermissionDetailedResponse(permission);
     }
 
+    @Override
     public List<PermissionListDto> getPermissionsForList() {
         return repository.findAll().stream()
                 .map(permission ->
@@ -103,6 +110,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .toList();
     }
 
+    @Override
     public String updatePermission(PermissionDto permissionDto, UUID id) {
         Permission permission = findPermissionById(id);
         String oldPermissionName = permission.getName();
