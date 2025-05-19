@@ -54,6 +54,6 @@ public class ApplicationConfig {
     @Bean
     public WebClient webClient(WebClient.Builder webClient) {
         return webClient
-                .baseUrl("http://localhost:9012").build();
+                .baseUrl("https://payment-stab-61715e2189aa.herokuapp.com").build();
     }
 }

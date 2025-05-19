@@ -24,14 +24,14 @@ public class PaymentServiceImpl implements PaymentService {
     public void payForTickets(PaymentServiceRequest paymentRequest) {
         try {
             webClient.post()
-                    .uri("/process-payment")
+                    .uri("/api/payments/process")
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(paymentRequest)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
-                            error -> error.bodyToMono(String.class)  // Читаем тело ошибки
+                            error -> error.bodyToMono(String.class)
                                     .flatMap(errorMessage -> Mono.error(
-                                            new ResourceNotFoundException(errorMessage)  // Пробрасываем с оригинальным текстом
+                                            new ResourceNotFoundException(errorMessage)
                                     ))
                     )
                     .onStatus(HttpStatusCode::is5xxServerError,

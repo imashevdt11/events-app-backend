@@ -62,8 +62,8 @@ public class EventControllerApi {
 
     @Operation(summary = "Купить билет")
     @PostMapping("/buy-ticket/{eventId}")
-    public ResponseEntity<String> butTicket(@PathVariable("eventId") UUID eventId,
-                                            @RequestBody PaymentRequest paymentRequest) {
+    public ResponseEntity<String> buyTicket(@PathVariable("eventId") UUID eventId,
+                                            @RequestBody @Valid PaymentRequest paymentRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.buyTickets(eventId, paymentRequest));
     }
 

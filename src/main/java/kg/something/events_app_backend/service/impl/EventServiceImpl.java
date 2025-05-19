@@ -97,6 +97,7 @@ public class EventServiceImpl implements EventService {
                 );
     }
 
+    @Override
     @Transactional
     public String buyTickets(UUID eventId, PaymentRequest paymentRequest) {
         User user = userService.getAuthenticatedUser();
