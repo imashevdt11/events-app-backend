@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -22,8 +21,7 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "number", updatable = false, unique = true)
-    @SequenceGenerator(name = "ticket_number_seq", sequenceName = "ticket_number_sequence")
+    @Column(name = "number")
     private Long number;
 
     @Column(name = "used", nullable = false, columnDefinition = "boolean default false")
@@ -56,7 +54,8 @@ public class Ticket {
 
     public Ticket() {}
 
-    public Ticket(Event event, User user) {
+    public Ticket(Long number, Event event, User user) {
+        this.number = number;
         this.event = event;
         this.user = user;
     }

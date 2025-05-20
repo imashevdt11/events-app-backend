@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
+import kg.something.events_app_backend.dto.TicketDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.request.EventUpdateRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
@@ -126,8 +127,13 @@ public class EventServiceImpl implements EventService {
                     paymentRequest.amountOfMoney() * paymentRequest.amountOfTickets()
             ));
         }
+        Long maximumTicketIndex = ticketService.getMaxTicketNumberByEvent(event);
+        if (maximumTicketIndex == null) {
+            maximumTicketIndex = 1L;
+        }
         for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
-            ticketService.save(new Ticket(event, user));
+            ticketService.save(new Ticket(maximumTicketIndex, event, user));
+            maximumTicketIndex++;
         }
         event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
         return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"
@@ -219,20 +225,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventListDto> getAllEvents() {
+        List<Event> events = repository.findAll();
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
     public List<EventListDto> getDislikedEvents() {
         User user = userService.getAuthenticatedUser();
         List<Grade> dislikedEvents = gradeService.findGradesByUserAndName(user, EventGrade.DISLIKE);
 
         return dislikedEvents.stream()
                 .map(Grade::getEvent)
-                .map(eventMapper::toEventListDto)
-                .toList();
-    }
-
-    @Override
-    public List<EventListDto> getAllEvents() {
-        List<Event> events = repository.findAll();
-        return events.stream()
                 .map(eventMapper::toEventListDto)
                 .toList();
     }
@@ -301,6 +307,24 @@ public class EventServiceImpl implements EventService {
                 .map(Grade::getEvent)
                 .map(eventMapper::toEventListDto)
                 .toList();
+    }
+
+    @Override
+    public List<TicketDto> getListOfTicketsPurchasedByUser() {
+        User user = userService.getAuthenticatedUser();
+
+        return ticketService.getTicketsByUser(user);
+    }
+
+    @Override
+    public List<TicketDto> getListOfTicketsSoldToEvent(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+        if (!user.getId().equals(event.getOrganizerUser().getId())) {
+            throw new InvalidRequestException("Пользователь не может посмотреть информацию о проданных билетах по созданному другим пользователем мероприятию");
+        }
+
+        return ticketService.getTicketsByEvent(event);
     }
 
     @Override
