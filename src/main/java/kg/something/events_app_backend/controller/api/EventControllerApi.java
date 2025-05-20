@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
+import kg.something.events_app_backend.dto.TicketDto;
 import kg.something.events_app_backend.dto.request.EventUpdateRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.dto.response.EventResponse;
@@ -79,6 +80,12 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.rateEvent(eventId, EventGrade.LIKE));
     }
 
+    @Operation(summary = "Добавить мероприятие в 'Сохраненные'")
+    @PostMapping("/save-as-bookmark/{id}")
+    public ResponseEntity<String> saveEventAsBookmark(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveEventAsBookmark(eventId));
+    }
+
     @Operation(summary = "Получение списка всех мероприятий")
     @GetMapping
     public ResponseEntity<List<EventListDto>> getAllEvents() {
@@ -129,6 +136,18 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getLikedEvents());
     }
 
+    @Operation(summary = "Получение списка купленных пользователем билетов")
+    @GetMapping("/purchased-tickets")
+    public ResponseEntity<List<TicketDto>> getListOfTicketsPurchasedByUser() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getListOfTicketsPurchasedByUser());
+    }
+
+    @Operation(summary = "Получение списка проданных на мероприятие билетов")
+    @GetMapping("/sold-tickets/{eventId}")
+    public ResponseEntity<List<TicketDto>> getListOfTicketsSoldToEvent(@PathVariable("eventId") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getListOfTicketsSoldToEvent(eventId));
+    }
+
     @Operation(summary = "Статистика по продажам билетов на мероприятия, созданные аутентифицированным пользователем")
     @GetMapping("/stats/sales-for-events")
     public ResponseEntity<List<SalesByEventDto>> getSalesStatisticForEvents() {
@@ -145,12 +164,6 @@ public class EventControllerApi {
     @GetMapping("/saved")
     public ResponseEntity<List<EventListDto>> getSavedEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getSavedEvents());
-    }
-
-    @Operation(summary = "Добавить мероприятие в 'Сохраненные'")
-    @PostMapping("/save-as-bookmark/{id}")
-    public ResponseEntity<String> saveEventAsBookmark(@PathVariable("id") UUID eventId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveEventAsBookmark(eventId));
     }
 
     @Operation(summary = "Обновление информации о мероприятии")
