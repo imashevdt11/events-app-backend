@@ -20,4 +20,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     @Query(value = "SELECT MAX(t.number) FROM tickets t WHERE t.event_id = :eventId", nativeQuery = true)
     Long getMaxTicketNumberByEvent(@Param("eventId") UUID eventId);
+
+    Ticket findTicketById(UUID id);
 }

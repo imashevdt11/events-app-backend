@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
-import kg.something.events_app_backend.dto.TicketDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.request.EventUpdateRequest;
 import kg.something.events_app_backend.dto.request.PaymentRequest;
@@ -307,24 +306,6 @@ public class EventServiceImpl implements EventService {
                 .map(Grade::getEvent)
                 .map(eventMapper::toEventListDto)
                 .toList();
-    }
-
-    @Override
-    public List<TicketDto> getListOfTicketsPurchasedByUser() {
-        User user = userService.getAuthenticatedUser();
-
-        return ticketService.getTicketsByUser(user);
-    }
-
-    @Override
-    public List<TicketDto> getListOfTicketsSoldToEvent(UUID eventId) {
-        User user = userService.getAuthenticatedUser();
-        Event event = findEventById(eventId);
-        if (!user.getId().equals(event.getOrganizerUser().getId())) {
-            throw new InvalidRequestException("Пользователь не может посмотреть информацию о проданных билетах по созданному другим пользователем мероприятию");
-        }
-
-        return ticketService.getTicketsByEvent(event);
     }
 
     @Override
