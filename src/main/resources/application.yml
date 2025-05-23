@@ -16,6 +16,17 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: u11se03r@gmail.com
+    password: tkvb tixr buig chlo
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 #  mustache:
 #    check-template-location: false
 #  thymeleaf:

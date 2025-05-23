@@ -3,10 +3,12 @@ package kg.something.events_app_backend.service.impl;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.configuration.JwtUtil;
 import kg.something.events_app_backend.dto.AccessToken;
+import kg.something.events_app_backend.dto.request.ChangePasswordRequest;
 import kg.something.events_app_backend.dto.request.LoginRequest;
 import kg.something.events_app_backend.dto.request.UserRegistrationRequest;
 import kg.something.events_app_backend.dto.response.LoginResponse;
 import kg.something.events_app_backend.dto.response.UserResponse;
+import kg.something.events_app_backend.entity.ConfirmationCode;
 import kg.something.events_app_backend.entity.Role;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.exception.InvalidRequestException;
@@ -15,6 +17,8 @@ import kg.something.events_app_backend.exception.ResourceAlreadyExistsException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.UserMapper;
 import kg.something.events_app_backend.service.AuthService;
+import kg.something.events_app_backend.service.ConfirmationCodeService;
+import kg.something.events_app_backend.service.EmailService;
 import kg.something.events_app_backend.service.RoleService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,8 +41,10 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final UserMapper userMapper;
     private final UserService userService;
+    private final ConfirmationCodeService confirmationCodeService;
+    private final EmailService emailService;
 
-    public AuthServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserService userService) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, RoleService roleService, UserDetailsService userDetailsService, UserMapper userMapper, UserService userService, ConfirmationCodeService confirmationCodeService, EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
@@ -46,6 +52,29 @@ public class AuthServiceImpl implements AuthService {
         this.userDetailsService = userDetailsService;
         this.userMapper = userMapper;
         this.userService = userService;
+        this.confirmationCodeService = confirmationCodeService;
+        this.emailService = emailService;
+    }
+
+    @Override
+    @Transactional
+    public String changePassword(ChangePasswordRequest request) {
+
+        User user = userService.findUserByEmail(request.email());
+        ConfirmationCode confirmationCode = confirmationCodeService.findByUserAndCode(user, Integer.parseInt(request.code()));
+
+        if (confirmationCode.isExpired()) {
+            throw new OutOfDateException("Срок действия кода подтверждения истек");
+        }
+        if (!confirmationCode.getCode().equals(Integer.parseInt(request.code()))) {
+            throw new ResourceNotFoundException("Код подтверждения '%s' не найден");
+        }
+        user.setEnabled(true);
+        user.setPassword(passwordEncoder.encode(request.password()));
+        userService.save(user);
+        confirmationCodeService.delete(confirmationCode);
+
+        return "Пароль изменен";
     }
 
     @Override
@@ -90,6 +119,15 @@ public class AuthServiceImpl implements AuthService {
         userService.save(user);
 
         return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public String sendRestoreCode(String email) {
+        User user = userService.findUserByEmail(email);
+        ConfirmationCode confirmationCode = confirmationCodeService.findConfirmationCodeByUser(user);
+        emailService.sendEmailWithConfirmationCode(confirmationCode, user);
+
+        return "Код подтверждения отправлен на почту '%s'".formatted(email);
     }
 
     private void checkUniqueFieldsForExistingBeforeRegistration(UserRegistrationRequest request) {
