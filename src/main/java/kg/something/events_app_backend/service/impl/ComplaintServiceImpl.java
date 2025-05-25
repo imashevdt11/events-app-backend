@@ -15,9 +15,11 @@ import kg.something.events_app_backend.service.UserService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ComplaintServiceImpl implements ComplaintService {
@@ -43,6 +45,17 @@ public class ComplaintServiceImpl implements ComplaintService {
         return repository.findAll().stream()
                 .map(complaintMapper::toComplaintListResponse)
                 .toList();
+    }
+
+    @Override
+    public List<String> getAllComplaintsStatuses() {
+        User user = userService.getAuthenticatedUser();
+        if (!user.getRole().getName().equals("ROLE_ADMIN")) {
+            throw new InvalidRequestException("Только администраторы могут просматривать жалобы");
+        }
+        return Arrays.stream(ComplaintStatus.class.getEnumConstants())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 
     @Override

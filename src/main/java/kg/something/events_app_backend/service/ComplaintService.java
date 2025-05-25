@@ -11,5 +11,7 @@ public interface ComplaintService {
 
     List<ComplaintListResponse> getAllComplaints();
 
+    List<String> getAllComplaintsStatuses();
+
     String sendComplaint(UUID eventId, String text);
 }
