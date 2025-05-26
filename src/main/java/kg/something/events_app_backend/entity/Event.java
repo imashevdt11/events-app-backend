@@ -74,7 +74,7 @@ public class Event {
     @Column(name = "amount_of_available_places")
     private Integer amountOfAvailablePlaces;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "organizer_user_id")
     private User organizerUser;
 

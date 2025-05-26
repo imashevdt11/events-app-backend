@@ -142,19 +142,25 @@
     <table>
         <thead>
         <tr>
+            <th>Дата создания</th>
+            <th>Автор</th>
+            <th>Тип</th>
             <th>Жалоба</th>
+            <th>Организатор мероприятия</th>
             <th>Статус</th>
-            <th>Автор жалобы</th>
-            <th>Мероприятие</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="complaint : ${complaints}">
+            <td th:text="${complaint.createdAt()}"></td>
+            <td th:text="${complaint.complaintAuthor()}"></td>
+            <td th:text="${complaint.complaintType().getDescription()}"></td>
             <td th:text="${#strings.length(complaint.complaintText()) > 20
               ? #strings.substring(complaint.complaintText(), 0, 20) + '...'
               : complaint.complaintText()}">
             </td>
+            <td th:text="${complaint.eventOrganizerFullName()}"></td>
             <td>
                 <label>
                     <select onchange="onComplaintStatusChange(this)" th:attr="data-id=${complaint.id}">
@@ -166,8 +172,6 @@
                     </select>
                 </label>
             </td>
-            <td th:text="${complaint.complaintAuthor()}"></td>
-            <td th:text="${complaint.eventTitle()}"></td>
             <td><a th:href="@{/complaints/detailed/{id}(id=${complaint.id})}" class="btn" style = "text-decoration: none">Подробнее</a></td>
         </tr>
         </tbody>

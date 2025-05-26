@@ -1,10 +1,11 @@
 package kg.something.events_app_backend.service.impl;
 
-import kg.something.events_app_backend.dto.response.ComplaintListResponse;
+import kg.something.events_app_backend.dto.response.ComplaintResponse;
 import kg.something.events_app_backend.entity.Complaint;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.enums.ComplaintStatus;
+import kg.something.events_app_backend.enums.ComplaintType;
 import kg.something.events_app_backend.exception.InvalidRequestException;
 import kg.something.events_app_backend.exception.ResourceNotFoundException;
 import kg.something.events_app_backend.mapper.ComplaintMapper;
@@ -37,7 +38,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public List<ComplaintListResponse> getAllComplaints() {
+    public List<ComplaintResponse> getAllComplaints() {
         User user = userService.getAuthenticatedUser();
         if (!user.getRole().getName().equals("ROLE_ADMIN")) {
             throw new InvalidRequestException("Только администраторы могут просматривать жалобы");
@@ -59,7 +60,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public ComplaintListResponse getComplaintById(UUID id) {
+    public ComplaintResponse getComplaintById(UUID id) {
         Complaint complaint = repository.findComplaintById(id);
         if (complaint == null) {
             throw new ResourceNotFoundException("Жалоба с id '%s' не найдена".formatted(id));
@@ -71,7 +72,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     public String changeComplaintStatus(UUID complaintId, String status) {
         User user = userService.getAuthenticatedUser();
         Complaint complaint = findComplaintById(complaintId);
-        String previousStatus = complaint.getComplaintStatus().name();
+        String previousStatus = complaint.getStatus().name();
 
         if (!user.getRole().getName().equals("ROLE_ADMIN")) {
             throw new InvalidRequestException("Только администраторы могут изменять статус жалобы");
@@ -83,7 +84,7 @@ public class ComplaintServiceImpl implements ComplaintService {
             throw new InvalidRequestException("Переданный и нынешний статус совпадают");
         }
 
-        complaint.setComplaintStatus(ComplaintStatus.valueOf(status));
+        complaint.setStatus(ComplaintStatus.valueOf(status));
         repository.save(complaint);
 
         return "Статус жалобы изменен с '%s' на '%s'".formatted(previousStatus, status);
@@ -95,14 +96,17 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public String sendComplaint(UUID eventId, String text) {
+    public String sendComplaint(UUID eventId, String text, String type) {
         User user = userService.getAuthenticatedUser();
         Event event = eventService.findEventById(eventId);
 
         if (event.getOrganizerUser().getId().equals(user.getId())) {
             throw new InvalidRequestException("Пользователь не может отправить жалобу на самого себя");
         }
-        repository.save(new Complaint(text, user, event));
-        return "Жалоба отправлена на рассмотрение";
+        if (!EnumUtils.isValidEnum(ComplaintType.class, type)) {
+            throw new ResourceNotFoundException("Типа мероприятия '%s' не существует".formatted(type));
+        }
+        repository.save(new Complaint(text, ComplaintType.valueOf(type), user, event));
+        return "Жалоба создана";
     }
 }

@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import kg.something.events_app_backend.enums.ComplaintStatus;
+import kg.something.events_app_backend.enums.ComplaintType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -34,8 +35,13 @@ public class Complaint {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private ComplaintType type;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private ComplaintStatus complaintStatus;
+    private ComplaintStatus status;
 
     @NotNull
     @ManyToOne
@@ -59,7 +65,7 @@ public class Complaint {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.complaintStatus = ComplaintStatus.NEW;
+        this.status = ComplaintStatus.NEW;
     }
 
     @PreUpdate
@@ -69,18 +75,11 @@ public class Complaint {
 
     public Complaint() {}
 
-    public Complaint(String text, User user, Event event) {
+    public Complaint(String text, ComplaintType type, User user, Event event) {
         this.text = text;
+        this.type = type;
         this.user = user;
         this.event = event;
-    }
-
-    public ComplaintStatus getComplaintStatus() {
-        return complaintStatus;
-    }
-
-    public void setComplaintStatus(ComplaintStatus complaintStatus) {
-        this.complaintStatus = complaintStatus;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -105,6 +104,22 @@ public class Complaint {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public ComplaintStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ComplaintStatus status) {
+        this.status = status;
+    }
+
+    public ComplaintType getType() {
+        return type;
+    }
+
+    public void setType(ComplaintType type) {
+        this.type = type;
     }
 
     public String getText() {

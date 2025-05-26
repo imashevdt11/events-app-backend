@@ -1,6 +1,6 @@
 package kg.something.events_app_backend.controller.mvc;
 
-import kg.something.events_app_backend.dto.response.ComplaintListResponse;
+import kg.something.events_app_backend.dto.response.ComplaintResponse;
 import kg.something.events_app_backend.service.ComplaintService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,7 +36,7 @@ public class ComplaintController {
     @GetMapping
     public String getAllComplaints(Model model) {
         try {
-            List<ComplaintListResponse> complaints = service.getAllComplaints();
+            List<ComplaintResponse> complaints = service.getAllComplaints();
             List<String> complaintsStatuses = service.getAllComplaintsStatuses();
             model.addAttribute("complaints", complaints);
             model.addAttribute("complaints_statuses", complaintsStatuses);
@@ -48,7 +48,7 @@ public class ComplaintController {
 
     @GetMapping("/detailed/{id}")
     public String moveToDetailedPage(@PathVariable UUID id, Model model) {
-        ComplaintListResponse complaint = service.getComplaintById(id);
+        ComplaintResponse complaint = service.getComplaintById(id);
         model.addAttribute("complaint", complaint);
         return "complaint_details";
     }
