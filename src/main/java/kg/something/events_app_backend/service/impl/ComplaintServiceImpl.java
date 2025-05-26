@@ -59,6 +59,15 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public ComplaintListResponse getComplaintById(UUID id) {
+        Complaint complaint = repository.findComplaintById(id);
+        if (complaint == null) {
+            throw new ResourceNotFoundException("Жалоба с id '%s' не найдена".formatted(id));
+        }
+        return complaintMapper.toComplaintListResponse(complaint);
+    }
+
+    @Override
     public String changeComplaintStatus(UUID complaintId, String status) {
         User user = userService.getAuthenticatedUser();
         Complaint complaint = findComplaintById(complaintId);

@@ -45,4 +45,11 @@ public class ComplaintController {
             return "error";
         }
     }
+
+    @GetMapping("/detailed/{id}")
+    public String moveToDetailedPage(@PathVariable UUID id, Model model) {
+        ComplaintListResponse complaint = service.getComplaintById(id);
+        model.addAttribute("complaint", complaint);
+        return "complaint_details";
+    }
 }

@@ -131,6 +131,7 @@
 </head>
 <body>
 <nav class="navbar">
+    <a href="/complaints">Жалобы</a>
     <a href="/categories">Категории</a>
     <a href="/permissions">Права доступа</a>
     <a href="/roles">Роли</a>
@@ -145,11 +146,15 @@
             <th>Статус</th>
             <th>Автор жалобы</th>
             <th>Мероприятие</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="complaint : ${complaints}">
-            <td th:text="${complaint.complaintText()}"></td>
+            <td th:text="${#strings.length(complaint.complaintText()) > 20
+              ? #strings.substring(complaint.complaintText(), 0, 20) + '...'
+              : complaint.complaintText()}">
+            </td>
             <td>
                 <label>
                     <select onchange="onComplaintStatusChange(this)" th:attr="data-id=${complaint.id}">
@@ -163,6 +168,7 @@
             </td>
             <td th:text="${complaint.complaintAuthor()}"></td>
             <td th:text="${complaint.eventTitle()}"></td>
+            <td><a th:href="@{/complaints/detailed/{id}(id=${complaint.id})}" class="btn" style = "text-decoration: none">Подробнее</a></td>
         </tr>
         </tbody>
     </table>

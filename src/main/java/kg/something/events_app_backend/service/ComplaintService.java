@@ -13,5 +13,7 @@ public interface ComplaintService {
 
     List<String> getAllComplaintsStatuses();
 
+    ComplaintListResponse getComplaintById(UUID id);
+
     String sendComplaint(UUID eventId, String text);
 }
