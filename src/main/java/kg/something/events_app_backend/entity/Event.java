@@ -74,6 +74,10 @@ public class Event {
     @Column(name = "amount_of_available_places")
     private Integer amountOfAvailablePlaces;
 
+//    @NotNull
+    @Column(name = "blocked")
+    private Boolean blocked;
+
     @ManyToOne
     @JoinColumn(name = "organizer_user_id")
     private User organizerUser;
@@ -114,6 +118,7 @@ public class Event {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.blocked = false;
     }
 
     @PreUpdate
@@ -173,6 +178,22 @@ public class Event {
 
     public void setAmountOfPlaces(Integer amountOfPlaces) {
         this.amountOfPlaces = amountOfPlaces;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    public List<Ticket> getEventTickets() {
+        return eventTickets;
+    }
+
+    public void setEventTickets(List<Ticket> eventTickets) {
+        this.eventTickets = eventTickets;
     }
 
     public LocalDateTime getCreatedAt() {
