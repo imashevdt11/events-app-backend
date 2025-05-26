@@ -44,6 +44,8 @@ public interface EventService {
 
     List<EventListDto> getLikedEvents();
 
+    List<EventListDto> getRelevantEvents();
+
     List<SalesByEventDto> getSalesStatisticForEvents();
 
     List<SalesByParticipantDto> getSalesStatisticsByParticipants();

@@ -309,6 +309,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventListDto> getRelevantEvents() {
+        List<Event> events = repository.findEventsByStartTimeAfter(LocalDateTime.now());
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
     public List<SalesByEventDto> getSalesStatisticForEvents() {
         User user = userService.getAuthenticatedUser();
 

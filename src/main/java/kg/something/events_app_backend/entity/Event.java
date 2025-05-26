@@ -74,7 +74,7 @@ public class Event {
     @Column(name = "amount_of_available_places")
     private Integer amountOfAvailablePlaces;
 
-//    @NotNull
+    @NotNull
     @Column(name = "blocked")
     private Boolean blocked;
 

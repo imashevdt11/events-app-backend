@@ -1,5 +1,6 @@
 package kg.something.events_app_backend.repository;
 
+import jakarta.validation.constraints.NotNull;
 import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.entity.Category;
@@ -66,4 +67,6 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     GROUP BY e.id, e.title, e.amountOfPlaces, e.price
     """)
     List<SalesByEventDto> findSalesByEventForOrganizer(@Param("organizerId") UUID organizerId);
+
+    List<Event> findEventsByStartTimeAfter(@NotNull LocalDateTime startTimeAfter);
 }

@@ -91,6 +91,12 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());
     }
 
+    @Operation(summary = "Получение списка актуальных (еще не прошедших) мероприятий")
+    @GetMapping("/relevant")
+    public ResponseEntity<List<EventListDto>> getRelevantEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getRelevantEvents());
+    }
+
     @Operation(summary = "Получение мероприятий, которым был поставлен 'DISLIKE'")
     @GetMapping("/disliked")
     public ResponseEntity<List<EventListDto>> getDislikedEvents() {
