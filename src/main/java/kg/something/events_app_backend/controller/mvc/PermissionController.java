@@ -63,7 +63,7 @@ public class PermissionController {
     }
 
     @GetMapping("/update/{id}")
-    public String editPermission(@PathVariable UUID id, Model model) {
+    public String moveToEditPermissionForm(@PathVariable UUID id, Model model) {
         PermissionDetailedResponse permission = service.getPermissionById(id);
         model.addAttribute("permission", permission);
         return "permission_edit_form";

@@ -1,0 +1,56 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали мероприятия</title>
+    <style>
+        body {
+            align-items: center;
+            background: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2c2c2c;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        .product-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .product-info {
+            text-align: left;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <img th:src="'data:image/png;base64,' + ${event.imageUrl()}" alt="Фото мероприятия" class="product-image">
+    <div class="product-info">
+        <h1 th:text="${event.title()} "></h1>
+        <p><strong>Описание:  </strong><span th:text="${event.description()}"></span></p>
+        <p><strong>Цена:  </strong><span th:text="${event.price()}"></span> сом</p>
+        <p><strong>В наличии:  </strong><span th:text="${event.startTime()}"></span></p>
+    </div>
+</div>
+</body>
+</html>

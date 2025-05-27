@@ -151,7 +151,9 @@
         </thead>
         <tbody>
         <tr th:each="event : ${events}">
-            <td th:text="${event.title()}"></td>
+            <td>
+                <a th:href="@{/events/{id}(id=${event.id})}" th:text="${event.title()}" style="text-decoration: none; color: white"></a>
+            </td>
             <td th:text="${event.price()} + ' ' + ${event.priceCurrency()}"></td>
             <td th:text="${event.amountOfAvailablePlaces() + event.amountOfTakenPlaces()}"></td>
             <td th:text="${(event.amountOfTakenPlaces() * 100) / (event.amountOfAvailablePlaces() + event.amountOfTakenPlaces())} + '%'"></td>
