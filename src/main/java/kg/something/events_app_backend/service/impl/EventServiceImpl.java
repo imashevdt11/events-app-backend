@@ -177,6 +177,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public String changeEventStatus(UUID eventId) {
+        User user = userService.getAuthenticatedUser();
+        Event event = findEventById(eventId);
+
+        if (!user.getRole().getName().equals("ROLE_ADMIN")) {
+            throw new InvalidRequestException("Только администраторы могут блокировать мероприятия");
+        }
+        boolean isBlocked = event.getBlocked() != null && event.getBlocked();
+        event.setBlocked(!isBlocked);
+        isBlocked = !isBlocked;
+        repository.save(event);
+
+        return isBlocked ? "Мероприятие заблокировано" : "Мероприятие разблокировано";
+    }
+
+    @Override
     @Transactional
     public EventResponse createEvent(String eventRequestString, MultipartFile image) {
         User authenticatedUser = userService.getAuthenticatedUser();
@@ -226,6 +242,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventListDto> getAllEvents() {
         List<Event> events = repository.findAll();
+        return events.stream()
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventListDto> getNotBlockedEvents() {
+        List<Event> events = repository.findEventsByBlockedNullOrBlockedFalse();
         return events.stream()
                 .map(eventMapper::toEventListDto)
                 .toList();

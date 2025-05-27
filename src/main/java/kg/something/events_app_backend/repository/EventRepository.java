@@ -21,10 +21,14 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     Event findEventById(UUID id);
 
+    List<Event> findEventsByBlockedNullOrBlockedFalse();
+
     List<Event> findEventsByCategories(Set<Category> categories);
 
     @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventComments WHERE e.organizerUser = :organizerUser")
     List<Event> findEventsByOrganizerUser(User organizerUser);
+
+    List<Event> findEventsByStartTimeAfter(@NotNull LocalDateTime startTimeAfter);
 
     @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventComments WHERE e.createdAt BETWEEN :startDate AND :endDate")
     List<Event> findEventsCreatedBetweenDates(@Param("startDate") LocalDateTime startDate,
@@ -67,6 +71,4 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     GROUP BY e.id, e.title, e.amountOfPlaces, e.price
     """)
     List<SalesByEventDto> findSalesByEventForOrganizer(@Param("organizerId") UUID organizerId);
-
-    List<Event> findEventsByStartTimeAfter(@NotNull LocalDateTime startTimeAfter);
 }

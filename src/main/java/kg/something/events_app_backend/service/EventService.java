@@ -22,6 +22,8 @@ public interface EventService {
 
     String changeEventImage(UUID eventId, MultipartFile image);
 
+    String changeEventStatus(UUID eventId);
+
     EventResponse createEvent(String eventRequestString, MultipartFile image);
 
     String deleteEvent(UUID eventId);
@@ -43,6 +45,8 @@ public interface EventService {
     List<EventListDto> getEventsByUser(UUID userId);
 
     List<EventListDto> getLikedEvents();
+
+    List<EventListDto> getNotBlockedEvents();
 
     List<EventListDto> getRelevantEvents();
 

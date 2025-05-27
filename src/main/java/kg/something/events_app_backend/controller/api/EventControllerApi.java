@@ -86,15 +86,9 @@ public class EventControllerApi {
     }
 
     @Operation(summary = "Получение списка всех мероприятий")
-    @GetMapping
+    @GetMapping("/admin")
     public ResponseEntity<List<EventListDto>> getAllEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEvents());
-    }
-
-    @Operation(summary = "Получение списка актуальных (еще не прошедших) мероприятий")
-    @GetMapping("/relevant")
-    public ResponseEntity<List<EventListDto>> getRelevantEvents() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getRelevantEvents());
     }
 
     @Operation(summary = "Получение мероприятий, которым был поставлен 'DISLIKE'")
@@ -141,6 +135,18 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getLikedEvents());
     }
 
+    @Operation(summary = "Получение списка не заблокированных всех мероприятий")
+    @GetMapping
+    public ResponseEntity<List<EventListDto>> getNotBlockedEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getNotBlockedEvents());
+    }
+
+    @Operation(summary = "Получение списка актуальных (еще не прошедших) мероприятий")
+    @GetMapping("/relevant")
+    public ResponseEntity<List<EventListDto>> getRelevantEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getRelevantEvents());
+    }
+
     @Operation(summary = "Статистика по продажам билетов на мероприятия, созданные аутентифицированным пользователем")
     @GetMapping("/stats/sales-for-events")
     public ResponseEntity<List<SalesByEventDto>> getSalesStatisticForEvents() {
@@ -157,6 +163,12 @@ public class EventControllerApi {
     @GetMapping("/saved")
     public ResponseEntity<List<EventListDto>> getSavedEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getSavedEvents());
+    }
+
+    @Operation(summary = "Изменить статус (заблокировать/разблокировать) мероприятие")
+    @PutMapping("/change-status/{id}")
+    public ResponseEntity<String> changeEventStatus(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.changeEventStatus(eventId));
     }
 
     @Operation(summary = "Обновление информации о мероприятии")
