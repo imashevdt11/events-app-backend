@@ -60,12 +60,12 @@ public class WebSecurityConfig {
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
         return (request, response, authentication) -> {
-//            boolean isUser = authentication.getAuthorities().stream()
-//                    .anyMatch(grantedAuthority ->
-//                            grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-//            if (isUser) {
+            boolean isUser = authentication.getAuthorities().stream()
+                    .anyMatch(grantedAuthority ->
+                            grantedAuthority.getAuthority().equals("PERMISSION2"));
+            if (isUser) {
                 response.sendRedirect("/users");
-//            }
+            }
         };
     }
 }
