@@ -1,7 +1,9 @@
 package kg.something.events_app_backend.controller.mvc;
 
+import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
 import kg.something.events_app_backend.dto.response.ComplaintResponse;
 import kg.something.events_app_backend.service.ComplaintService;
+import kg.something.events_app_backend.service.EventService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,17 +18,19 @@ import java.util.UUID;
 @RequestMapping("/complaints")
 public class ComplaintController {
 
-    private final ComplaintService service;
+    private final ComplaintService complaintService;
+    private final EventService eventService;
 
-    public ComplaintController(ComplaintService service) {
-        this.service = service;
+    public ComplaintController(ComplaintService complaintService, EventService eventService) {
+        this.complaintService = complaintService;
+        this.eventService = eventService;
     }
 
     @GetMapping("/change-status/{id}")
     public String changeUserRole(@PathVariable UUID id,
                                  @RequestParam("status") String status) {
         try {
-            service.changeComplaintStatus(id, status);
+            complaintService.changeComplaintStatus(id, status);
         } catch (Exception e) {
             return "error";
         }
@@ -36,8 +40,8 @@ public class ComplaintController {
     @GetMapping
     public String getAllComplaints(Model model) {
         try {
-            List<ComplaintResponse> complaints = service.getAllComplaints();
-            List<String> complaintsStatuses = service.getAllComplaintsStatuses();
+            List<ComplaintResponse> complaints = complaintService.getAllComplaints();
+            List<String> complaintsStatuses = complaintService.getAllComplaintsStatuses();
             model.addAttribute("complaints", complaints);
             model.addAttribute("complaints_statuses", complaintsStatuses);
             return "complaint_list";
@@ -48,8 +52,10 @@ public class ComplaintController {
 
     @GetMapping("/detailed/{id}")
     public String moveToDetailedPage(@PathVariable UUID id, Model model) {
-        ComplaintResponse complaint = service.getComplaintById(id);
+        ComplaintResponse complaint = complaintService.getComplaintById(id);
+        EventDetailedInAdminPanel event = eventService.getEventDetailedInformationForAdminPanel(complaint.eventId());
         model.addAttribute("complaint", complaint);
+        model.addAttribute("event", event);
         return "complaint_details";
     }
 }

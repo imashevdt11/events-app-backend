@@ -4,6 +4,7 @@ import com.cloudinary.utils.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
@@ -282,6 +283,12 @@ public class EventServiceImpl implements EventService {
             }
         }
         return eventMapper.toEventResponse(event, isLiked, isDisliked);
+    }
+
+    @Override
+    public EventDetailedInAdminPanel getEventDetailedInformationForAdminPanel(UUID id) {
+        Event event = findEventById(id);
+        return eventMapper.toEventDetailedInAdminPanel(event);
     }
 
     @Override

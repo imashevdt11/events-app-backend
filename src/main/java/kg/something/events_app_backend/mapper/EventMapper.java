@@ -1,6 +1,7 @@
 package kg.something.events_app_backend.mapper;
 
 import kg.something.events_app_backend.dto.CommentDto;
+import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
@@ -43,6 +44,28 @@ public class EventMapper {
         );
     }
 
+    public EventDetailedInAdminPanel toEventDetailedInAdminPanel(Event event) {
+        return new EventDetailedInAdminPanel(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getLocation(),
+                event.getMinimumAge(),
+                event.getStartTime(),
+                "%s %s".formatted(event.getPrice(), event.getPriceCurrency()),
+                event.getAmountOfPlaces(),
+                event.getAmountOfAvailablePlaces(),
+                event.getCreatedAt(),
+                event.getImage() != null ? event.getImage().getUrl() : " ",
+                event.getBlocked(),
+                event.getOrganizerUser() != null ?
+                        "%s %s".formatted(event.getOrganizerUser().getFirstName(), event.getOrganizerUser().getLastName()) : " ",
+                event.getOrganizerUser() != null ?
+                        event.getOrganizerUser().getEmail() : " ",
+                event.getOrganizerUser() != null ?
+                        event.getOrganizerUser().getPhoneNumber() : " "
+        );
+    }
     public EventListDto toEventListDto(Event event) {
         return new EventListDto(
                 event.getId(),
