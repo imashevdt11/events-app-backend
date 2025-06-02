@@ -50,9 +50,11 @@ public class Role {
     @JoinColumn(name = "id_user")
     private User user;
 
+    @NotNull
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

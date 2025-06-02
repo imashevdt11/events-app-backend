@@ -28,9 +28,8 @@ public class Complaint {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // todo:поменять название на 'text' перед пересозданием базы данных на сервере
     @NotBlank
-    @Column(name = "reson")
+    @Column(name = "text")
     private String text;
 
     @NotNull

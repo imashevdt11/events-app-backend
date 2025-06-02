@@ -11,6 +11,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,17 +28,21 @@ public class Subscription {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_organizer_id", nullable = false)
     private User organizer;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_subscriber_id", nullable = false)
     private User subscriber;
 
+    @NotNull
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

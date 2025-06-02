@@ -41,9 +41,11 @@ public class Category {
     @JoinColumn(name = "id_user")
     private User user;
 
+    @NotNull
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

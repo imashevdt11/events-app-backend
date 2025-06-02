@@ -77,6 +77,7 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "id_role")
     private Role role;

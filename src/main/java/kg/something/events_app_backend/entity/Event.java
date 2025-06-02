@@ -78,6 +78,7 @@ public class Event {
     @Column(name = "blocked")
     private Boolean blocked;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "organizer_user_id")
     private User organizerUser;
@@ -85,9 +86,11 @@ public class Event {
     @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private Image image;
 
+    @NotNull
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

@@ -37,17 +37,21 @@ public class Grade {
     @Column(name = "name")
     private EventGrade name;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
+    @NotNull
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
