@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.EventListInAdminPanelDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
 import kg.something.events_app_backend.dto.request.EventUpdateRequest;
@@ -289,6 +290,13 @@ public class EventServiceImpl implements EventService {
     public EventDetailedInAdminPanel getEventDetailedInformationForAdminPanel(UUID id) {
         Event event = findEventById(id);
         return eventMapper.toEventDetailedInAdminPanel(event);
+    }
+
+    @Override
+    public List<EventListInAdminPanelDto> getEventListForAdminPanel() {
+        return repository.findAll().stream()
+                .map(eventMapper::toEventListInAdminPanelDto)
+                .toList();
     }
 
     @Override

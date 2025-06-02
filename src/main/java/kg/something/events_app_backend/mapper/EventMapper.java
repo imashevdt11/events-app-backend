@@ -2,6 +2,7 @@ package kg.something.events_app_backend.mapper;
 
 import kg.something.events_app_backend.dto.CommentDto;
 import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
+import kg.something.events_app_backend.dto.EventListInAdminPanelDto;
 import kg.something.events_app_backend.dto.EventListDto;
 import kg.something.events_app_backend.dto.CategoryDto;
 import kg.something.events_app_backend.dto.request.EventRequest;
@@ -105,6 +106,21 @@ public class EventMapper {
                 gradeService.getEventAmountOfDislikes(event),
                 isLiked,
                 isDisliked
+        );
+    }
+
+    public EventListInAdminPanelDto toEventListInAdminPanelDto(Event event) {
+        return new EventListInAdminPanelDto(
+                event.getId(),
+                event.getTitle(),
+                event.getCreatedAt(),
+                event.getBlocked(),
+                event.getOrganizerUser() != null ?
+                        "%s %s".formatted(event.getOrganizerUser().getFirstName(), event.getOrganizerUser().getLastName()) : " ",
+                event.getOrganizerUser() != null ?
+                        event.getOrganizerUser().getEmail() : " ",
+                event.getOrganizerUser() != null ?
+                        event.getOrganizerUser().getPhoneNumber() : " "
         );
     }
 }

@@ -144,10 +144,12 @@
     <table>
         <thead>
         <tr>
+            <th>Время создания</th>
             <th>Название</th>
-            <th>Цена</th>
-            <th>Общее количество билетов</th>
-            <th>Процент проданных билетов</th>
+            <th>Организатор</th>
+            <th>Контакты организатора</th>
+            <th>Статус</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -155,10 +157,64 @@
             <td>
                 <a th:href="@{/events/{id}(id=${event.id})}" th:text="${event.title()}" style="text-decoration: none; color: white"></a>
             </td>
-            <td th:text="${event.price()} + ' ' + ${event.priceCurrency()}"></td>
-            <td th:text="${event.amountOfAvailablePlaces() + event.amountOfTakenPlaces()}"></td>
-            <td th:text="${(event.amountOfTakenPlaces() * 100) / (event.amountOfAvailablePlaces() + event.amountOfTakenPlaces())} + '%'"></td>
+            <td th:text="${event.createdAt()}"></td>
+            <td th:text="${event.organizerFullName()}"></td>
+            <td>
+                <p th:text="${event.organizerPhoneNumber()}"><br></p>
+                <p th:text="${event.organizerEmail()}"><br></p>
+            </td>
+            <td>
+                <button
+                        class="btn"
+                        th:attr="data-id=${event.id}, data-enabled=${event.blocked()}"
+                        th:text="${event.blocked()} ? 'Разблокировать' : 'Заблокировать'"
+                        onclick="openChangeStatusModal(this)">
+                </button>
+            </td>
         </tr>
         </tbody>
     </table>
 </div>
+</body>
+<div id="changeStatusModal" class="modal">
+    <div class="modal-content">
+        <p id="changeStatusText">Вы уверены, что хотите заблокировать мероприятие?</p>
+        <div class="modal-buttons">
+            <button class="btn btn-delete" id="confirmChangeStatus">Заблокировать</button>
+            <button class="btn btn-edit" onclick="closeChangeStatusModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+<script>
+    let eventId = null;
+    let eventBlocked = null;
+
+    function openChangeStatusModal(button) {
+        eventId = button.getAttribute("data-id");
+        eventBlocked = button.getAttribute("data-enabled") === "true";
+
+        const modalText = document.getElementById("changeStatusText");
+        const confirmBtn = document.getElementById("confirmChangeStatus");
+
+        if (eventBlocked) {
+            modalText.textContent = "Вы уверены, что хотите разблокировать мероприятие?";
+            confirmBtn.textContent = "Разблокировать";
+        } else {
+            modalText.textContent = "Вы уверены, что хотите заблокировать мероприятие?";
+            confirmBtn.textContent = "Заблокировать";
+        }
+
+        document.getElementById("changeStatusModal").style.display = "flex";
+    }
+
+    function closeChangeStatusModal() {
+        document.getElementById("changeStatusModal").style.display = "none";
+    }
+
+    document.getElementById("confirmChangeStatus").addEventListener("click", function () {
+        if (eventId) {
+            window.location.href = "/events/change-status/" + eventId;
+        }
+    });
+</script>
+</html>

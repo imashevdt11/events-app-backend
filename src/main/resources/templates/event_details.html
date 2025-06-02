@@ -13,7 +13,7 @@
             font-family: Arial, sans-serif;
             justify-content: center;
             margin: 0;
-            padding: 0;
+            padding: 70px 0 0 0;
         }
         .container {
             max-width: 800px;
@@ -75,16 +75,28 @@
     <img th:src="${event.imageUrl()}" alt="Фото мероприятия" class="product-image">
     <div class="product-info">
         <h1 th:text="${event.title()} "></h1>
+        <br>
         <p><strong>Описание:  </strong><span th:text="${event.description()}"></span></p>
+        <br>
         <p><strong>Локация:  </strong><span th:text="${event.location()}"></span></p>
+        <br>
         <p><strong>Дата создания:  </strong><span th:text="${event.createdAt()}"></span></p>
+        <br>
         <p><strong>Минимальный возраст для участия:  </strong><span th:text="${event.minimumAge()}"></span></p>
+        <br>
         <p><strong>Начало:  </strong><span th:text="${event.startTime()}"></span></p>
+        <br>
         <p><strong>Цена:  </strong><span th:text="${event.price()}"></span></p>
+        <br>
         <p><strong>Общее количество мест:  </strong><span th:text="${event.amountOfPlaces()}"></span></p>
+        <br>
         <p><strong>Видимость:  </strong><span th:text="${event.blocked}"></span></p>
+        <br>
         <p><strong>Организатор:  </strong><span th:text="${event.organizerFullName}"></span></p>
-        <p><strong>Контакты организатора:  </strong><span th:text="${event.organizerEmail} + '\n' + ${event.organizerPhoneNumber()}"></span></p>
+        <br>
+        <p><strong>Контакты организатора:  </strong></p>
+        <p th:text="'Email: ' + ${event.organizerEmail()}"><br></p>
+        <p th:text="'Номер телефона: ' + ${event.organizerPhoneNumber()}"><br></p>
     </div>
 </div>
 </body>

@@ -2,6 +2,7 @@ package kg.something.events_app_backend.service;
 
 import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
 import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.EventListInAdminPanelDto;
 import kg.something.events_app_backend.dto.SalesByEventDto;
 import kg.something.events_app_backend.dto.SalesByParticipantDto;
 import kg.something.events_app_backend.dto.request.EventUpdateRequest;
@@ -38,6 +39,8 @@ public interface EventService {
     EventResponse getEventById(UUID id);
 
     EventDetailedInAdminPanel getEventDetailedInformationForAdminPanel(UUID id);
+
+    List<EventListInAdminPanelDto> getEventListForAdminPanel();
 
     List<EventListDto> getEventsByCreationTimePeriod(LocalDate startDate, LocalDate endDate);
 

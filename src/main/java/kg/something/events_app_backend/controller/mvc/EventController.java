@@ -1,13 +1,12 @@
 package kg.something.events_app_backend.controller.mvc;
 
 import kg.something.events_app_backend.dto.EventDetailedInAdminPanel;
-import kg.something.events_app_backend.dto.EventListDto;
+import kg.something.events_app_backend.dto.EventListInAdminPanelDto;
 import kg.something.events_app_backend.service.EventService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -23,20 +22,20 @@ public class EventController {
         this.service = service;
     }
 
-    @PostMapping("/change-status/{id}")
+    @GetMapping("/change-status/{id}")
     public String changeEventsStatus(@PathVariable UUID id) {
         try {
             service.changeEventStatus(id);
         } catch (Exception e) {
             return "error";
         }
-        return "redirect:/complaints";
+        return "redirect:/events";
     }
 
     @GetMapping
     public String getAllEvents(Model model) {
         try {
-            List<EventListDto> events = service.getAllEvents();
+            List<EventListInAdminPanelDto> events = service.getEventListForAdminPanel();
             model.addAttribute("events", events);
             return "event_list";
         } catch (Exception e) {
