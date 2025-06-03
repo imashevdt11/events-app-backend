@@ -200,6 +200,7 @@ public class EventServiceImpl implements EventService {
         User authenticatedUser = userService.getAuthenticatedUser();
         if (!authenticatedUser.getRole().getName().equals("ROLE_ORGANIZER")) {
             System.out.println(authenticatedUser.getRole().getName());
+            System.out.println(authenticatedUser.getFirstName());
             throw new InvalidRequestException("Только пользователи с ролью 'ROLE_ORGANIZER' могут создавать мероприятия");
         }
         Image savedImage = cloudinaryService.saveImage(image);
