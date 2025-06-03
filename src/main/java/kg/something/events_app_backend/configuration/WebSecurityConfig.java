@@ -62,7 +62,7 @@ public class WebSecurityConfig {
         return (request, response, authentication) -> {
             boolean isUser = authentication.getAuthorities().stream()
                     .anyMatch(grantedAuthority ->
-                            grantedAuthority.getAuthority().equals("PERMISSION2"));
+                            grantedAuthority.getAuthority().equals("EVERYTHING"));
             if (isUser) {
                 response.sendRedirect("/users");
             }
