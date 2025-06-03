@@ -45,7 +45,6 @@ public class Role {
     )
     private Set<Permission> permissions;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_user")
     private User user;
