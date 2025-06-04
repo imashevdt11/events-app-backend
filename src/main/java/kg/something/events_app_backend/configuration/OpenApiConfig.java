@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "Events App",
-                description = "App for searching and creating events"
+                title = "Events App Backend",
+                description = "Application for creating and searching events"
         )
 )
 @SecurityScheme(
