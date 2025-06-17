@@ -16,7 +16,7 @@
             align-items: center;
             justify-content: center;">
 
-<div style="  display: flex;
+<div style="
             align-items: center;
             justify-content: center;
             height: 100vh;
@@ -32,7 +32,7 @@
             color: #666666;">
         </div>
         <h2>Билеты для пользователя <span th:text="${user.getFirstName()} + '' + ${user.getLastName()}"></span></h2>
-        <p>Номера билетов: </p><span th:each="ticketNumber : ${ticketNumbers}" style=" display: inline-block;
+        <p>Номера билетов: </p><span th:each="ticketNumber : ${ticketNumbers}" th:text="${ticketNumber}" style=" display: inline-block;
             background-color: #292929;
             color: #ffffff;
             text-decoration: none;
@@ -41,28 +41,14 @@
             transition: background-color 0.3s ease;"></span>
     </div>
     <h2>Информация о мероприятии</h2>
-    <img th:src="${event.getImage().getUrl()}" alt="Фото мероприятия" class="product-image">
+    <img th:src="${event.getImage().getUrl()}" alt="Фото мероприятия" class="product-image" style="width: 500px">
     <div class="product-info">
         <h1 th:text="${event.getTitle()} "></h1>
-        <br>
         <p><strong>Описание:  </strong><span th:text="${event.getDescription()}"></span></p>
-        <br>
         <p><strong>Локация:  </strong><span th:text="${event.getLocation()}"></span></p>
-        <br>
-        <p><strong>Дата создания:  </strong><span th:text="${event.getCreatedAt()}"></span></p>
-        <br>
-        <p><strong>Минимальный возраст для участия:  </strong><span th:text="${event.getMinimumAge()}"></span></p>
-        <br>
         <p><strong>Начало:  </strong><span th:text="${event.getStartTime()}"></span></p>
-        <br>
         <p><strong>Цена:  </strong><span th:text="${event.getPrice()}"></span></p>
-        <br>
-        <p><strong>Общее количество мест:  </strong><span th:text="${event.getAmountOfPlaces()}"></span></p>
-        <br>
-        <p><strong>Видимость:  </strong><span th:text="${event.getBlocked()}"></span></p>
-        <br>
         <p><strong>Организатор:  </strong><span th:text="${event.getOrganizerUser().getFirstName()}"></span></p>
-        <br>
         <p><strong>Контакты организатора:  </strong></p>
         <p th:text="'Email: ' + ${event.getOrganizerUser().getEmail()}"><br></p>
         <p th:text="'Номер телефона: ' + ${event.getOrganizerUser().getPhoneNumber()}"><br></p>
