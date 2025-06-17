@@ -129,10 +129,16 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByStartTimePeriod(startDate, endDate));
     }
 
-    @Operation(summary = "Получение списка мероприятий, созданных указанным пользователем")
+    @Operation(summary = "Получение не заблокированных мероприятий, созданных указанным пользователем (для фронта)")
     @GetMapping("/created-by/{userId}")
-    public ResponseEntity<List<EventListDto>> getEventsByUser(@PathVariable("userId") UUID userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUser(userId));
+    public ResponseEntity<List<EventListDto>> getNotBlockedEventsByUser(@PathVariable("userId") UUID userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getNotBlockedEventsByUser(userId));
+    }
+
+    @Operation(summary = "Получение всех мероприятий, созданных указанным пользователем")
+    @GetMapping("/all/created-by/{userId}")
+    public ResponseEntity<List<EventListDto>> getAllEventsByUser(@PathVariable("userId") UUID userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAllEventsByUser(userId));
     }
 
     @Operation(summary = "Получение мероприятий, которым был поставлен 'LIKE'")

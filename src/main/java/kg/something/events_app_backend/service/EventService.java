@@ -34,6 +34,8 @@ public interface EventService {
 
     List<EventListDto> getAllEvents();
 
+    List<EventListDto> getAllEventsByUser(UUID userId);
+
     List<EventListDto> getDislikedEvents();
 
     EventResponse getEventById(UUID id);
@@ -48,7 +50,7 @@ public interface EventService {
 
     List<EventListDto> getEventsByStartTimePeriod(LocalDate startDate, LocalDate endDate);
 
-    List<EventListDto> getEventsByUser(UUID userId);
+    List<EventListDto> getNotBlockedEventsByUser(UUID userId);
 
     List<EventListDto> getEventsByUserSubscriptions();
 

@@ -342,7 +342,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventListDto> getEventsByUser(UUID userId) {
+    public List<EventListDto> getNotBlockedEventsByUser(UUID userId) {
+        User user = userService.findUserById(userId);
+        return repository.findEventsByOrganizerUser(user)
+                .stream()
+                .filter(event -> !event.getBlocked())
+                .map(eventMapper::toEventListDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventListDto> getAllEventsByUser(UUID userId) {
         User user = userService.findUserById(userId);
         return repository.findEventsByOrganizerUser(user)
                 .stream()
@@ -357,7 +367,7 @@ public class EventServiceImpl implements EventService {
         List<EventListDto> eventsCreatedByUsersSubscriptions = new ArrayList<>();
 
         for (Subscription subscription : usersSubscriptions) {
-            List<EventListDto> organizersEvents = getEventsByUser(subscription.getOrganizer().getId());
+            List<EventListDto> organizersEvents = getNotBlockedEventsByUser(subscription.getOrganizer().getId());
             eventsCreatedByUsersSubscriptions.addAll(organizersEvents);
         }
         return eventsCreatedByUsersSubscriptions;
