@@ -20,6 +20,7 @@ import kg.something.events_app_backend.entity.Comment;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.Grade;
 import kg.something.events_app_backend.entity.SavedEvent;
+import kg.something.events_app_backend.entity.Subscription;
 import kg.something.events_app_backend.entity.Image;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.enums.EventGrade;
@@ -35,6 +36,7 @@ import kg.something.events_app_backend.service.EventService;
 import kg.something.events_app_backend.service.GradeService;
 import kg.something.events_app_backend.service.PaymentService;
 import kg.something.events_app_backend.service.SavedEventService;
+import kg.something.events_app_backend.service.SubscriptionService;
 import kg.something.events_app_backend.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -46,6 +48,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -68,8 +71,9 @@ public class EventServiceImpl implements EventService {
     private final TicketService ticketService;
     private final UserService userService;
     private final Validator validator;
+    private final SubscriptionService subscriptionService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, TicketService ticketService, SavedEventService savedEventService, PaymentService paymentService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, TicketService ticketService, SavedEventService savedEventService, PaymentService paymentService, SubscriptionService subscriptionService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
@@ -81,6 +85,7 @@ public class EventServiceImpl implements EventService {
         this.commentService = commentService;
         this.ticketService = ticketService;
         this.savedEventService = savedEventService;
+        this.subscriptionService = subscriptionService;
         this.paymentService = paymentService;
     }
 
@@ -336,6 +341,19 @@ public class EventServiceImpl implements EventService {
                 .stream()
                 .map(eventMapper::toEventListDto)
                 .toList();
+    }
+
+    @Override
+    public List<EventListDto> getEventsByUserSubscriptions() {
+        User user = userService.getAuthenticatedUser();
+        List<Subscription> usersSubscriptions = subscriptionService.findAllOrganizersUserFollows(user);
+        List<EventListDto> eventsCreatedByUsersSubscriptions = new ArrayList<>();
+
+        for (Subscription subscription : usersSubscriptions) {
+            List<EventListDto> organizersEvents = getEventsByUser(subscription.getOrganizer().getId());
+            eventsCreatedByUsersSubscriptions.addAll(organizersEvents);
+        }
+        return eventsCreatedByUsersSubscriptions;
     }
 
     @Override

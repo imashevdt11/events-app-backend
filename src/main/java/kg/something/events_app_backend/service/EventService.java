@@ -50,6 +50,8 @@ public interface EventService {
 
     List<EventListDto> getEventsByUser(UUID userId);
 
+    List<EventListDto> getEventsByUserSubscriptions();
+
     List<EventListDto> getLikedEvents();
 
     List<EventListDto> getNotBlockedEvents();

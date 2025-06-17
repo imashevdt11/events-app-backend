@@ -109,6 +109,12 @@ public class EventControllerApi {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByCategory(category));
     }
 
+    @Operation(summary = "Получение списка мероприятий созданных пользователями, на которых подписан пользователь")
+    @GetMapping("/subscriptions-events")
+    public ResponseEntity<List<EventListDto>> getEventsByUserSubscriptions() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEventsByUserSubscriptions());
+    }
+
     @Operation(summary = "Получение списка мероприятий, созданных в указанные период")
     @GetMapping("/creation-time-period")
     public ResponseEntity<List<EventListDto>> getEventsByCreatedTimePeriod(@RequestParam("startDate") LocalDate startDate,

@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserService {
         if (subscriber.getId().equals(organizer.getId())) {
             throw new InvalidRequestException("Пользователь не может подписаться на самого себя");
         }
-        if (!subscriber.getRole().getName().equals("ROLE_ORGANIZER")) {
+        if (!organizer.getRole().getName().equals("ROLE_ORGANIZER")) {
             throw new InvalidRequestException("Вы не можете подписаться на пользователя, поскольку он не является организатором");
         }
         Subscription subscription = subscriptionService.findSubscribeByOrganizerAndSubscriber(organizer, subscriber);
