@@ -32,6 +32,7 @@ import kg.something.events_app_backend.service.TicketService;
 import kg.something.events_app_backend.service.CategoryService;
 import kg.something.events_app_backend.service.CloudinaryService;
 import kg.something.events_app_backend.service.CommentService;
+import kg.something.events_app_backend.service.EmailService;
 import kg.something.events_app_backend.service.EventService;
 import kg.something.events_app_backend.service.GradeService;
 import kg.something.events_app_backend.service.PaymentService;
@@ -72,11 +73,13 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     private final Validator validator;
     private final SubscriptionService subscriptionService;
+    private final EmailService emailService;
 
-    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, TicketService ticketService, SavedEventService savedEventService, PaymentService paymentService, SubscriptionService subscriptionService) {
+    public EventServiceImpl(CategoryService categoryService, CloudinaryService cloudinaryService, EventRepository repository, EventMapper eventMapper, ObjectMapper objectMapper, UserService userService, Validator validator, GradeService gradeService, CommentService commentService, TicketService ticketService, SavedEventService savedEventService, PaymentService paymentService, SubscriptionService subscriptionService, EmailService emailService) {
         this.categoryService = categoryService;
         this.cloudinaryService = cloudinaryService;
         this.repository = repository;
+        this.emailService = emailService;
         this.eventMapper = eventMapper;
         this.objectMapper = objectMapper;
         this.userService = userService;
@@ -137,11 +140,15 @@ public class EventServiceImpl implements EventService {
         if (maximumTicketIndex == null) {
             maximumTicketIndex = 1L;
         }
+        long[] ticketNumbers = new long[paymentRequest.amountOfTickets()];
         for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {
             ticketService.save(new Ticket(maximumTicketIndex, event, user));
+            ticketNumbers[i] = maximumTicketIndex;
             maximumTicketIndex++;
         }
+        emailService.sendEmailWithCheck(user, event, ticketNumbers);
         event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
+
         return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"
                 .formatted(
                         paymentRequest.amountOfTickets(),

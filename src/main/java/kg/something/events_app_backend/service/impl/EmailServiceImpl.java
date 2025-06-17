@@ -3,6 +3,7 @@ package kg.something.events_app_backend.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import kg.something.events_app_backend.entity.ConfirmationCode;
+import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.User;
 import kg.something.events_app_backend.service.ConfirmationCodeService;
 import kg.something.events_app_backend.service.EmailService;
@@ -41,9 +42,37 @@ public class EmailServiceImpl implements EmailService {
         return mimeMessage;
     }
 
+    public MimeMessage createMailWithCheck(User user, Event event, long[] ticketNumbers) throws MessagingException {
+
+        Context context = new Context();
+        context.setVariable("ticketNumbers", ticketNumbers);
+        context.setVariable("user", user);
+        context.setVariable("event", event);
+        String emailBody = engine.process("tickets_email", context);
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+        helper.setText(emailBody, true);
+        helper.setTo(user.getEmail());
+        helper.setSubject("Чек о покупке билетов на мероприятие");
+
+        return mimeMessage;
+    }
+
     @Override
     public void sendEmail(MimeMessage email) {
         javaMailSender.send(email);
+    }
+
+    @Override
+    public void sendEmailWithCheck(User user, Event event, long[] ticketNumbers) {
+
+        MimeMessage simpleMailMessage;
+        try {
+            simpleMailMessage = createMailWithCheck(user, event, ticketNumbers);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Failed to send email");
+        }
+        sendEmail(simpleMailMessage);
     }
 
     @Override

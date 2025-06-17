@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Чек о покупке билетов</title>
+</head>
+<body style=" margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            width:100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;">
+
+<div style="  display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+           ">
+    <div style="
+            background-color: #ffffff;
+            text-align: center;">
+        <h1 style=" padding-top: 50px;
+            margin-bottom: 20px;
+            color: #292929;">Доброго времени суток</h1>
+        <br/>
+        <div style="margin-bottom: 20px;
+            color: #666666;">
+        </div>
+        <h2>Билеты для пользователя <span th:text="${user.getFirstName()} + '' + ${user.getLastName()}"></span></h2>
+        <p>Номера билетов: </p><span th:each="ticketNumber : ${ticketNumbers}" style=" display: inline-block;
+            background-color: #292929;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            transition: background-color 0.3s ease;"></span>
+    </div>
+    <h2>Информация о мероприятии</h2>
+    <img th:src="${event.getImage().getUrl()}" alt="Фото мероприятия" class="product-image">
+    <div class="product-info">
+        <h1 th:text="${event.getTitle()} "></h1>
+        <br>
+        <p><strong>Описание:  </strong><span th:text="${event.getDescription()}"></span></p>
+        <br>
+        <p><strong>Локация:  </strong><span th:text="${event.getLocation()}"></span></p>
+        <br>
+        <p><strong>Дата создания:  </strong><span th:text="${event.getCreatedAt()}"></span></p>
+        <br>
+        <p><strong>Минимальный возраст для участия:  </strong><span th:text="${event.getMinimumAge()}"></span></p>
+        <br>
+        <p><strong>Начало:  </strong><span th:text="${event.getStartTime()}"></span></p>
+        <br>
+        <p><strong>Цена:  </strong><span th:text="${event.getPrice()}"></span></p>
+        <br>
+        <p><strong>Общее количество мест:  </strong><span th:text="${event.getAmountOfPlaces()}"></span></p>
+        <br>
+        <p><strong>Видимость:  </strong><span th:text="${event.getBlocked()}"></span></p>
+        <br>
+        <p><strong>Организатор:  </strong><span th:text="${event.getOrganizerUser().getFirstName()}"></span></p>
+        <br>
+        <p><strong>Контакты организатора:  </strong></p>
+        <p th:text="'Email: ' + ${event.getOrganizerUser().getEmail()}"><br></p>
+        <p th:text="'Номер телефона: ' + ${event.getOrganizerUser().getPhoneNumber()}"><br></p>
+    </div>
+</div>
+</body>
+</html>
