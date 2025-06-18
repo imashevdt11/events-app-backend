@@ -139,6 +139,8 @@ public class EventServiceImpl implements EventService {
         Long maximumTicketIndex = ticketService.getMaxTicketNumberByEvent(event);
         if (maximumTicketIndex == null) {
             maximumTicketIndex = 1L;
+        } else {
+            maximumTicketIndex++;
         }
         long[] ticketNumbers = new long[paymentRequest.amountOfTickets()];
         for (int i = 0; i < paymentRequest.amountOfTickets(); i++) {

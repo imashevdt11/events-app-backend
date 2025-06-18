@@ -22,5 +22,7 @@ public interface TicketService {
 
     List<TicketDto> getListOfTicketsSoldToEvent(UUID eventId);
 
+    TicketDto getTicketByEventIdAndNumber(UUID eventId, Long ticketNumber);
+
     void save(Ticket ticket);
 }

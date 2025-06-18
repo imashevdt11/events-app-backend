@@ -81,6 +81,14 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketDto getTicketByEventIdAndNumber(UUID eventId, Long ticketNumber) {
+        userService.getAuthenticatedUser();
+        Event event = eventService.findEventById(eventId);
+
+        return ticketMapper.toTicketDto(repository.findTicketByEventAndNumber(event, ticketNumber));
+    }
+
+    @Override
     public List<TicketDto> getTicketsByUser(User user) {
         return repository.findTicketsByUser(user).stream()
                 .map(ticketMapper::toTicketDto)

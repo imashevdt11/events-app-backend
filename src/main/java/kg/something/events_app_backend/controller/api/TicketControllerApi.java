@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,6 +35,13 @@ public class TicketControllerApi {
     @GetMapping("/sold-tickets/{eventId}")
     public ResponseEntity<List<TicketDto>> getListOfTicketsSoldToEvent(@PathVariable("eventId") UUID eventId) {
         return ResponseEntity.status(HttpStatus.OK).body(service.getListOfTicketsSoldToEvent(eventId));
+    }
+
+    @Operation(summary = "Получение билета по id мероприятия и номеру билета")
+    @GetMapping("/{eventId}")
+    public ResponseEntity<TicketDto> getTicketByEventIdAndNumber(@PathVariable("eventId") UUID eventId,
+                                                                 @RequestParam("ticketNumber") Long ticketNumber) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getTicketByEventIdAndNumber(eventId, ticketNumber));
     }
 
     @Operation(summary = "Изменить статус билета (использован/не использован)")
