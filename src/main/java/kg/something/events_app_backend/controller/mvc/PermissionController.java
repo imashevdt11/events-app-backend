@@ -32,10 +32,11 @@ public class PermissionController {
     }
 
     @PostMapping("/create")
-    public String createPermission(@Valid @ModelAttribute PermissionDto permission) {
+    public String createPermission(@Valid @ModelAttribute PermissionDto permission, Model model) {
         try {
             service.createPermission(permission);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось создать право доступа по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/permissions";
@@ -48,15 +49,17 @@ public class PermissionController {
             model.addAttribute("permissions", permissions);
             return "permission_list";
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось получить список прав доступа по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
     }
 
     @GetMapping("/delete/{id}")
-    public String deletePermission(@PathVariable UUID id) {
+    public String deletePermission(@PathVariable UUID id, Model model) {
         try {
             service.deletePermission(id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось удалить право доступа по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/permissions";
@@ -71,10 +74,12 @@ public class PermissionController {
 
     @PostMapping("/update/{id}")
     public String updatePermission(@PathVariable UUID id,
-                                   @Valid @ModelAttribute PermissionDto permission) {
+                                   @Valid @ModelAttribute PermissionDto permission,
+                                   Model model) {
         try {
             service.updatePermission(permission, id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить право доступа по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/permissions";

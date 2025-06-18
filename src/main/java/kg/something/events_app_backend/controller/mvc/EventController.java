@@ -23,10 +23,11 @@ public class EventController {
     }
 
     @GetMapping("/change-status/{id}")
-    public String changeEventsStatus(@PathVariable UUID id) {
+    public String changeEventsStatus(@PathVariable UUID id, Model model) {
         try {
             service.changeEventStatus(id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить статус мероприятия по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/events";
@@ -39,6 +40,7 @@ public class EventController {
             model.addAttribute("events", events);
             return "event_list";
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось получить список мероприятий по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
     }

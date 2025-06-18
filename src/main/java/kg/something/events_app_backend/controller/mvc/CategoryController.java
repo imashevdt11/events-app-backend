@@ -32,10 +32,11 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public String createCategory(@Valid @ModelAttribute CategoryDto category) {
+    public String createCategory(@Valid @ModelAttribute CategoryDto category, Model model) {
         try {
             service.createCategory(category);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось создать категорию по причине: \n%s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/categories";
@@ -48,15 +49,17 @@ public class CategoryController {
             model.addAttribute("categories", categories);
             return "category_list";
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось получить список категорий по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteCategory(@PathVariable UUID id) {
+    public String deleteCategory(@PathVariable UUID id, Model model) {
         try {
             service.deleteCategory(id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось удалить категорию по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/categories";
@@ -70,10 +73,11 @@ public class CategoryController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduct(@PathVariable UUID id, @Valid @ModelAttribute CategoryDto category) {
+    public String updateProduct(@PathVariable UUID id, @Valid @ModelAttribute CategoryDto category, Model model) {
         try {
             service.updateCategory(category, id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить категорию по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/categories";

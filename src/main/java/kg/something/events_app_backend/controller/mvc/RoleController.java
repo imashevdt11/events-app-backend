@@ -38,10 +38,11 @@ public class RoleController {
     }
 
     @PostMapping("/create")
-    public String createRole(@Valid @ModelAttribute RoleDto role) {
+    public String createRole(@Valid @ModelAttribute RoleDto role, Model model) {
         try {
             roleService.createRole(role);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось создать роль по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/roles";
@@ -54,15 +55,17 @@ public class RoleController {
             model.addAttribute("roles", roles);
             return "role_list";
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось получить список ролей по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteRole(@PathVariable UUID id) {
+    public String deleteRole(@PathVariable UUID id, Model model) {
         try {
             roleService.deleteRole(id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось удалить роль по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/roles";
@@ -79,10 +82,12 @@ public class RoleController {
 
     @PostMapping("/update/{id}")
     public String updateRole(@PathVariable UUID id,
-                             @Valid @ModelAttribute RoleDto role) {
+                             @Valid @ModelAttribute RoleDto role,
+                             Model model) {
         try {
             roleService.updateRole(role, id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить роль по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/roles";

@@ -28,10 +28,12 @@ public class ComplaintController {
 
     @GetMapping("/change-status/{id}")
     public String changeUserRole(@PathVariable UUID id,
-                                 @RequestParam("status") String status) {
+                                 @RequestParam("status") String status,
+                                 Model model) {
         try {
             complaintService.changeComplaintStatus(id, status);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось поменять статус жалобы по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/complaints";
@@ -46,6 +48,7 @@ public class ComplaintController {
             model.addAttribute("complaints_statuses", complaintsStatuses);
             return "complaint_list";
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось получить список жалоб по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
     }

@@ -43,10 +43,11 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String createUser(@Valid @ModelAttribute UserRegistrationRequest user) {
+    public String createUser(@Valid @ModelAttribute UserRegistrationRequest user, Model model) {
         try {
             authService.register(user);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось создать пользователя по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/users";
@@ -61,26 +62,30 @@ public class UserController {
             model.addAttribute("roles", roles);
             return "user_list";
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось получить список пользователей по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
     }
 
     @GetMapping("/change-role/{id}")
     public String changeUserRole(@PathVariable UUID id,
-                                 @RequestParam("role") String role) {
+                                 @RequestParam("role") String role,
+                                 Model model) {
         try {
             userService.changeUserRole(id, role);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить роль пользователя по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/users";
     }
 
     @GetMapping("/change-status/{id}")
-    public String changeUserStatus(@PathVariable UUID id) {
+    public String changeUserStatus(@PathVariable UUID id, Model model) {
         try {
             userService.changeUserStatus(id);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить статус пользователя по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/users";
@@ -97,10 +102,12 @@ public class UserController {
 
     @PostMapping("/update/{id}")
     public String updateUser(@PathVariable UUID id,
-                             @Valid @ModelAttribute UserUpdateRequest user) {
+                             @Valid @ModelAttribute UserUpdateRequest user,
+                             Model model) {
         try {
             userService.updateUser(id, user);
         } catch (Exception e) {
+            model.addAttribute("exception", "Не удалось изменить данные пользователя по причине: %s".formatted(e.getLocalizedMessage()));
             return "error";
         }
         return "redirect:/users";
