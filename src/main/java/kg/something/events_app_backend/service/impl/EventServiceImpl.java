@@ -148,7 +148,7 @@ public class EventServiceImpl implements EventService {
             ticketNumbers[i] = maximumTicketIndex;
             maximumTicketIndex++;
         }
-        emailService.sendEmailWithCheck(user, event, ticketNumbers);
+        emailService.sendEmailWithCheck(user, event, ticketNumbers, paymentRequest);
         event.setAmountOfAvailablePlaces(event.getAmountOfAvailablePlaces() - paymentRequest.amountOfTickets());
 
         return "%s мест(о) забронированы(о) на мероприятии '%s' пользователем '%s %s'"

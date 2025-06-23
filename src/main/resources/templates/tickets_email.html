@@ -31,7 +31,7 @@
         <div style="margin-bottom: 20px;
             color: #666666;">
         </div>
-        <h2>Билеты для пользователя <span th:text="${user.getFirstName()} + '' + ${user.getLastName()}"></span></h2>
+        <h2>Билеты для пользователя <span th:text="${user.getFirstName()} + ' ' + ${user.getLastName()}"></span></h2>
         <p>Номера билетов: </p><span th:each="ticketNumber : ${ticketNumbers}" th:text="${ticketNumber}" style=" display: inline-block;
             background-color: #292929;
             color: #ffffff;
@@ -39,6 +39,7 @@
             padding: 12px 24px;
             border-radius: 25px;
             transition: background-color 0.3s ease;"></span>
+        <p>Потрачено: </p><span th:text="${checkInfo.amountOfMoney()} + ' ' + ${event.getPriceCurrency()}" style=" display: inline-block;"></span>
     </div>
     <h2>Информация о мероприятии</h2>
     <img th:src="${event.getImage().getUrl()}" alt="Фото мероприятия" class="product-image" style="width: 500px">

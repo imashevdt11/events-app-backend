@@ -2,6 +2,7 @@ package kg.something.events_app_backend.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import kg.something.events_app_backend.dto.request.PaymentRequest;
 import kg.something.events_app_backend.entity.ConfirmationCode;
 import kg.something.events_app_backend.entity.Event;
 import kg.something.events_app_backend.entity.User;
@@ -42,12 +43,13 @@ public class EmailServiceImpl implements EmailService {
         return mimeMessage;
     }
 
-    public MimeMessage createMailWithCheck(User user, Event event, long[] ticketNumbers) throws MessagingException {
+    public MimeMessage createMailWithCheck(User user, Event event, long[] ticketNumbers, PaymentRequest paymentRequest) throws MessagingException {
 
         Context context = new Context();
         context.setVariable("ticketNumbers", ticketNumbers);
         context.setVariable("user", user);
         context.setVariable("event", event);
+        context.setVariable("checkInfo", paymentRequest);
         String emailBody = engine.process("tickets_email", context);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
@@ -64,11 +66,11 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendEmailWithCheck(User user, Event event, long[] ticketNumbers) {
+    public void sendEmailWithCheck(User user, Event event, long[] ticketNumbers, PaymentRequest paymentRequest) {
 
         MimeMessage simpleMailMessage;
         try {
-            simpleMailMessage = createMailWithCheck(user, event, ticketNumbers);
+            simpleMailMessage = createMailWithCheck(user, event, ticketNumbers, paymentRequest);
         } catch (MessagingException e) {
             throw new IllegalStateException("Failed to send email");
         }
