@@ -9,6 +9,9 @@ public record LoginResponse (
         UUID id,
 
         @JsonProperty
+        String role,
+
+        @JsonProperty
         String accessToken,
 
         @JsonProperty
