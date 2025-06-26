@@ -50,7 +50,8 @@ public class UserMapper {
                 user.getPhoneNumber(),
                 user.getDateOfBirth(),
                 user.getEmail(),
-                user.getImage() == null ? null : user.getImage().getUrl()
+                user.getImage() == null ? null : user.getImage().getUrl(),
+                user.getRole().getName()
         );
     }
 

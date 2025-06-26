@@ -16,5 +16,6 @@ public record UserResponse (
         @JsonProperty("date_of_birth")
         LocalDate dateOfBirth,
         String email,
-        String image
+        String image,
+        String role
 ) {}
